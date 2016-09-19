@@ -1,5 +1,6 @@
 package org.eclipse.scout.springboot.ui.task;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -30,6 +31,8 @@ import org.eclipse.scout.springboot.entity.User;
 import org.eclipse.scout.springboot.ui.task.AbstractTaskTablePage.Table;
 
 public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
+
+  private static SimpleDateFormat WEEKDAY_FORMATTER = new SimpleDateFormat("EEEE");
 
   @Override
   protected String getConfiguredTitle() {
@@ -84,8 +87,8 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       if (days == -1) {
         return "Yesterday";
       }
-      else if (days > -7) {
-        return "Last" + weekdayToString(DateUtility.getWeekday(date));
+      else if (days >= -7) {
+        return "Last " + WEEKDAY_FORMATTER.format(date);
       }
       else {
         return "" + (-days) + " days ago";
@@ -96,21 +99,18 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       if (days == 1) {
         return "Tomorrow";
       }
+      else if (days < 7) {
+        return WEEKDAY_FORMATTER.format(date);
+      }
+      else if (days < 14) {
+        return "Next " + WEEKDAY_FORMATTER.format(date);
+      }
       else {
         return "In " + days + " days";
       }
     }
 
     return "Today";
-  }
-
-  private String weekdayToString(int day) {
-    switch (day) {
-      case 1:
-        return TEXTS.get("Sunday");
-    }
-
-    return "Anderer Tag";
   }
 
   /**
