@@ -76,4 +76,108 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+  <pluginManagement>
+    <plugins>
+      <!--This plugin's configuration is used to store Eclipse m2e settings
+        only. It has no influence on the Maven build itself. -->
+      <plugin>
+        <groupId>org.eclipse.m2e</groupId>
+        <artifactId>lifecycle-mapping</artifactId>
+        <version>1.0.0</version>
+        <configuration>
+          <lifecycleMappingMetadata>
+            <pluginExecutions>
+              <pluginExecution>
+                <pluginExecutionFilter>
+                  <groupId>org.jboss.jandex</groupId>
+                  <artifactId>jandex-maven-plugin</artifactId>
+                  <versionRange>[1.0.1,)</versionRange>
+                  <goals>
+                    <goal>jandex</goal>
+                  </goals>
+                </pluginExecutionFilter>
+                <action>
+                  <ignore></ignore>
+                </action>
+              </pluginExecution>
+              <pluginExecution>
+                <pluginExecutionFilter>
+                  <groupId>com.github.klieber</groupId>
+                  <artifactId>phantomjs-maven-plugin</artifactId>
+                  <versionRange>[0.7,)</versionRange>
+                  <goals>
+                    <goal>install</goal>
+                  </goals>
+                </pluginExecutionFilter>
+                <action>
+                  <ignore></ignore>
+                </action>
+              </pluginExecution>
+              <!-- WS-STUB generation: Instrument 'm2e' to generate webservice stub
+                in Eclipse IDE (does not affect standalone Maven build) -->
+              <!-- Note: Artifacts are on re-generated if the hash of 'wsartifact-hash'
+                changes. -->
+              <!-- Note: Do not move into 'jaxws' profile because ignored by 'm2e'
+                otherwise. -->
+              <pluginExecution>
+                <pluginExecutionFilter>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>jaxws-maven-plugin</artifactId>
+                  <versionRange>[${master_plugin_jaxws_version},)</versionRange>
+                  <goals>
+                    <goal>wsimport</goal>
+                  </goals>
+                </pluginExecutionFilter>
+                <action>
+                  <execute>
+                    <!-- to run on full and incremental build -->
+                    <runOnIncremental>true</runOnIncremental>
+                    <!-- to run once a JAX-WS module is imported into workspace -->
+                    <runOnConfiguration>true</runOnConfiguration>
+                  </execute>
+                </action>
+              </pluginExecution>
+            </pluginExecutions>
+          </lifecycleMappingMetadata>
+        </configuration>
+      </plugin>
+    </plugins>
+  </pluginManagement>
+  </build>
+
+
+  <profiles>
+    <profile>
+      <!-- Only create the jandex.idx when a scout.xml is found -->
+      <id>jandex-idx</id>
+      <activation>
+        <file>
+          <exists>${basedir}/src/main/resources/META-INF/scout.xml</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <!-- Create META-INF/jandex.idx -->
+          <plugin>
+            <groupId>org.jboss.jandex</groupId>
+            <artifactId>jandex-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>make-index</id>
+                <goals>
+                  <goal>jandex</goal>
+                </goals>
+                <!-- phase is 'process-classes by default' -->
+                <configuration>
+                  <!-- Nothing needed here for simple cases -->
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
