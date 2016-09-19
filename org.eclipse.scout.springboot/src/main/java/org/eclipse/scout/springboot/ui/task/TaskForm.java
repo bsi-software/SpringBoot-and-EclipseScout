@@ -281,13 +281,13 @@ public class TaskForm extends AbstractForm {
     protected void execLoad() {
       Task task = getTask();
 
-      getTitleField().setValue(task.name);
-      getResponsibleField().setValue(task.responsible);
-      getReminderField().setValue(task.reminder);
-      getDueDateField().setValue(task.dueDate);
-      getAcceptedField().setValue(task.accepted);
-      getDoneField().setValue(task.done);
-      getDescriptionField().setValue(task.description);
+      getTitleField().setValue(task.getName());
+      getResponsibleField().setValue(task.getResponsible());
+      getReminderField().setValue(task.getReminder());
+      getDueDateField().setValue(task.getDueDate());
+      getAcceptedField().setValue(task.isAccepted());
+      getDoneField().setValue(task.isDone());
+      getDescriptionField().setValue(task.getDescription());
 
       getForm().setSubTitle(calculateSubTitle());
 
@@ -301,10 +301,10 @@ public class TaskForm extends AbstractForm {
       Date date = getDueDateField().getValue();
 
       Task taskNew = new Task(title, user, date);
-      taskNew.reminder = getReminderField().getValue();
-      taskNew.accepted = getAcceptedField().getValue();
-      taskNew.done = getDoneField().getValue();
-      taskNew.description = getDescriptionField().getValue();
+      taskNew.setReminder(getReminderField().getValue());
+      taskNew.setAccepted(getAcceptedField().getValue());
+      taskNew.setDone(getDoneField().getValue());
+      taskNew.setDescription(getDescriptionField().getValue());
 
       BEANS.get(ToDoListModel.class).saveTask(getTask(), taskNew);
     }
@@ -352,10 +352,10 @@ public class TaskForm extends AbstractForm {
       Date date = getDueDateField().getValue();
 
       Task task = new Task(title, user, date);
-      task.reminder = getReminderField().getValue();
-      task.accepted = getAcceptedField().getValue();
-      task.done = getDoneField().getValue();
-      task.description = getDescriptionField().getValue();
+      task.setReminder(getReminderField().getValue());
+      task.setAccepted(getAcceptedField().getValue());
+      task.setDone(getDoneField().getValue());
+      task.setDescription(getDescriptionField().getValue());
 
       BEANS.get(ToDoListModel.class).addTask(task);
     }

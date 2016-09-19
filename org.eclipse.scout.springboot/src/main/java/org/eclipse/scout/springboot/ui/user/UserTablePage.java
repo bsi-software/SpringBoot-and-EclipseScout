@@ -48,10 +48,10 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
     for (User user : users) {
       ITableRow row = table.createRow();
 
-      table.getUserNameColumn().setValue(row, user.name);
-      table.getFirstNameColumn().setValue(row, user.firstName);
-      table.getLastNameColumn().setValue(row, user.lastName);
-      table.getAdminColumn().setValue(row, user.roles.contains(ToDoListModel.ROLE_ADMIN));
+      table.getUserNameColumn().setValue(row, user.getName());
+      table.getFirstNameColumn().setValue(row, user.getFirstName());
+      table.getLastNameColumn().setValue(row, user.getLastName());
+      table.getAdminColumn().setValue(row, user.getRoles().contains(ToDoListModel.ROLE_ADMIN));
 
       table.addRow(row);
     }

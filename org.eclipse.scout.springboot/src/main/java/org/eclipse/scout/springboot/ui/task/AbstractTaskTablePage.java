@@ -58,18 +58,18 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     for (Task task : tasks) {
       ITableRow row = table.createRow();
 
-      table.getIdColumn().setValue(row, task.id);
+      table.getIdColumn().setValue(row, task.getId());
       // TODO doesn't work: html has <img> tag -> put image as static resource somewhere?
 //			table.getIconColumn().setValue(row, task.creator.name);
       table.getIconColumn().setValue(row, AbstractIcons.Star);
-      table.getDueInColumn().setValue(row, getDueInValue(task.dueDate));
-      table.getDueDateColumn().setValue(row, task.dueDate);
-      table.getTitleColumn().setValue(row, task.name);
-      table.getCreatorColumn().setValue(row, task.creator.toString());
-      table.getResponsibleColumn().setValue(row, task.responsible.toString());
-      table.getReminderColumn().setValue(row, task.reminder);
-      table.getAcceptedColumn().setValue(row, task.accepted);
-      table.getDoneColumn().setValue(row, task.done);
+      table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
+      table.getDueDateColumn().setValue(row, task.getDueDate());
+      table.getTitleColumn().setValue(row, task.getName());
+      table.getCreatorColumn().setValue(row, task.getCreator().toString());
+      table.getResponsibleColumn().setValue(row, task.getResponsible().toString());
+      table.getReminderColumn().setValue(row, task.getReminder());
+      table.getAcceptedColumn().setValue(row, task.isAccepted());
+      table.getDoneColumn().setValue(row, task.isDone());
 
       table.addRow(row);
     }
@@ -215,8 +215,8 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
           User user = BEANS.get(ToDoListModel.class).loggedInUser();
           Task task = BEANS.get(ToDoListModel.class).getTask(taskId);
 
-          if (task != null && task.responsible.equals(user)) {
-            task.accepted = true;
+          if (task != null && task.getResponsible().equals(user)) {
+            task.setAccepted(true);
             listHasChanged = true;
           }
         }
@@ -292,16 +292,16 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
-    @Order(500)
+    @Order(1000)
     public class IconColumn extends AbstractIconColumn {
 
       @Override
       protected int getConfiguredWidth() {
-        return 100;
+        return 50;
       }
     }
 
-    @Order(1000)
+    @Order(2000)
     public class CreatorColumn extends AbstractStringColumn {
       @Override
       protected String getConfiguredHeaderText() {
@@ -310,11 +310,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected int getConfiguredWidth() {
-        return 200;
+        return 150;
       }
     }
 
-    @Order(2000)
+    @Order(3000)
     public class TitleColumn extends AbstractStringColumn {
       @Override
       protected String getConfiguredHeaderText() {
@@ -332,7 +332,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
-    @Order(3000)
+    @Order(4000)
     public class ResponsibleColumn extends AbstractStringColumn {
       @Override
       protected String getConfiguredHeaderText() {
@@ -346,11 +346,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected int getConfiguredWidth() {
-        return 200;
+        return 150;
       }
     }
 
-    @Order(3500)
+    @Order(5000)
     public class DueInColumn extends AbstractStringColumn {
       @Override
       protected String getConfiguredHeaderText() {
@@ -359,11 +359,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected int getConfiguredWidth() {
-        return 100;
+        return 150;
       }
     }
 
-    @Order(4000)
+    @Order(6000)
     public class DueDateColumn extends AbstractDateColumn {
       @Override
       protected String getConfiguredHeaderText() {
@@ -381,7 +381,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
-    @Order(5000)
+    @Order(7000)
     public class ReminderColumn extends AbstractDateTimeColumn {
       @Override
       protected String getConfiguredHeaderText() {
@@ -390,11 +390,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected int getConfiguredWidth() {
-        return 200;
+        return 150;
       }
     }
 
-    @Order(6000)
+    @Order(8000)
     public class AcceptedColumn extends AbstractBooleanColumn {
       @Override
       protected String getConfiguredHeaderText() {
@@ -407,7 +407,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
-    @Order(7000)
+    @Order(9000)
     public class DoneColumn extends AbstractBooleanColumn {
       @Override
       protected String getConfiguredHeaderText() {

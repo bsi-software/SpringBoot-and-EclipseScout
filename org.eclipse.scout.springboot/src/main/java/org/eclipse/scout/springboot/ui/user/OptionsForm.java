@@ -27,13 +27,13 @@ public class OptionsForm extends AbstractForm {
   protected void execInitForm() {
     User user = BEANS.get(ToDoListModel.class).loggedInUser();
 
-    getUsernameField().setValue(user.name);
+    getUsernameField().setValue(user.getName());
     getUsernameField().setEnabled(false);
 
-    getPictureField().setImage(user.picture);
-    getFirstNameField().setValue(user.firstName);
-    getLastNameField().setValue(user.lastName);
-    getPasswordField().setValue(user.password);
+    getPictureField().setImage(user.getPicture());
+    getFirstNameField().setValue(user.getFirstName());
+    getLastNameField().setValue(user.getLastName());
+    getPasswordField().setValue(user.getPassword());
 
     getAdminField().setVisible(false);
   }
@@ -41,10 +41,10 @@ public class OptionsForm extends AbstractForm {
   protected void storeOptions() {
     User user = BEANS.get(ToDoListModel.class).loggedInUser();
 
-    user.picture = getPictureField().getByteArrayValue();
-    user.firstName = getFirstNameField().getValue();
-    user.lastName = getLastNameField().getValue();
-    user.password = getPasswordField().getValue();
+    user.setPicture(getPictureField().getByteArrayValue());
+    user.setFirstName(getFirstNameField().getValue());
+    user.setLastName(getLastNameField().getValue());
+    user.setPassword(getPasswordField().getValue());
   }
 
   public UserBox getUserBox() {

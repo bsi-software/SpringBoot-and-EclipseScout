@@ -33,16 +33,16 @@ public class ToDoListModel {
     userList = new ConcurrentHashMap<>();
 
     User alice = new User("alice", "Alice", "", "test");
-    alice.roles.add(ROLE_USER);
-    alice.roles.add(ROLE_ADMIN);
+    alice.getRoles().add(ROLE_USER);
+    alice.getRoles().add(ROLE_ADMIN);
 
     User bob = new User("bob", "Bob", "", "test");
-    bob.roles.add(ROLE_USER);
+    bob.getRoles().add(ROLE_USER);
 
-    roleList.put(ROLE_USER.name, ROLE_USER);
-    roleList.put(ROLE_ADMIN.name, ROLE_ADMIN);
-    userList.put(alice.name, alice);
-    userList.put(bob.name, bob);
+    roleList.put(ROLE_USER.getName(), ROLE_USER);
+    roleList.put(ROLE_ADMIN.getName(), ROLE_ADMIN);
+    userList.put(alice.getName(), alice);
+    userList.put(bob.getName(), bob);
   }
 
   public void addUser(User user) {
@@ -51,11 +51,11 @@ public class ToDoListModel {
     }
 
     // make sure user is not already in list
-    if (userList.containsKey(user.name)) {
+    if (userList.containsKey(user.getName())) {
       return;
     }
 
-    userList.put(user.name, user);
+    userList.put(user.getName(), user);
   }
 
   public User getUser(String userName) {
@@ -76,23 +76,23 @@ public class ToDoListModel {
     }
 
     // make sure task is not already in list
-    if (taskList.containsKey(task.id)) {
+    if (taskList.containsKey(task.getId())) {
       return;
     }
 
-    User responsible = task.responsible;
+    User responsible = task.getResponsible();
 
     if (!userTasks.containsKey(responsible)) {
       userTasks.put(responsible, new ConcurrentLinkedQueue<Task>());
     }
 
     userTasks.get(responsible).add(task);
-    taskList.put(task.id, task);
+    taskList.put(task.getId(), task);
   }
 
   public void saveTask(Task taskOld, Task taskNew) {
-    User userOld = taskOld.responsible;
-    User userNew = taskNew.responsible;
+    User userOld = taskOld.getResponsible();
+    User userNew = taskNew.getResponsible();
 
     if (!userNew.equals(userOld)) {
       changeUser(taskOld, userNew);
@@ -102,7 +102,7 @@ public class ToDoListModel {
   }
 
   private void changeUser(Task task, User userNew) {
-    getUserTasks(task.responsible).remove(task);
+    getUserTasks(task.getResponsible()).remove(task);
     getUserTasks(userNew).add(task);
   }
 
@@ -122,7 +122,7 @@ public class ToDoListModel {
     List<Task> inboxList = new ArrayList<>();
 
     for (Task task : getUserTasks(user)) {
-      if (!task.accepted) {
+      if (!task.isAccepted()) {
         inboxList.add(task);
       }
     }
@@ -134,7 +134,7 @@ public class ToDoListModel {
     List<Task> ownList = new ArrayList<>();
 
     for (Task task : getUserTasks(user)) {
-      if (task.accepted) {
+      if (task.isAccepted()) {
         ownList.add(task);
       }
     }
@@ -146,11 +146,11 @@ public class ToDoListModel {
     List<Task> todaysList = new ArrayList<>();
 
     for (Task task : getUserTasks(user)) {
-      if (!task.accepted || task.done) {
+      if (!task.isAccepted() || task.isDone()) {
         continue;
       }
 
-      if (isToday(task.dueDate) || isToday(task.reminder)) {
+      if (isToday(task.getDueDate()) || isToday(task.getReminder())) {
         todaysList.add(task);
       }
     }

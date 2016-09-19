@@ -106,11 +106,11 @@ public class UserForm extends AbstractForm {
       User user = BEANS.get(ToDoListModel.class).getUser(getUsernameField().getValue());
 
       getUsernameField().setEnabled(false);
-      getPictureField().setImage(user.picture);
-      getFirstNameField().setValue(user.firstName);
-      getLastNameField().setValue(user.lastName);
-      getPasswordField().setValue(user.password);
-      getAdminField().setValue(user.roles.contains(ToDoListModel.ROLE_ADMIN));
+      getPictureField().setImage(user.getPicture());
+      getFirstNameField().setValue(user.getFirstName());
+      getLastNameField().setValue(user.getLastName());
+      getPasswordField().setValue(user.getPassword());
+      getAdminField().setValue(user.getRoles().contains(ToDoListModel.ROLE_ADMIN));
 
       getForm().setSubTitle(calculateSubTitle());
 
@@ -121,19 +121,19 @@ public class UserForm extends AbstractForm {
     protected void execStore() {
       User user = BEANS.get(ToDoListModel.class).getUser(getUsernameField().getValue());
 
-      user.picture = getPictureField().getByteArrayValue();
-      user.firstName = getFirstNameField().getValue();
-      user.lastName = getLastNameField().getValue();
-      user.password = getPasswordField().getValue();
+      user.setPicture(getPictureField().getByteArrayValue());
+      user.setFirstName(getFirstNameField().getValue());
+      user.setLastName(getLastNameField().getValue());
+      user.setPassword(getPasswordField().getValue());
 
       if (getAdminField().getValue()) {
-        user.roles.add(ToDoListModel.ROLE_ADMIN);
+        user.getRoles().add(ToDoListModel.ROLE_ADMIN);
       }
       else {
-        user.roles.remove(ToDoListModel.ROLE_ADMIN);
+        user.getRoles().remove(ToDoListModel.ROLE_ADMIN);
       }
 
-      BEANS.get(UserPictureProviderService.class).addUserPicture(user.name, user.picture);
+      BEANS.get(UserPictureProviderService.class).addUserPicture(user.getName(), user.getPicture());
     }
 
     @Override
@@ -160,7 +160,7 @@ public class UserForm extends AbstractForm {
 
       if (user != null) {
         getUsernameField().setValue(null);
-        throw new VetoException(TEXTS.get("AccountAlreadyExists", user.name));
+        throw new VetoException(TEXTS.get("AccountAlreadyExists", user.getName()));
       }
 
       String userName = getUsernameField().getValue();
@@ -169,13 +169,13 @@ public class UserForm extends AbstractForm {
       String password = getPasswordField().getValue();
 
       user = new User(userName, firstName, lastName, password);
-      user.picture = getPictureField().getByteArrayValue();
+      user.setPicture(getPictureField().getByteArrayValue());
 
       if (getAdminField().getValue()) {
-        user.roles.add(ToDoListModel.ROLE_ADMIN);
+        user.getRoles().add(ToDoListModel.ROLE_ADMIN);
       }
       else {
-        user.roles.remove(ToDoListModel.ROLE_ADMIN);
+        user.getRoles().remove(ToDoListModel.ROLE_ADMIN);
       }
 
       BEANS.get(ToDoListModel.class).addUser(user);

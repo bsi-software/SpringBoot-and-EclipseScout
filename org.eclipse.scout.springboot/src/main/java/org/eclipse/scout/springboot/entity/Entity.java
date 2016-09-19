@@ -3,8 +3,24 @@ package org.eclipse.scout.springboot.entity;
 import java.util.UUID;
 
 public class Entity {
-  public String id;
-  public String name;
+  private String id;
+  private String name;
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
 
   public Entity(String name) {
     if (name == null) {
@@ -17,13 +33,13 @@ public class Entity {
       throw new IllegalArgumentException("name must not be empty");
     }
 
-    id = UUID.randomUUID().toString();
-    this.name = name;
+    setId(UUID.randomUUID().toString());
+    this.setName(name);
   }
 
   @Override
   public int hashCode() {
-    return id.hashCode();
+    return getId().hashCode();
   }
 
   @Override
@@ -36,6 +52,6 @@ public class Entity {
       return false;
     }
 
-    return id.equals(((Entity) obj).id);
+    return getId().equals(((Entity) obj).getId());
   }
 }
