@@ -1,184 +1,156 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.eclipse.scout.springboot</groupId>
-  <artifactId>org.eclipse.scout.springboot</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.eclipse.scout.springboot</groupId>
+	<artifactId>org.eclipse.scout.springboot</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>1.4.0.RELEASE</version>
-  </parent>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.4.0.RELEASE</version>
+	</parent>
 
- <!--  eclipse repositories for snapshot builds -->
-  <repositories>
-    <repository>
-      <snapshots></snapshots>
-      <id>eclipse.snapshot</id>
-      <name>eclipse-snapshot-repo</name>
-      <url>https://repo.eclipse.org/content/groups/snapshots/</url>
-    </repository>
-  </repositories>
+	<!-- eclipse repositories for snapshot builds -->
+	<repositories>
+		<repository>
+			<snapshots></snapshots>
+			<id>eclipse.snapshot</id>
+			<name>eclipse-snapshot-repo</name>
+			<url>https://repo.eclipse.org/content/groups/snapshots/</url>
+		</repository>
+	</repositories>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <snapshots></snapshots>
-      <id>eclipse.snapshot</id>
-      <name>eclipse-snapshot-repo</name>
-      <url>https://repo.eclipse.org/content/groups/snapshots/</url>
-    </pluginRepository>
-  </pluginRepositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<snapshots></snapshots>
+			<id>eclipse.snapshot</id>
+			<name>eclipse-snapshot-repo</name>
+			<url>https://repo.eclipse.org/content/groups/snapshots/</url>
+		</pluginRepository>
+	</pluginRepositories>
 
-  <properties>
-    <scout.version>6.1.0-SNAPSHOT</scout.version>
-    <java.version>1.8</java.version>
-    <javax.inject.version>1</javax.inject.version>
-  </properties>
+	<properties>
+		<scout.version>6.1.0-SNAPSHOT</scout.version>
+		<java.version>1.8</java.version>
+		<javax.inject.version>1</javax.inject.version>
+	</properties>
 
-  <dependencies>
-    <!-- Scout dependencies -->
-    <dependency>
-      <groupId>org.eclipse.scout.rt</groupId>
-      <artifactId>org.eclipse.scout.rt.ui.html</artifactId>
-      <version>${scout.version}</version>
-    </dependency>
+	<dependencies>
+		<!-- Scout dependencies -->
+		<dependency>
+			<groupId>org.eclipse.scout.rt</groupId>
+			<artifactId>org.eclipse.scout.rt.ui.html</artifactId>
+			<version>${scout.version}</version>
+		</dependency>
 
-    <!-- Springboot dependencies -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
+		<!-- Springboot dependencies -->
 
-    <!-- Miscellaneous dependencies -->
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>${javax.inject.version}</version>
-    </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
+		<!-- Miscellaneous dependencies -->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>${javax.inject.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-    <!-- Test dependencies -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-  <build>
-  <pluginManagement>
-    <plugins>
-      <!--This plugin's configuration is used to store Eclipse m2e settings
-        only. It has no influence on the Maven build itself. -->
-      <plugin>
-        <groupId>org.eclipse.m2e</groupId>
-        <artifactId>lifecycle-mapping</artifactId>
-        <version>1.0.0</version>
-        <configuration>
-          <lifecycleMappingMetadata>
-            <pluginExecutions>
-              <pluginExecution>
-                <pluginExecutionFilter>
-                  <groupId>org.jboss.jandex</groupId>
-                  <artifactId>jandex-maven-plugin</artifactId>
-                  <versionRange>[1.0.1,)</versionRange>
-                  <goals>
-                    <goal>jandex</goal>
-                  </goals>
-                </pluginExecutionFilter>
-                <action>
-                  <ignore></ignore>
-                </action>
-              </pluginExecution>
-              <pluginExecution>
-                <pluginExecutionFilter>
-                  <groupId>com.github.klieber</groupId>
-                  <artifactId>phantomjs-maven-plugin</artifactId>
-                  <versionRange>[0.7,)</versionRange>
-                  <goals>
-                    <goal>install</goal>
-                  </goals>
-                </pluginExecutionFilter>
-                <action>
-                  <ignore></ignore>
-                </action>
-              </pluginExecution>
-              <!-- WS-STUB generation: Instrument 'm2e' to generate webservice stub
-                in Eclipse IDE (does not affect standalone Maven build) -->
-              <!-- Note: Artifacts are on re-generated if the hash of 'wsartifact-hash'
-                changes. -->
-              <!-- Note: Do not move into 'jaxws' profile because ignored by 'm2e'
-                otherwise. -->
-              <pluginExecution>
-                <pluginExecutionFilter>
-                  <groupId>org.codehaus.mojo</groupId>
-                  <artifactId>jaxws-maven-plugin</artifactId>
-                  <versionRange>[${master_plugin_jaxws_version},)</versionRange>
-                  <goals>
-                    <goal>wsimport</goal>
-                  </goals>
-                </pluginExecutionFilter>
-                <action>
-                  <execute>
-                    <!-- to run on full and incremental build -->
-                    <runOnIncremental>true</runOnIncremental>
-                    <!-- to run once a JAX-WS module is imported into workspace -->
-                    <runOnConfiguration>true</runOnConfiguration>
-                  </execute>
-                </action>
-              </pluginExecution>
-            </pluginExecutions>
-          </lifecycleMappingMetadata>
-        </configuration>
-      </plugin>
-    </plugins>
-  </pluginManagement>
-  </build>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.jboss.jandex</groupId>
+										<artifactId>jandex-maven-plugin</artifactId>
+										<versionRange>[1.0.1,)</versionRange>
+										<goals>
+											<goal>jandex</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 
-  <profiles>
-    <profile>
-      <!-- Only create the jandex.idx when a scout.xml is found -->
-      <id>jandex-idx</id>
-      <activation>
-        <file>
-          <exists>${basedir}/src/main/resources/META-INF/scout.xml</exists>
-        </file>
-      </activation>
-      <build>
-        <plugins>
-          <!-- Create META-INF/jandex.idx -->
-          <plugin>
-            <groupId>org.jboss.jandex</groupId>
-            <artifactId>jandex-maven-plugin</artifactId>
-            <version>1.0.3</version>
-            <executions>
-              <execution>
-                <id>make-index</id>
-                <goals>
-                  <goal>jandex</goal>
-                </goals>
-                <!-- phase is 'process-classes by default' -->
-                <configuration>
-                  <!-- Nothing needed here for simple cases -->
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+	<profiles>
+		<profile>
+			<!-- Only create the jandex.idx when a scout.xml is found -->
+			<id>jandex-idx</id>
+			<activation>
+				<file>
+					<exists>${basedir}/src/main/resources/META-INF/scout.xml</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<!-- Create META-INF/jandex.idx -->
+					<plugin>
+						<groupId>org.jboss.jandex</groupId>
+						<artifactId>jandex-maven-plugin</artifactId>
+						<version>1.0.3</version>
+						<executions>
+							<execution>
+								<id>make-index</id>
+								<goals>
+									<goal>jandex</goal>
+								</goals>
+								<!-- phase is 'process-classes by default' -->
+								<configuration>
+									<!-- Nothing needed here for simple cases -->
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
