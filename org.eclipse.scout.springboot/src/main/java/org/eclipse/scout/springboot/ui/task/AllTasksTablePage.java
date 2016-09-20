@@ -20,8 +20,6 @@ public class AllTasksTablePage extends AbstractTaskTablePage {
 
   @Override
   protected Collection<Task> getTasks() {
-    Collection<Task> tasks = BEANS.get(ToDoListModel.class).getAllTasks();
-
-    return tasks;
+    return BEANS.get(ToDoListModel.class).getAllTasks();
   }
 }

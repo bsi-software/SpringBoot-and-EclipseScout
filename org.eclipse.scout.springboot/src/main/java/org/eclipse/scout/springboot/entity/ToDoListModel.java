@@ -19,30 +19,36 @@ public class ToDoListModel {
   public static final Role ROLE_USER = new Role("user");
   public static final Role ROLE_ADMIN = new Role("admin");
 
-  private Map<String, Task> taskList;
-  private Map<User, Queue<Task>> userTasks;
+  private final Map<String, Task> taskList = new ConcurrentHashMap<>();
+  private final Map<User, Queue<Task>> userTasks = new ConcurrentHashMap<>();
 
-  private Map<String, Role> roleList;
-  private Map<String, User> userList;
+  private final Map<String, Role> roleList = new ConcurrentHashMap<>();
+  private final Map<String, User> userList = new ConcurrentHashMap<>();
 
   public ToDoListModel() {
-    userTasks = new ConcurrentHashMap<>();
-    taskList = new ConcurrentHashMap<>();
+    createDummyUsers();
+  }
 
-    roleList = new ConcurrentHashMap<>();
-    userList = new ConcurrentHashMap<>();
-
+  private void createDummyUsers() {
     User alice = new User("alice", "Alice", "", "test");
     alice.getRoles().add(ROLE_USER);
     alice.getRoles().add(ROLE_ADMIN);
+    addDummyUser(alice);
 
     User bob = new User("bob", "Bob", "", "test");
     bob.getRoles().add(ROLE_USER);
+    addDummyUser(bob);
 
-    roleList.put(ROLE_USER.getName(), ROLE_USER);
-    roleList.put(ROLE_ADMIN.getName(), ROLE_ADMIN);
-    userList.put(alice.getName(), alice);
-    userList.put(bob.getName(), bob);
+    User eclipse = new User("eclipse", "Eclipse", "", "scout");
+    eclipse.getRoles().add(ROLE_USER);
+    addDummyUser(eclipse);
+  }
+
+  private void addDummyUser(User user) {
+    userList.put(user.getName(), user);
+    user.getRoles().forEach((role) -> {
+      roleList.put(role.getName(), role);
+    });
   }
 
   public void addUser(User user) {
@@ -64,10 +70,6 @@ public class ToDoListModel {
 
   public Collection<User> getUsers() {
     return userList.values();
-  }
-
-  public User loggedInUser() {
-    return getUser("alice");
   }
 
   public void addTask(Task task) {

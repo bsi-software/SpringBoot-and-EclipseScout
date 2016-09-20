@@ -1,4 +1,4 @@
-package org.eclipse.scout.springboot.ui;
+package org.eclipse.scout.springboot.auth;
 
 import java.io.IOException;
 
@@ -13,8 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.scout.rt.platform.BEANS;
-import org.eclipse.scout.rt.platform.security.ConfigFileCredentialVerifier;
-import org.eclipse.scout.rt.server.commons.authentication.DevelopmentAccessController;
 import org.eclipse.scout.rt.server.commons.authentication.FormBasedAccessController;
 import org.eclipse.scout.rt.server.commons.authentication.FormBasedAccessController.FormBasedAuthConfig;
 import org.eclipse.scout.rt.server.commons.authentication.ServletFilterHelper;
@@ -32,10 +30,7 @@ public class UiServletFilter implements Filter {
   private FormBasedAccessController formBasedAccessController;
 
   @Inject
-  private DevelopmentAccessController developmentAccessController;
-
-  @Inject
-  private ConfigFileCredentialVerifier credentialVerifier;
+  private CredentialVerifier credentialVerifier;
 
   @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
@@ -44,7 +39,6 @@ public class UiServletFilter implements Filter {
         .withLoginPageInstalled(true));
     formBasedAccessController.init(new FormBasedAuthConfig()
         .withCredentialVerifier(credentialVerifier));
-    developmentAccessController.init();
   }
 
   @Override
@@ -60,16 +54,11 @@ public class UiServletFilter implements Filter {
       return;
     }
 
-    if (developmentAccessController.handle(req, resp, chain)) {
-      return;
-    }
-
     BEANS.get(ServletFilterHelper.class).forwardToLoginForm(req, resp);
   }
 
   @Override
   public void destroy() {
-    developmentAccessController.destroy();
     formBasedAccessController.destroy();
     trivialAccessController.destroy();
   }

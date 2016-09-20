@@ -3,11 +3,10 @@ package org.eclipse.scout.springboot.ui.user;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
-import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.springboot.entity.ToDoListModel;
 import org.eclipse.scout.springboot.entity.User;
+import org.eclipse.scout.springboot.ui.ClientSession;
 import org.eclipse.scout.springboot.ui.user.AbstractUserBox.AdminField;
 import org.eclipse.scout.springboot.ui.user.AbstractUserBox.FirstNameField;
 import org.eclipse.scout.springboot.ui.user.AbstractUserBox.LastNameField;
@@ -25,8 +24,7 @@ public class OptionsForm extends AbstractForm {
 
   @Override
   protected void execInitForm() {
-    User user = BEANS.get(ToDoListModel.class).loggedInUser();
-
+    User user = ClientSession.get().getUser();
     getUsernameField().setValue(user.getName());
     getUsernameField().setEnabled(false);
 
@@ -39,8 +37,7 @@ public class OptionsForm extends AbstractForm {
   }
 
   protected void storeOptions() {
-    User user = BEANS.get(ToDoListModel.class).loggedInUser();
-
+    User user = ClientSession.get().getUser();
     user.setPicture(getPictureField().getByteArrayValue());
     user.setFirstName(getFirstNameField().getValue());
     user.setLastName(getLastNameField().getValue());

@@ -7,6 +7,7 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.springboot.entity.Task;
 import org.eclipse.scout.springboot.entity.ToDoListModel;
 import org.eclipse.scout.springboot.entity.User;
+import org.eclipse.scout.springboot.ui.ClientSession;
 import org.eclipse.scout.springboot.ui.task.AbstractTaskTablePage.Table.AcceptMenu;
 
 public class MyTaskTablePage extends AbstractTaskTablePage {
@@ -24,10 +25,8 @@ public class MyTaskTablePage extends AbstractTaskTablePage {
 
   @Override
   protected Collection<Task> getTasks() {
-    User user = BEANS.get(ToDoListModel.class).loggedInUser();
-    Collection<Task> tasks = BEANS.get(ToDoListModel.class).getOwnTasks(user);
-
-    return tasks;
+    User user = ClientSession.get().getUser();
+    return BEANS.get(ToDoListModel.class).getOwnTasks(user);
   }
 
   @Override

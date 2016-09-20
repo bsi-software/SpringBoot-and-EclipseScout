@@ -27,7 +27,7 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.springboot.entity.Task;
 import org.eclipse.scout.springboot.entity.ToDoListModel;
-import org.eclipse.scout.springboot.entity.User;
+import org.eclipse.scout.springboot.ui.ClientSession;
 import org.eclipse.scout.springboot.ui.task.AbstractTaskTablePage.Table;
 
 public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
@@ -60,7 +60,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       table.getIdColumn().setValue(row, task.getId());
       // TODO doesn't work: html has <img> tag -> put image as static resource somewhere?
-//			table.getIconColumn().setValue(row, task.creator.name);
+//      table.getIconColumn().setValue(row, task.creator.name);
       table.getIconColumn().setValue(row, AbstractIcons.Star);
       table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
       table.getDueDateColumn().setValue(row, task.getDueDate());
@@ -212,10 +212,9 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
         for (ITableRow row : getSelectedRows()) {
           String taskId = (String) row.getKeyValues().get(0);
-          User user = BEANS.get(ToDoListModel.class).loggedInUser();
           Task task = BEANS.get(ToDoListModel.class).getTask(taskId);
 
-          if (task != null && task.getResponsible().equals(user)) {
+          if (task != null && task.getResponsible().equals(ClientSession.get().getUser())) {
             task.setAccepted(true);
             listHasChanged = true;
           }

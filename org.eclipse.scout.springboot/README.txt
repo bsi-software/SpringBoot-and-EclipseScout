@@ -6,11 +6,7 @@ Running the example in console:
 ===============================
 mvn spring-boot:run
 
-
 Open Application on http://localhost:8080/
 
-By default, this application requires user authentication. The credentials are 'eclipse/scout'.
-You can change this in 'config.properties':
-- change to development mode (property: scout.dev.mode)
-- change credentials (property: scout.auth.credentials)
+By default, this application requires user authentication. The credentials are 'eclipse/scout', 'alice/test', 'bob/test'.
 

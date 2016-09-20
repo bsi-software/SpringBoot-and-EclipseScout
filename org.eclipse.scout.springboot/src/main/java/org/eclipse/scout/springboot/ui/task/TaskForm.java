@@ -22,19 +22,20 @@ import org.eclipse.scout.springboot.entity.Task;
 import org.eclipse.scout.springboot.entity.ToDoListModel;
 import org.eclipse.scout.springboot.entity.User;
 import org.eclipse.scout.springboot.ui.AbstractDirtyFormHandler;
+import org.eclipse.scout.springboot.ui.ClientSession;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.CancelButton;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.OkButton;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox.AcceptedField;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox.DoneField;
-import org.eclipse.scout.springboot.ui.user.UserLookupCall;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.CreatorField;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.DescriptionField;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.DueDateField;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.ReminderField;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.ResponsibleField;
 import org.eclipse.scout.springboot.ui.task.TaskForm.MainBox.TopBox.TitleField;
+import org.eclipse.scout.springboot.ui.user.UserLookupCall;
 
 public class TaskForm extends AbstractForm {
 
@@ -334,14 +335,12 @@ public class TaskForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      User user = BEANS.get(ToDoListModel.class).loggedInUser();
-
+      User user = ClientSession.get().getUser();
       // add default values
       getCreatorField().setValue(user);
       getResponsibleField().setValue(user);
       getAcceptedField().setValue(true);
       getDueDateField().setValue(new Date());
-
       setEnabledPermission(new CreateTaskPermission());
     }
 

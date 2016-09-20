@@ -7,8 +7,8 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.scout.rt.ui.html.UiHttpSessionListener;
 import org.eclipse.scout.rt.ui.html.UiServlet;
+import org.eclipse.scout.springboot.auth.UiServletFilter;
 import org.eclipse.scout.springboot.platform.ScoutSpringWebappListener;
-import org.eclipse.scout.springboot.ui.UiServletFilter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
