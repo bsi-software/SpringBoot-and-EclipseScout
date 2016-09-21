@@ -1,4 +1,4 @@
-package org.eclipse.scout.springboot.auth;
+package org.eclipse.scout.springboot.security;
 
 import java.io.IOException;
 

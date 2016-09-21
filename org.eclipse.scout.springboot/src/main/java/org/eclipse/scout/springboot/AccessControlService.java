@@ -1,12 +1,15 @@
 package org.eclipse.scout.springboot;
 
 import java.security.AllPermission;
+import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
 
+import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.shared.ISession;
 import org.eclipse.scout.rt.shared.services.common.security.AbstractAccessControlService;
 import org.eclipse.scout.rt.shared.services.common.security.IAccessControlService;
+import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
 
 /**
  * <h3>{@link UserIdAccessControlService}</h3> {@link IAccessControlService} service that uses
@@ -29,7 +32,15 @@ public class AccessControlService extends AbstractAccessControlService<String> {
     Permissions p = new Permissions();
     AllPermission all = new AllPermission();
     p.add(all);
-    //TODO mzi
+    // TODO mzi add permissions depnding on roles
+    // BEANS.get(IPermissionService.class).getAllPermissionClasses()
+    System.out.println(">>> List of permission classes:");
+    for (Class<? extends Permission> p1 : BEANS.get(IPermissionService.class).getAllPermissionClasses()) {
+      System.out.println(p1.getSimpleName() + "," + p1.getName());
+    }
+
+    // more info
+    // https://wiki.eclipse.org/Scout/Tutorial/3.8/Minicrm/Permissions
     return p;
   }
 }

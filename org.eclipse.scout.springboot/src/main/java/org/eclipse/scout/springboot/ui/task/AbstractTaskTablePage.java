@@ -55,6 +55,9 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       return;
     }
 
+    // TODO remove this and start to implement role based stuff
+    String userId = ClientSession.get().getUser().getName();
+
     for (Task task : tasks) {
       ITableRow row = table.createRow();
 

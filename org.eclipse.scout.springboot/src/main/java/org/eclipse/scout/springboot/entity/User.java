@@ -14,6 +14,24 @@ public class User extends Entity {
   private boolean active;
   private Collection<Role> roles;
 
+  public User(String name, String firstName, String lastName, String password) {
+    super(name);
+
+    if (firstName == null) {
+      throw new IllegalArgumentException("first name must not be null");
+    }
+
+    if (password == null) {
+      throw new IllegalArgumentException("password must not be null");
+    }
+
+    this.setFirstName(firstName);
+    this.setLastName(lastName);
+    this.setPassword(password);
+
+    setRoles(new HashSet<Role>());
+  }
+
   public String getFirstName() {
     return firstName;
   }
@@ -68,24 +86,6 @@ public class User extends Entity {
 
   public void setActive(boolean active) {
     this.active = active;
-  }
-
-  public User(String name, String firstName, String lastName, String password) {
-    super(name);
-
-    if (firstName == null) {
-      throw new IllegalArgumentException("first name must not be null");
-    }
-
-    if (password == null) {
-      throw new IllegalArgumentException("password must not be null");
-    }
-
-    this.setFirstName(firstName);
-    this.setLastName(lastName);
-    this.setPassword(password);
-
-    setRoles(new HashSet<Role>());
   }
 
   @Override

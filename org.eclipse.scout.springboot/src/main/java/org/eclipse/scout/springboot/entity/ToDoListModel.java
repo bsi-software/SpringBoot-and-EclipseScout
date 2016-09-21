@@ -26,29 +26,28 @@ public class ToDoListModel {
   private final Map<String, User> userList = new ConcurrentHashMap<>();
 
   public ToDoListModel() {
-    createDummyUsers();
+    createInitialRoles();
+    createInitialUsers();
   }
 
-  private void createDummyUsers() {
+  private void createInitialRoles() {
+    addRole(ROLE_USER);
+    addRole(ROLE_ADMIN);
+  }
+
+  private void createInitialUsers() {
     User alice = new User("alice", "Alice", "", "test");
     alice.getRoles().add(ROLE_USER);
     alice.getRoles().add(ROLE_ADMIN);
-    addDummyUser(alice);
+    addUser(alice);
 
     User bob = new User("bob", "Bob", "", "test");
     bob.getRoles().add(ROLE_USER);
-    addDummyUser(bob);
+    addUser(bob);
 
     User eclipse = new User("eclipse", "Eclipse", "", "scout");
     eclipse.getRoles().add(ROLE_USER);
-    addDummyUser(eclipse);
-  }
-
-  private void addDummyUser(User user) {
-    userList.put(user.getName(), user);
-    user.getRoles().forEach((role) -> {
-      roleList.put(role.getName(), role);
-    });
+    addUser(eclipse);
   }
 
   public void addUser(User user) {
@@ -70,6 +69,27 @@ public class ToDoListModel {
 
   public Collection<User> getUsers() {
     return userList.values();
+  }
+
+  public void addRole(Role role) {
+    if (role == null) {
+      return;
+    }
+
+    // make sure role is not already in list
+    if (roleList.containsKey(role.getId())) {
+      return;
+    }
+
+    roleList.put(role.getId(), role);
+  }
+
+  public Role getRole(String roleId) {
+    return roleList.get(roleId);
+  }
+
+  public Collection<Role> getRoles() {
+    return roleList.values();
   }
 
   public void addTask(Task task) {

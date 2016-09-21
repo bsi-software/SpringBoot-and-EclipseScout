@@ -6,6 +6,7 @@ import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutline;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.springboot.ui.user.RoleTablePage;
 import org.eclipse.scout.springboot.ui.user.UserTablePage;
 
 /**
@@ -31,5 +32,6 @@ public class AdminOutline extends AbstractOutline {
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     super.execCreateChildPages(pageList);
     pageList.add(new UserTablePage());
+    pageList.add(new RoleTablePage());
   }
 }
