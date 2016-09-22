@@ -8,6 +8,7 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleTablePage;
 import org.eclipse.scout.springboot.demo.scout.ui.user.UserTablePage;
+import org.springframework.context.ApplicationContext;
 
 /**
  * <h3>{@link AdminOutline}</h3>
@@ -31,7 +32,9 @@ public class AdminOutline extends AbstractOutline {
   @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     super.execCreateChildPages(pageList);
-    pageList.add(new UserTablePage());
-    pageList.add(new RoleTablePage());
+
+    final ApplicationContext applicationContext = ApplicationContexts.current();
+    pageList.add(applicationContext.getBean(UserTablePage.class));
+    pageList.add(applicationContext.getBean(RoleTablePage.class));
   }
 }

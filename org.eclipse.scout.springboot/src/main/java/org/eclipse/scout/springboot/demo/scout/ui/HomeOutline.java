@@ -9,6 +9,7 @@ import org.eclipse.scout.springboot.demo.scout.ui.task.AllTasksTablePage;
 import org.eclipse.scout.springboot.demo.scout.ui.task.InboxTablePage;
 import org.eclipse.scout.springboot.demo.scout.ui.task.MyTaskTablePage;
 import org.eclipse.scout.springboot.demo.scout.ui.task.TodaysTaskTablePage;
+import org.springframework.context.ApplicationContext;
 
 public class HomeOutline extends AbstractOutline {
 
@@ -26,9 +27,11 @@ public class HomeOutline extends AbstractOutline {
   @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     super.execCreateChildPages(pageList);
-    pageList.add(new InboxTablePage());
-    pageList.add(new TodaysTaskTablePage());
-    pageList.add(new MyTaskTablePage());
-    pageList.add(new AllTasksTablePage());
+
+    final ApplicationContext applicationContext = ApplicationContexts.current();
+    pageList.add(applicationContext.getBean(InboxTablePage.class));
+    pageList.add(applicationContext.getBean(TodaysTaskTablePage.class));
+    pageList.add(applicationContext.getBean(MyTaskTablePage.class));
+    pageList.add(applicationContext.getBean(AllTasksTablePage.class));
   }
 }

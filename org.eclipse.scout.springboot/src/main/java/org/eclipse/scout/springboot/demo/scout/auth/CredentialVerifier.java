@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CredentialVerifier implements ICredentialVerifier {
 
-  @Autowired
+  @Autowired // TODO [mzi] ask Patrick why this annotation is required. Here we have construction injection. Is it just to make clear that this field is injected?
   private UserService userService;
 
   @Inject

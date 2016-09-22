@@ -11,11 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-/**
- * <h3>{@link TaskController}</h3>
- *
- * @author patbaumgartner
- */
 @Controller
 @RequestMapping("/tasks")
 public class TaskController {

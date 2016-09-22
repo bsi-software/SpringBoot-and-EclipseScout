@@ -21,12 +21,14 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
 import org.eclipse.scout.springboot.demo.model.Role;
 import org.eclipse.scout.springboot.demo.scout.ui.AbstractDirtyFormHandler;
+import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.CancelButton;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.OkButton;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.RoleBox;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.RoleBox.RoleNameField;
 import org.eclipse.scout.springboot.demo.spring.service.RoleService;
+import org.springframework.context.ApplicationContext;
 
 public class RoleForm extends AbstractForm {
 
@@ -204,10 +206,12 @@ public class RoleForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      Role role = BEANS.get(RoleService.class).getRole(UUID.fromString(getId()));
+      Role role = getRole();
 
-      getRoleNameField().setValue(role.getName());
-      getPermissionTableField().getTable().setInitialRowContent(role.getPermissions());
+      // TODO fix code below (same lazy loading problem as with UserTablePage)
+//      getRoleNameField().setValue(role.getName());
+//      getPermissionTableField().getTable().setInitialRowContent(role.getPermissions());
+
       setSubTitle(calculateSubTitle());
 
       setEnabledPermission(new UpdateUserPermission());
@@ -215,7 +219,7 @@ public class RoleForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      Role role = BEANS.get(RoleService.class).getRole(UUID.fromString(getId()));
+      Role role = getRole();
 
       role.setName(getRoleNameField().getValue());
 
@@ -230,20 +234,8 @@ public class RoleForm extends AbstractForm {
           role.removePermission(permission);
         }
       }
-//
-//      user.setPicture(getPictureField().getByteArrayValue());
-//      user.setFirstName(getFirstNameField().getValue());
-//      user.setLastName(getLastNameField().getValue());
-//      user.setPassword(getPasswordField().getValue());
-//
-//      if (getAdminField().getValue()) {
-//        user.getRoles().add(ToDoListModel.ROLE_ADMIN);
-//      }
-//      else {
-//        user.getRoles().remove(ToDoListModel.ROLE_ADMIN);
-//      }
-//
-//      BEANS.get(UserPictureProviderService.class).addUserPicture(user.getName(), user.getPicture());
+
+      getRoleService().saveRole(role);
     }
 
     @Override
@@ -266,29 +258,10 @@ public class RoleForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-//      User user = BEANS.get(ToDoListModel.class).getUser(getUsernameField().getValue());
-//
-//      if (user != null) {
-//        getUsernameField().setValue(null);
-//        throw new VetoException(TEXTS.get("AccountAlreadyExists", user.getName()));
-//      }
-//
-//      String userName = getUsernameField().getValue();
-//      String firstName = getFirstNameField().getValue();
-//      String lastName = getLastNameField().getValue();
-//      String password = getPasswordField().getValue();
-//
-//      user = new User(userName, firstName, lastName, password);
-//      user.setPicture(getPictureField().getByteArrayValue());
-//
-//      if (getAdminField().getValue()) {
-//        user.getRoles().add(ToDoListModel.ROLE_ADMIN);
-//      }
-//      else {
-//        user.getRoles().remove(ToDoListModel.ROLE_ADMIN);
-//      }
-//
-//      BEANS.get(ToDoListModel.class).addUser(user);
+      String name = getRoleNameField().getValue();
+      Role role = new Role(name);
+
+      getRoleService().addRole(role);
     }
 
     @Override
@@ -299,5 +272,16 @@ public class RoleForm extends AbstractForm {
 
   private String calculateSubTitle() {
     return getRoleNameField().getValue();
+  }
+
+  private Role getRole() {
+    RoleService service = getRoleService();
+    UUID uuid = UUID.fromString(getId());
+    return service.getRole(uuid);
+  }
+
+  private RoleService getRoleService() {
+    ApplicationContext applicationContext = ApplicationContexts.current();
+    return applicationContext.getBean(RoleService.class);
   }
 }

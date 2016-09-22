@@ -1,4 +1,4 @@
-package org.eclipse.scout.springboot.demo.scout.ui.task;
+package org.eclipse.scout.springboot.demo.scout.ui.user;
 
 import java.security.BasicPermission;
 

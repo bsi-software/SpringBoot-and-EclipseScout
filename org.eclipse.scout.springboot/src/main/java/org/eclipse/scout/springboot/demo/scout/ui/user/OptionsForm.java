@@ -6,6 +6,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.springboot.demo.model.User;
+import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.ClientSession;
 import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.AdminField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.FirstNameField;
@@ -14,6 +15,8 @@ import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.PasswordF
 import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.PictureField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.UserNameField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.OptionsForm.MainBox.UserBox;
+import org.eclipse.scout.springboot.demo.spring.service.UserService;
+import org.springframework.context.ApplicationContext;
 
 public class OptionsForm extends AbstractForm {
 
@@ -24,8 +27,7 @@ public class OptionsForm extends AbstractForm {
 
   @Override
   protected void execInitForm() {
-
-    User user = ClientSession.get().getUser();
+    User user = getUser();
 
     getUsernameField().setValue(user.getName());
     getUsernameField().setEnabled(false);
@@ -39,11 +41,14 @@ public class OptionsForm extends AbstractForm {
   }
 
   protected void storeOptions() {
-    User user = ClientSession.get().getUser();
+    User user = getUser();
+
     user.setPicture(getPictureField().getByteArrayValue());
     user.setFirstName(getFirstNameField().getValue());
     user.setLastName(getLastNameField().getValue());
     user.setPassword(getPasswordField().getValue());
+
+    getUserService().saveUser(user);
   }
 
   public UserBox getUserBox() {
@@ -95,5 +100,16 @@ public class OptionsForm extends AbstractForm {
         storeOptions();
       }
     }
+  }
+
+  private User getUser() {
+    UserService userService = getUserService();
+    String username = ClientSession.get().getUser().getName();
+    return userService.getUser(username);
+  }
+
+  private UserService getUserService() {
+    final ApplicationContext applicationContext = ApplicationContexts.current();
+    return applicationContext.getBean(UserService.class);
   }
 }

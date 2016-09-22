@@ -15,13 +15,13 @@ import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.sequencebox.AbstractSequenceBox;
 import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
-import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.eclipse.scout.springboot.demo.model.Task;
 import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.scout.ui.AbstractDirtyFormHandler;
+import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.ClientSession;
 import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.CancelButton;
 import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.OkButton;
@@ -37,6 +37,7 @@ import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.TopBox.R
 import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.TopBox.TitleField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.UserLookupCall;
 import org.eclipse.scout.springboot.demo.spring.service.TaskService;
+import org.springframework.context.ApplicationContext;
 
 public class TaskForm extends AbstractForm {
 
@@ -68,7 +69,8 @@ public class TaskForm extends AbstractForm {
   }
 
   public void startModify() {
-    startInternalExclusive(new ModifyHandler());
+    final ApplicationContext applicationContext = ApplicationContexts.current();
+    startInternalExclusive(applicationContext.getBean(ModifyHandler.class));
   }
 
   public void startNew() {
@@ -265,7 +267,6 @@ public class TaskForm extends AbstractForm {
           return 2;
         }
       }
-
     }
 
     @Order(100000)
@@ -308,7 +309,7 @@ public class TaskForm extends AbstractForm {
       taskNew.setDone(getDoneField().getValue());
       taskNew.setDescription(getDescriptionField().getValue());
 
-      BEANS.get(TaskService.class).saveTask(getTask(), taskNew);
+      getTaskService().saveTask(getTask(), taskNew);
     }
 
     @Override
@@ -322,13 +323,19 @@ public class TaskForm extends AbstractForm {
     }
 
     private Task getTask() {
-      Task task = BEANS.get(TaskService.class).getTask(UUID.fromString(getTaskId()));
+      UUID id = UUID.fromString(getTaskId());
+      Task task = getTaskService().getTask(id);
 
       if (task == null) {
-        throw new IllegalArgumentException("invalid taskId '" + getTaskId() + "': no record found");
+        throw new IllegalArgumentException("invalid taskId '" + id + "': no record found");
       }
 
       return task;
+    }
+
+    private TaskService getTaskService() {
+      final ApplicationContext applicationContext = ApplicationContexts.current();
+      return applicationContext.getBean(TaskService.class);
     }
   }
 
@@ -358,7 +365,9 @@ public class TaskForm extends AbstractForm {
       task.setDone(getDoneField().getValue());
       task.setDescription(getDescriptionField().getValue());
 
-      BEANS.get(TaskService.class).addTask(task);
+      final ApplicationContext applicationContext = ApplicationContexts.current();
+      // TODO fix this: save throws Caused by: org.h2.jdbc.JdbcSQLException: Value too long for column "CREATOR BINARY(255)":
+      applicationContext.getBean(TaskService.class).addTask(task);
     }
 
     @Override

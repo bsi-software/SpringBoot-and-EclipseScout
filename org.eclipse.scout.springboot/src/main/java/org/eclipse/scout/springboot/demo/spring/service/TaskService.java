@@ -6,11 +6,6 @@ import java.util.UUID;
 import org.eclipse.scout.springboot.demo.model.Task;
 import org.eclipse.scout.springboot.demo.model.User;
 
-/**
- * <h3>{@link TaskService}</h3>
- *
- * @author patbaumgartner
- */
 public interface TaskService {
 
   Collection<Task> getAllTasks();

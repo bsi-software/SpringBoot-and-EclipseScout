@@ -3,6 +3,8 @@ package org.eclipse.scout.springboot.demo.scout.ui.user;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
@@ -12,7 +14,6 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
 import org.eclipse.scout.rt.client.ui.form.FormListener;
-import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
@@ -20,8 +21,16 @@ import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.springboot.demo.model.Role;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleTablePage.Table;
 import org.eclipse.scout.springboot.demo.spring.service.RoleService;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class RoleTablePage extends AbstractPageWithTable<Table> {
+
+  @Inject
+  private RoleService roleService;
 
   @Override
   protected String getConfiguredTitle() {
@@ -35,7 +44,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
   @Override
   protected void execLoadData(SearchFilter filter) {
-    Collection<Role> roles = BEANS.get(RoleService.class).getRoles();
+    Collection<Role> roles = roleService.getRoles();
     Table table = getTable();
 
     table.deleteAllRows();

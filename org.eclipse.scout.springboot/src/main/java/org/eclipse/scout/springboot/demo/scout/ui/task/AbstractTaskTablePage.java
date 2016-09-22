@@ -27,6 +27,7 @@ import org.eclipse.scout.rt.shared.AbstractIcons;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.springboot.demo.model.Task;
+import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.scout.ui.ClientSession;
 import org.eclipse.scout.springboot.demo.scout.ui.task.AbstractTaskTablePage.Table;
 import org.eclipse.scout.springboot.demo.spring.service.TaskService;
@@ -46,6 +47,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
   }
 
   @Override
+  protected void execPageActivated() {
+    reloadPage();
+  }
+
+  @Override
   protected void execLoadData(SearchFilter filter) {
     Collection<Task> tasks = getTasks();
     Table table = getTable();
@@ -55,9 +61,6 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     if (tasks == null || tasks.size() == 0) {
       return;
     }
-
-    // TODO remove this and start to implement role based stuff
-    String userId = ClientSession.get().getUser().getName();
 
     for (Task task : tasks) {
       ITableRow row = table.createRow();
@@ -78,6 +81,10 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       table.addRow(row);
     }
+  }
+
+  protected User getUser() {
+    return ClientSession.get().getUser();
   }
 
   private String getDueInValue(Date date) {
