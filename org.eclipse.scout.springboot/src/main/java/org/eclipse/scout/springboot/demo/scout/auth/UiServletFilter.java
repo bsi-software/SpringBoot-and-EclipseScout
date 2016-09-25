@@ -2,7 +2,6 @@ package org.eclipse.scout.springboot.demo.scout.auth;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -18,18 +17,16 @@ import org.eclipse.scout.rt.server.commons.authentication.FormBasedAccessControl
 import org.eclipse.scout.rt.server.commons.authentication.ServletFilterHelper;
 import org.eclipse.scout.rt.server.commons.authentication.TrivialAccessController;
 import org.eclipse.scout.rt.server.commons.authentication.TrivialAccessController.TrivialAuthConfig;
-import org.springframework.stereotype.Component;
 
-@Component
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class UiServletFilter implements Filter {
 
-  @Inject
   private TrivialAccessController trivialAccessController;
 
-  @Inject
   private FormBasedAccessController formBasedAccessController;
 
-  @Inject
   private CredentialVerifier credentialVerifier;
 
   @Override

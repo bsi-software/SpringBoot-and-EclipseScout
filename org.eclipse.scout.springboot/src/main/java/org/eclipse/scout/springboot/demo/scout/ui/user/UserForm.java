@@ -204,7 +204,7 @@ public class UserForm extends AbstractForm {
   }
 
   private UserService getUserService() {
-    final ApplicationContext applicationContext = ApplicationContexts.current();
+    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
     return applicationContext.getBean(UserService.class);
   }
 

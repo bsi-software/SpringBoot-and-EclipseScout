@@ -33,7 +33,7 @@ public class AdminOutline extends AbstractOutline {
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     super.execCreateChildPages(pageList);
 
-    final ApplicationContext applicationContext = ApplicationContexts.current();
+    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
     pageList.add(applicationContext.getBean(UserTablePage.class));
     pageList.add(applicationContext.getBean(RoleTablePage.class));
   }

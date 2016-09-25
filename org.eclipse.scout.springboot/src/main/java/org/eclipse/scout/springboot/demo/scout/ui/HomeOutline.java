@@ -27,8 +27,8 @@ public class HomeOutline extends AbstractOutline {
   @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     super.execCreateChildPages(pageList);
-
-    final ApplicationContext applicationContext = ApplicationContexts.current();
+    // TODO: Is there a better way to do that? Is HomeOutline a SpringBean?
+    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
     pageList.add(applicationContext.getBean(InboxTablePage.class));
     pageList.add(applicationContext.getBean(TodaysTaskTablePage.class));
     pageList.add(applicationContext.getBean(MyTaskTablePage.class));

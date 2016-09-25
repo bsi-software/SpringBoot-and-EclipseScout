@@ -2,16 +2,15 @@ package org.eclipse.scout.springboot.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * Spring Boot start class.
  */
-@SpringBootApplication
-@EnableWebMvc
-@Import(ScoutServletConfig.class)
+@SpringBootApplication(exclude = DispatcherServletAutoConfiguration.class)
+@Import({ScoutServletConfig.class, WebMvcConfig.class})
 public class Application {
 
   public static void main(final String[] args) {

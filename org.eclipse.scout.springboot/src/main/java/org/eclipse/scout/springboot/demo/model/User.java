@@ -40,9 +40,9 @@ public class User extends BaseEntity {
       throw new IllegalArgumentException("password must not be null");
     }
 
-    this.setFirstName(firstName);
-    this.setLastName(lastName);
-    this.setPassword(password);
+    setFirstName(firstName);
+    setLastName(lastName);
+    setPassword(password);
 
     setRoles(new HashSet<Role>());
   }

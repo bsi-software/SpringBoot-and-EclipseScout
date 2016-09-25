@@ -17,7 +17,7 @@ public class TaskController {
   @Autowired
   private TaskService taskService;
 
-  @RequestMapping("/")
+  @RequestMapping(path = {"", "/"})
   public Collection<Task> showTasks() {
     return taskService.getAllTasks();
   }

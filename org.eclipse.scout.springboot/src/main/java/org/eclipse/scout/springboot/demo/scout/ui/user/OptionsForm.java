@@ -109,7 +109,8 @@ public class OptionsForm extends AbstractForm {
   }
 
   private UserService getUserService() {
-    final ApplicationContext applicationContext = ApplicationContexts.current();
+    // TODO: Is OptionsForm not a SpringBean? Is there a better way to retrieve the service?
+    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
     return applicationContext.getBean(UserService.class);
   }
 }

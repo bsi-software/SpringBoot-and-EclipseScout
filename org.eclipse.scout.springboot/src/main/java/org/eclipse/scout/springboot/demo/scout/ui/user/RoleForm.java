@@ -281,7 +281,7 @@ public class RoleForm extends AbstractForm {
   }
 
   private RoleService getRoleService() {
-    ApplicationContext applicationContext = ApplicationContexts.current();
+    ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
     return applicationContext.getBean(RoleService.class);
   }
 }

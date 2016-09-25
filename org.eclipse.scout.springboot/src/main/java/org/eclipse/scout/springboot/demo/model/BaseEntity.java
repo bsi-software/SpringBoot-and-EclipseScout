@@ -38,7 +38,7 @@ public abstract class BaseEntity implements Persistable<UUID> {
 
     setId(UUID.randomUUID());
 
-    this.name = name;
+    setName(name);
   }
 
   @Override

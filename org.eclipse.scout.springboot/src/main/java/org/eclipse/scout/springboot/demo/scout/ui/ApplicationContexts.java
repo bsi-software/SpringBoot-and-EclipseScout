@@ -14,7 +14,7 @@ public final class ApplicationContexts {
   private ApplicationContexts() {
   }
 
-  public static ApplicationContext current() {
+  public static ApplicationContext getApplicationContext() {
     final ServletContext servletContext = BEANS.get(ServletContext.class);
     return WebApplicationContextUtils.getWebApplicationContext(servletContext);
   }

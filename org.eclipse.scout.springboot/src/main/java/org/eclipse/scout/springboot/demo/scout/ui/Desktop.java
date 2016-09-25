@@ -17,7 +17,6 @@ import org.eclipse.scout.rt.platform.config.PlatformConfigProperties.Application
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.springboot.demo.scout.ui.user.OptionsForm;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -28,23 +27,13 @@ import org.springframework.stereotype.Component;
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class Desktop extends AbstractDesktop {
 
-  private final ApplicationContext applicationContext;
-
   private final ApplicationNameProperty applicationNameConfig;
 
   @Inject
-  public Desktop(final ApplicationContext applicationContext, final ApplicationNameProperty applicationNameConfig) {
+  public Desktop(final ApplicationNameProperty applicationNameConfig) {
     super(false);
-    this.applicationContext = applicationContext;
     this.applicationNameConfig = applicationNameConfig;
     callInitializer();
-  }
-
-  /**
-   * Returns the Spring application context.
-   */
-  public ApplicationContext getApplicationContext() {
-    return applicationContext;
   }
 
   @Override

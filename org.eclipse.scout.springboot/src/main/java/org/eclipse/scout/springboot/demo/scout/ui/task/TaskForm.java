@@ -69,7 +69,7 @@ public class TaskForm extends AbstractForm {
   }
 
   public void startModify() {
-    final ApplicationContext applicationContext = ApplicationContexts.current();
+    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
     startInternalExclusive(applicationContext.getBean(ModifyHandler.class));
   }
 
@@ -334,7 +334,7 @@ public class TaskForm extends AbstractForm {
     }
 
     private TaskService getTaskService() {
-      final ApplicationContext applicationContext = ApplicationContexts.current();
+      final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
       return applicationContext.getBean(TaskService.class);
     }
   }
@@ -365,8 +365,7 @@ public class TaskForm extends AbstractForm {
       task.setDone(getDoneField().getValue());
       task.setDescription(getDescriptionField().getValue());
 
-      final ApplicationContext applicationContext = ApplicationContexts.current();
-      // TODO fix this: save throws Caused by: org.h2.jdbc.JdbcSQLException: Value too long for column "CREATOR BINARY(255)":
+      final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
       applicationContext.getBean(TaskService.class).addTask(task);
     }
 

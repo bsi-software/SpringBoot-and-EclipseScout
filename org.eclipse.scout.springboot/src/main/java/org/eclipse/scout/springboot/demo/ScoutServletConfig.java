@@ -4,16 +4,19 @@ import javax.servlet.DispatcherType;
 import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpSessionListener;
 
+import org.eclipse.scout.rt.server.commons.authentication.FormBasedAccessController;
+import org.eclipse.scout.rt.server.commons.authentication.TrivialAccessController;
 import org.eclipse.scout.rt.ui.html.UiHttpSessionListener;
 import org.eclipse.scout.rt.ui.html.UiServlet;
+import org.eclipse.scout.springboot.demo.scout.auth.CredentialVerifier;
 import org.eclipse.scout.springboot.demo.scout.auth.UiServletFilter;
 import org.eclipse.scout.springboot.demo.scout.platform.ScoutSpringWebappListener;
+import org.eclipse.scout.springboot.demo.spring.service.UserService;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.DispatcherServlet;
 
 @Configuration
 public class ScoutServletConfig {
@@ -38,6 +41,16 @@ public class ScoutServletConfig {
   }
 
   @Bean
+  public UiServletFilter uiServletFilter(TrivialAccessController trivialAccessController, FormBasedAccessController formBasedAccessController, CredentialVerifier credentialVerifier) {
+    return new UiServletFilter(trivialAccessController, formBasedAccessController, credentialVerifier);
+  }
+
+  @Bean
+  public CredentialVerifier credentialVerifier(UserService userService) {
+    return new CredentialVerifier(userService);
+  }
+
+  @Bean
   public FilterRegistrationBean authenticationFilter(UiServletFilter uiServletFilter) {
     final FilterRegistrationBean reg = new FilterRegistrationBean();
     reg.setFilter(uiServletFilter);
@@ -46,14 +59,6 @@ public class ScoutServletConfig {
     reg.setName("authFilter");
     reg.setDispatcherTypes(DispatcherType.REQUEST); // apply this filter only for requests, but not for forwards or redirects.
     return reg;
-  }
-
-  @Bean
-  public ServletRegistrationBean dispatcherRegistration(DispatcherServlet dispatcherServlet) {
-    ServletRegistrationBean registration = new ServletRegistrationBean(
-        dispatcherServlet);
-    registration.addUrlMappings("/services/*");
-    return registration;
   }
 
 }
