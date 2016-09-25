@@ -11,7 +11,6 @@ import org.eclipse.scout.springboot.demo.model.Role;
 import org.eclipse.scout.springboot.demo.model.Task;
 import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.spring.repository.RoleRepository;
-import org.eclipse.scout.springboot.demo.spring.repository.TaskRepository;
 import org.eclipse.scout.springboot.demo.spring.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,9 +23,6 @@ public class DefaultUserService implements UserService {
 
   @Autowired
   private RoleRepository roleRepository;
-
-  @Autowired
-  private TaskRepository taskRepository;
 
   /**
    * Add initial demo entities: Roles, users and a task.

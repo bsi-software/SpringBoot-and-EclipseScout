@@ -3,6 +3,7 @@ package org.eclipse.scout.springboot.demo.model;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,9 @@ public class Task extends BaseEntity {
 
   private static final long serialVersionUID = 1L;
 
+  @OneToOne
   private User creator;
+  @OneToOne
   private User responsible;
   private Date reminder;
   private Date dueDate;

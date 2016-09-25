@@ -13,16 +13,15 @@ import org.eclipse.scout.rt.platform.util.Assertions;
 import org.eclipse.scout.rt.server.commons.WebappEventListener;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Scout platform which uses Spring bean manager to manage and lookup beans.
  * <p>
- * This allows Scout beans to be looked up via {@link BEANS#get(Class)} or {@link ApplicationContext#getBean(Class)}.
- * Also, when lookup beans via Scout bean manager, the semantic of {@link Replace}, {@link Order} and
- * {@link IBeanDecorator} is still guaranteed.
+ * This allows Scout beans to be looked up via {@link BEANS#get(Class)} or
+ * {@link ConfigurableApplicationContext#getBean(Class)}. Also, when lookup beans via Scout bean manager, the semantic
+ * of {@link Replace}, {@link Order} and {@link IBeanDecorator} is still guaranteed.
  * <p>
  * This class is registered in 'META-INF/services/org.eclipse.scout.rt.platform'.
  */

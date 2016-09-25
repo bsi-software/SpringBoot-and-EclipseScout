@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class User extends BaseEntity {
   private String firstName;
   private String lastName;
   private String password;
+  @Lob
   private byte[] picture;
   private boolean active;
 

@@ -32,10 +32,7 @@ import org.springframework.stereotype.Component;
 public class UserTablePage extends AbstractPageWithTable<Table> {
 
   @Inject
-  UserService userService;
-
-  @Inject
-  RoleService roleService;
+  private UserService userService;
 
   @Override
   protected String getConfiguredTitle() {
@@ -64,7 +61,7 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       table.getFirstNameColumn().setValue(row, user.getFirstName());
       table.getLastNameColumn().setValue(row, user.getLastName());
       // TODO fix bug below to show if user has root privileges
-//      table.getAdminColumn().setValue(row, isRoot(user));
+// table.getAdminColumn().setValue(row, isRoot(user));
       table.addRow(row);
     }
   }
