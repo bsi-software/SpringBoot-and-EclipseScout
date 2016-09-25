@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.domain.Persistable;
 
 import lombok.Getter;
@@ -20,6 +21,7 @@ public abstract class BaseEntity implements Persistable<UUID> {
   private static final long serialVersionUID = 1L;
 
   @Id
+  @Type(type = "uuid-char")
   private UUID id;
   private String name;
 
