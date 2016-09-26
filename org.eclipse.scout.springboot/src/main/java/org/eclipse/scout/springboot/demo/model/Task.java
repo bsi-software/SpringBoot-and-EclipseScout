@@ -21,6 +21,7 @@ public class Task extends BaseEntity {
   private User creator;
   @OneToOne
   private User responsible;
+
   private Date reminder;
   private Date dueDate;
   private boolean accepted;
@@ -30,30 +31,32 @@ public class Task extends BaseEntity {
   public Task(String name, User creator, Date dueDate) {
     super(name);
 
+    setCreator(creator);
+    setResponsible(creator);
+    setDueDate(dueDate);
+  }
+
+  public void setCreator(User creator) {
     if (creator == null) {
       throw new IllegalArgumentException("creator must not be null");
     }
 
+    this.creator = creator;
+  }
+
+  public void setResponsible(User responsible) {
+    if (responsible == null) {
+      throw new IllegalArgumentException("responsible must not be null");
+    }
+
+    this.responsible = responsible;
+  }
+
+  public void setDueDate(Date dueDate) {
     if (dueDate == null) {
       throw new IllegalArgumentException("due date must not be null");
     }
 
-    this.setCreator(creator);
-    this.setResponsible(creator);
-    this.setDueDate(dueDate);
-  }
-
-  public void copyTaskAttributesFrom(Task taskNew) {
-    if (taskNew == null) {
-      throw new IllegalArgumentException("task to copy from must not be null");
-    }
-
-    setName(taskNew.getName());
-    setResponsible(taskNew.getResponsible());
-    setReminder(taskNew.getReminder());
-    setDueDate(taskNew.getDueDate());
-    setAccepted(taskNew.isAccepted());
-    setDone(taskNew.isDone());
-    setDescription(taskNew.getDescription());
+    this.dueDate = dueDate;
   }
 }

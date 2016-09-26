@@ -34,20 +34,8 @@ public class DefaultTaskService implements TaskService {
   }
 
   @Override
-  public void saveTask(Task taskOld, Task taskNew) {
-    User userOld = taskOld.getResponsible();
-    User userNew = taskNew.getResponsible();
-
-    if (!userNew.equals(userOld)) {
-      changeUser(taskOld, userNew);
-    }
-
-    taskOld.copyTaskAttributesFrom(taskNew);
-  }
-
-  private void changeUser(Task task, User userNew) {
-    getUserTasks(task.getResponsible()).remove(task);
-    getUserTasks(userNew).add(task);
+  public void saveTask(Task task) {
+    taskRepository.save(task);
   }
 
   private List<Task> getUserTasks(User user) {

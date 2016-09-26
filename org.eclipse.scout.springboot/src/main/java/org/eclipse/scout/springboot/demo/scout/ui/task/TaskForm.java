@@ -69,8 +69,9 @@ public class TaskForm extends AbstractForm {
   }
 
   public void startModify() {
-    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-    startInternalExclusive(applicationContext.getBean(ModifyHandler.class));
+//    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
+//    startInternalExclusive(applicationContext.getBean(ModifyHandler.class));
+    startInternal(new ModifyHandler());
   }
 
   public void startNew() {
@@ -299,17 +300,17 @@ public class TaskForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      String title = getTitleField().getValue();
-      User user = getResponsibleField().getValue();
-      Date date = getDueDateField().getValue();
+      Task task = getTask();
 
-      Task taskNew = new Task(title, user, date);
-      taskNew.setReminder(getReminderField().getValue());
-      taskNew.setAccepted(getAcceptedField().getValue());
-      taskNew.setDone(getDoneField().getValue());
-      taskNew.setDescription(getDescriptionField().getValue());
+      task.setName(getTitleField().getValue());
+      task.setResponsible(getResponsibleField().getValue());
+      task.setDueDate(getDueDateField().getValue());
+      task.setReminder(getReminderField().getValue());
+      task.setAccepted(getAcceptedField().getValue());
+      task.setDone(getDoneField().getValue());
+      task.setDescription(getDescriptionField().getValue());
 
-      getTaskService().saveTask(getTask(), taskNew);
+      getTaskService().saveTask(task);
     }
 
     @Override

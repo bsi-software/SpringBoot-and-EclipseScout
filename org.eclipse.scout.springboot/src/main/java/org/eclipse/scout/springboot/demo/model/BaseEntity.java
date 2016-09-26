@@ -8,6 +8,7 @@ import javax.persistence.MappedSuperclass;
 import org.hibernate.annotations.Type;
 import org.springframework.data.domain.Persistable;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"id"})
 @MappedSuperclass
 public abstract class BaseEntity implements Persistable<UUID> {
 
@@ -26,6 +28,13 @@ public abstract class BaseEntity implements Persistable<UUID> {
   private String name;
 
   public BaseEntity(String name) {
+
+    setId(UUID.randomUUID());
+
+    setName(name);
+  }
+
+  public void setName(String name) {
     if (name == null) {
       throw new IllegalArgumentException("name must not be null");
     }
@@ -36,31 +45,11 @@ public abstract class BaseEntity implements Persistable<UUID> {
       throw new IllegalArgumentException("name must not be empty");
     }
 
-    setId(UUID.randomUUID());
-
-    setName(name);
+    this.name = name;
   }
 
   @Override
   public boolean isNew() {
     return getId() == null;
-  }
-
-  @Override
-  public int hashCode() {
-    return id.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) {
-      return false;
-    }
-
-    if (!(obj instanceof BaseEntity)) {
-      return false;
-    }
-
-    return id.equals(((BaseEntity) obj).id);
   }
 }

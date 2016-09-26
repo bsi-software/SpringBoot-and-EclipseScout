@@ -19,7 +19,6 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
 import org.eclipse.scout.rt.client.ui.form.FormListener;
-import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
@@ -28,9 +27,11 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.springboot.demo.model.Task;
 import org.eclipse.scout.springboot.demo.model.User;
+import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.ClientSession;
 import org.eclipse.scout.springboot.demo.scout.ui.task.AbstractTaskTablePage.Table;
 import org.eclipse.scout.springboot.demo.spring.service.TaskService;
+import org.springframework.context.ApplicationContext;
 
 public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
@@ -224,9 +225,8 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
         for (ITableRow row : getSelectedRows()) {
           String taskId = (String) row.getKeyValues().get(0);
-          Task task = BEANS.get(TaskService.class).getTask(UUID.fromString(taskId));
-          if (task != null && task.getResponsible().equals(ClientSession.get().getUser())) {
-            task.setAccepted(true);
+
+          if (acceptTask(taskId)) {
             listHasChanged = true;
           }
         }
@@ -234,6 +234,39 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
         if (listHasChanged) {
           reloadPage();
         }
+      }
+
+      private boolean acceptTask(String id) {
+        UUID taskId = UUID.fromString(id);
+        Task task = getTask(taskId);
+
+        if (task != null && task.getResponsible().equals(ClientSession.get().getUser())) {
+          task.setAccepted(true);
+          saveTask(task);
+
+          return true;
+        }
+
+        return false;
+      }
+
+      private Task getTask(UUID id) {
+        Task task = getTaskService().getTask(id);
+
+        if (task == null) {
+          throw new IllegalArgumentException("invalid taskId '" + id + "': no record found");
+        }
+
+        return task;
+      }
+
+      private void saveTask(Task task) {
+        getTaskService().saveTask(task);
+      }
+
+      private TaskService getTaskService() {
+        final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
+        return applicationContext.getBean(TaskService.class);
       }
     }
 

@@ -18,7 +18,7 @@ public interface TaskService {
 
   Task getTask(UUID taskId);
 
-  void saveTask(Task taskOld, Task taskNew);
+  void saveTask(Task task);
 
   void addTask(Task task);
 }

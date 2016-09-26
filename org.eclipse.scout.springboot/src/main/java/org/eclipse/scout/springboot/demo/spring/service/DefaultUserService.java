@@ -1,6 +1,5 @@
 package org.eclipse.scout.springboot.demo.spring.service;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -8,7 +7,6 @@ import javax.annotation.PostConstruct;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.springboot.demo.model.Role;
-import org.eclipse.scout.springboot.demo.model.Task;
 import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.spring.repository.RoleRepository;
 import org.eclipse.scout.springboot.demo.spring.repository.UserRepository;
@@ -44,13 +42,6 @@ public class DefaultUserService implements UserService {
     eclipse.getRoles().add(roleUser);
     eclipse.getRoles().add(roleAdmin);
     userRepository.save(eclipse);
-
-    Task task = new Task("Finish task application", alice, new Date());
-    task.setResponsible(eclipse);
-    // TODO: fix jpa annotations for task creator (and responsible too most likely)
-    // Caused by: org.h2.jdbc.JdbcSQLException: Value too long for column "CREATOR BINARY(255)": "X'aced00057372002c6f72672e65636c697073652e73636f75742e737072696e67626f6f742e64656d6f2e6d6f64656c2e557365720000000000000001020006... (1077)"; SQL statement:
-    //   insert into task (name, accepted, creator, description, done, due_date, reminder, responsible, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?) [22001-192]
-    // taskRepository.save(task);
   }
 
   @Override

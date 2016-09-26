@@ -1,15 +1,16 @@
 package org.eclipse.scout.springboot.demo.model;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor
 public class Role extends BaseEntity {
 
@@ -23,10 +24,6 @@ public class Role extends BaseEntity {
 
   public Role(String name) {
     super(name);
-  }
-
-  public Collection<String> getPermissions() {
-    return permissions;
   }
 
   public void addPermission(String permission) {
