@@ -23,12 +23,12 @@ public class DefaultUserService implements UserService {
   private RoleRepository roleRepository;
 
   /**
-   * Add initial demo entities: Roles, users and a task.
+   * Add initial demo entities: Roles and users.
    */
   @PostConstruct
   public void init() {
-    Role roleUser = roleRepository.save(RoleService.USER_ROLE);
     Role roleAdmin = roleRepository.save(RoleService.ROOT_ROLE);
+    Role roleUser = roleRepository.save(new Role("user"));
 
     User alice = new User("alice", "Alice", "test");
     alice.getRoles().add(roleUser);

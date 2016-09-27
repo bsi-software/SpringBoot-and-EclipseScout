@@ -106,6 +106,13 @@ public class BeanFilter {
     }
   }
 
+  /**
+   * Default bean filter skips bean classes without a no args constructor. This means that the Desktop class of this app
+   * would not be considered a valid bean.
+   *
+   * @param noArgConstructorRequired
+   * @return
+   */
   public BeanFilter withNoArgConstructorRequired(boolean noArgConstructorRequired) {
     m_noArgConstructorRequired = noArgConstructorRequired;
     return this;

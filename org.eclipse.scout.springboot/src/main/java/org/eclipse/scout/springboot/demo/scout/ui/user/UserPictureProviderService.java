@@ -11,9 +11,8 @@ import org.eclipse.scout.rt.platform.Order;
 
 import lombok.extern.slf4j.Slf4j;
 
-// source: https://github.com/BSI-Business-Systems-Integration-AG/org.eclipsescout.demo/blob/4.0/widgets/org.eclipsescout.demo.widgets.client/src/org/eclipsescout/demo/widgets/client/services/FontIconProviderService.java
 @Slf4j
-@Order(0)
+@Order(1000)
 @CreateImmediately // todo: check if necessary
 public class UserPictureProviderService extends AbstractIconProviderService {
 

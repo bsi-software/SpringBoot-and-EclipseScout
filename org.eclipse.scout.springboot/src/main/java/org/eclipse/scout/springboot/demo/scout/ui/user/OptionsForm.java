@@ -27,17 +27,22 @@ public class OptionsForm extends AbstractForm {
   @Inject
   private RoleService roleService;
 
-  @Override
-  protected String getConfiguredTitle() {
-    return TEXTS.get("Options");
-  }
-
   public UserBox getUserBox() {
     return getFieldByClass(UserBox.class);
   }
 
   public void startDefault() {
     startInternal(new DefaultHandler());
+  }
+
+  @Override
+  protected String getConfiguredTitle() {
+    return TEXTS.get("Options");
+  }
+
+  @Override
+  protected void execInitForm() {
+    getUserBox().getRoleTableField().setVisible(false);
   }
 
   @Order(10)
@@ -50,7 +55,6 @@ public class OptionsForm extends AbstractForm {
       protected Collection<Role> execFindRoles() {
         return roleService.getRoles();
       }
-
     }
 
     @Order(20)

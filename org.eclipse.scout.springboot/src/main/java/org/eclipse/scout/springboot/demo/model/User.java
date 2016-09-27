@@ -44,11 +44,15 @@ public class User implements Persistable<UUID> {
 
   @NonNull
   private String firstName;
+
   private String lastName;
+
   @NonNull
   private String password;
+
   @Lob
   private byte[] picture;
+
   private boolean active;
 
   @ManyToMany

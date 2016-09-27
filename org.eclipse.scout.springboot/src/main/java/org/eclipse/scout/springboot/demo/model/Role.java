@@ -27,7 +27,6 @@ import lombok.Setter;
 public class Role implements Persistable<UUID> {
 
   public static final String ROLE_ROOT = "root";
-  public static final String ROLE_USER = "user";
 
   private static final long serialVersionUID = 1L;
 

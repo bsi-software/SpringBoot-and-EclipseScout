@@ -63,7 +63,7 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
 
     @Override
     protected int getConfiguredGridH() {
-      return 5;
+      return 4;
     }
 
     @Override

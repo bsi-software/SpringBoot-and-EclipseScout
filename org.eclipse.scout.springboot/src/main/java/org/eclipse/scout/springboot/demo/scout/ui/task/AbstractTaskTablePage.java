@@ -28,7 +28,6 @@ import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
-import org.eclipse.scout.rt.shared.AbstractIcons;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
@@ -37,6 +36,7 @@ import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.scout.ui.ClientSession;
 import org.eclipse.scout.springboot.demo.scout.ui.task.AbstractTaskTablePage.Table;
 import org.eclipse.scout.springboot.demo.scout.ui.user.UserLookupCall;
+import org.eclipse.scout.springboot.demo.scout.ui.user.UserPictureProviderService;
 import org.eclipse.scout.springboot.demo.spring.service.TaskService;
 
 @Bean
@@ -46,6 +46,9 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
   @Inject
   private TaskService taskService;
+
+  @Inject
+  private UserPictureProviderService userPictureService;
 
   @Override
   protected String getConfiguredTitle() {
@@ -84,7 +87,8 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       // TODO doesn't work: html has <img> tag -> put image as static resource somewhere?
       // table.getIconColumn().setValue(row, task.getCreator().getName());
 
-      table.getIconColumn().setValue(row, AbstractIcons.Star);
+      table.getIconColumn().setValue(row, task.getCreator().getName());
+
       table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
       table.getDueDateColumn().setValue(row, task.getDueDate());
       table.getTitleColumn().setValue(row, task.getName());
