@@ -6,6 +6,6 @@ public class TextProviderService extends AbstractDynamicNlsTextProviderService {
 
   @Override
   public String getDynamicNlsBaseName() {
-    return "org.eclipse.scout.springboot.ui.nls.Texts";
+    return "org.eclipse.scout.springboot.demo.scout.ui.nls.Texts";
   }
 }
