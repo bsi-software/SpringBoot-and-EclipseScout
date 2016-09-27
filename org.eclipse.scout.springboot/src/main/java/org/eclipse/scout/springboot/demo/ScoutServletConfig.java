@@ -31,6 +31,7 @@ public class ScoutServletConfig {
 
   private static final String CONTEXT_PATH = "/*";
   public static final String SERVICES_PATH = "/api";
+  public static final String CONSOLE_PATH = "/h2-console";
 
   @Bean
   public ServletListenerRegistrationBean<ServletContextListener> webappEventListener() {
@@ -62,7 +63,7 @@ public class ScoutServletConfig {
     final FilterRegistrationBean reg = new FilterRegistrationBean();
     reg.setFilter(uiServletFilter);
     reg.addUrlPatterns(CONTEXT_PATH);
-    reg.addInitParameter("filter-exclude", "/res/*, " + SERVICES_PATH + "/*");
+    reg.addInitParameter("filter-exclude", "/res/*, " + SERVICES_PATH + "/*, " + CONSOLE_PATH + "/*");
     reg.setName("authFilter");
     reg.setDispatcherTypes(DispatcherType.REQUEST); // apply this filter only for requests, but not for forwards or redirects.
     return reg;
@@ -89,6 +90,9 @@ public class ScoutServletConfig {
     @Override
     protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
       if (request.getRequestURI().startsWith(SERVICES_PATH)) {
+        super.service(request, response);
+      }
+      else if (request.getRequestURI().startsWith(CONSOLE_PATH)) {
         super.service(request, response);
       }
       else {
