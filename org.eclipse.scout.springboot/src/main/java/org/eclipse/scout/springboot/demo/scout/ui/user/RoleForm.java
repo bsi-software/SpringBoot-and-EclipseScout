@@ -119,19 +119,23 @@ public class RoleForm extends AbstractForm {
 
         @Override
         protected int getConfiguredGridH() {
-          return 6;
+          return 4;
         }
 
         public class Table extends AbstractTable {
 
           public void setInitialRowContent(Collection<String> permissionIds) {
-            for (Class<? extends Permission> permission : BEANS.get(IPermissionService.class).getAllPermissionClasses()) {
+            for (Class<? extends Permission> permission : getPermissions()) {
               String pId = permission.getName();
               String pName = TEXTS.getWithFallback(pId, pId);
               Boolean assigned = new Boolean(permissionIds.contains(pId));
 
               getTable().addRowByArray(new Object[]{pId, pName, assigned});
             }
+          }
+
+          private Collection<Class<? extends Permission>> getPermissions() {
+            return BEANS.get(IPermissionService.class).getAllPermissionClasses();
           }
 
           public AssignedColumn getAssignedColumn() {

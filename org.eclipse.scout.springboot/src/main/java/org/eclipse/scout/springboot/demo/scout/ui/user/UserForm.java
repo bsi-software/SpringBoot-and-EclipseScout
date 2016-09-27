@@ -20,6 +20,7 @@ import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.FirstName
 import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.LastNameField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.PasswordField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.PictureField;
+import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.RoleTableField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.UserNameField;
 import org.eclipse.scout.springboot.demo.spring.service.RoleService;
 import org.eclipse.scout.springboot.demo.spring.service.UserService;
@@ -56,6 +57,10 @@ public class UserForm extends AbstractForm {
 
   public UserBox getUserBox() {
     return getFieldByClass(UserBox.class);
+  }
+
+  public RoleTableField getRoleTableField() {
+    return getFieldByClass(RoleTableField.class);
   }
 
   PictureField getPictureField() {
@@ -115,6 +120,7 @@ public class UserForm extends AbstractForm {
       getPasswordField().setValue(user.getPassword());
       // TODO fix line below. lazy loading -> failed to lazily initialize a collection of role
       // getAdminField().setValue(user.getRoles().contains(RoleService.ROOT_ROLE));
+      getRoleTableField().getTable().setInitialRowContent(null);
       getForm().setSubTitle(calculateSubTitle());
 
       setEnabledPermission(new UpdateUserPermission());
