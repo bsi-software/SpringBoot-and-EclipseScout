@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.scout.rt.platform.util.Assertions;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
 import org.eclipse.scout.springboot.demo.model.Task;
 import org.eclipse.scout.springboot.demo.model.User;
@@ -35,6 +36,8 @@ public class DefaultTaskService implements TaskService {
 
   @Override
   public void saveTask(Task task) {
+    Assertions.assertNotNull(task.getCreator(), "creator must be set");
+
     taskRepository.save(task);
   }
 

@@ -1,30 +1,27 @@
 package org.eclipse.scout.springboot.demo.scout.ui;
 
-import java.util.Arrays;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.eclipse.scout.rt.client.session.ClientSessionProvider;
 import org.eclipse.scout.rt.client.ui.action.keystroke.IKeyStroke;
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
 import org.eclipse.scout.rt.client.ui.desktop.AbstractDesktop;
+import org.eclipse.scout.rt.client.ui.desktop.AbstractDesktopExtension;
 import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutlineViewButton;
 import org.eclipse.scout.rt.client.ui.desktop.outline.IOutline;
 import org.eclipse.scout.rt.client.ui.form.AbstractFormMenu;
+import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.config.PlatformConfigProperties.ApplicationNameProperty;
+import org.eclipse.scout.rt.platform.util.collection.OrderedCollection;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.springboot.demo.scout.ui.user.OptionsForm;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 /**
  * This Spring managed bean represents the web application.
  */
-@Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+@Bean
 public class Desktop extends AbstractDesktop {
 
   private final ApplicationNameProperty applicationNameConfig;
@@ -44,11 +41,6 @@ public class Desktop extends AbstractDesktop {
   @Override
   protected String getConfiguredLogoId() {
     return Icons.ECLIPSE_SCOUT;
-  }
-
-  @Override
-  protected List<Class<? extends IOutline>> getConfiguredOutlines() {
-    return Arrays.asList(HomeOutline.class, AdminOutline.class);
   }
 
   @Override
@@ -102,32 +94,6 @@ public class Desktop extends AbstractDesktop {
 //    }
   }
 
-//  @Order(10)
-//  public class QuickAccessMenu extends AbstractMenu {
-//
-//    @Override
-//    protected String getConfiguredText() {
-//      return TEXTS.get("QuickAccess");
-//    }
-//
-//    @Order(10)
-//    public class LogoutMenu extends AbstractMenu {
-//
-//      @Override
-//      protected String getConfiguredText() {
-//        return TEXTS.get("Logout");
-//      }
-//
-//      @Override
-//      protected void execAction() {
-//        final HttpSession session = IHttpServletRoundtrip.CURRENT_HTTP_SERVLET_REQUEST.get().getSession(false);
-//        if (session != null) {
-//          session.invalidate();
-//        }
-//      }
-//    }
-//  }
-
   @Order(1000)
   public class OptionsMenu extends AbstractFormMenu<OptionsForm> {
 
@@ -143,8 +109,13 @@ public class Desktop extends AbstractDesktop {
     }
 
     @Override
-    protected Class<OptionsForm> getConfiguredForm() {
-      return OptionsForm.class;
+    protected void startForm() {
+      getForm().startDefault();
+    }
+
+    @Override
+    protected OptionsForm createForm() {
+      return BEANS.get(OptionsForm.class);
     }
   }
 
@@ -168,4 +139,11 @@ public class Desktop extends AbstractDesktop {
     }
   }
 
+  public static class DesktopExtension extends AbstractDesktopExtension {
+
+    @Override
+    public void contributeOutlines(OrderedCollection<IOutline> outlines) {
+      outlines.addAllLast(BEANS.all(IOutline.class));
+    }
+  }
 }

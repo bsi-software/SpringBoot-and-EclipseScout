@@ -6,36 +6,46 @@ import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractDateColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractDateTimeColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractIconColumn;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractSmartColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
 import org.eclipse.scout.rt.client.ui.form.FormListener;
+import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
 import org.eclipse.scout.rt.shared.AbstractIcons;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
+import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.eclipse.scout.springboot.demo.model.Task;
 import org.eclipse.scout.springboot.demo.model.User;
-import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.ClientSession;
 import org.eclipse.scout.springboot.demo.scout.ui.task.AbstractTaskTablePage.Table;
+import org.eclipse.scout.springboot.demo.scout.ui.user.UserLookupCall;
 import org.eclipse.scout.springboot.demo.spring.service.TaskService;
-import org.springframework.context.ApplicationContext;
 
+@Bean
 public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
-  private static SimpleDateFormat WEEKDAY_FORMATTER = new SimpleDateFormat("EEEE");
+  private static final SimpleDateFormat WEEKDAY_FORMATTER = new SimpleDateFormat("EEEE");
+
+  @Inject
+  private TaskService taskService;
 
   @Override
   protected String getConfiguredTitle() {
@@ -55,6 +65,10 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
   @Override
   protected void execLoadData(SearchFilter filter) {
     Collection<Task> tasks = getTasks();
+    importTableRowData(tasks);
+  }
+
+  private void importTableRowData(Collection<Task> tasks) {
     Table table = getTable();
 
     table.deleteAllRows();
@@ -66,7 +80,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     for (Task task : tasks) {
       ITableRow row = table.createRow();
 
-      table.getIdColumn().setValue(row, task.getId().toString());
+      table.getIdColumn().setValue(row, task.getId());
       // TODO doesn't work: html has <img> tag -> put image as static resource somewhere?
       // table.getIconColumn().setValue(row, task.getCreator().getName());
 
@@ -74,8 +88,8 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
       table.getDueDateColumn().setValue(row, task.getDueDate());
       table.getTitleColumn().setValue(row, task.getName());
-      table.getCreatorColumn().setValue(row, task.getCreator().toString());
-      table.getResponsibleColumn().setValue(row, task.getResponsible().toString());
+      table.getCreatorColumn().setValue(row, task.getCreator());
+      table.getResponsibleColumn().setValue(row, task.getResponsible());
       table.getReminderColumn().setValue(row, task.getReminder());
       table.getAcceptedColumn().setValue(row, task.isAccepted());
       table.getDoneColumn().setValue(row, task.isDone());
@@ -164,7 +178,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        TaskForm form = new TaskForm();
+        TaskForm form = BEANS.get(TaskForm.class);
         form.addFormListener(new TaskFormListener());
         form.startNew();
       }
@@ -191,9 +205,9 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        String taskId = (String) getSelectedRow().getKeyValues().get(0);
+        UUID taskId = getIdColumn().getSelectedValue();
 
-        TaskForm form = new TaskForm();
+        TaskForm form = BEANS.get(TaskForm.class);
         form.addFormListener(new TaskFormListener());
         form.setTaskId(taskId);
         form.startModify();
@@ -223,9 +237,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       protected void execAction() {
         boolean listHasChanged = false;
 
-        for (ITableRow row : getSelectedRows()) {
-          String taskId = (String) row.getKeyValues().get(0);
-
+        for (UUID taskId : getIdColumn().getSelectedValues()) {
           if (acceptTask(taskId)) {
             listHasChanged = true;
           }
@@ -236,37 +248,17 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
         }
       }
 
-      private boolean acceptTask(String id) {
-        UUID taskId = UUID.fromString(id);
-        Task task = getTask(taskId);
+      private boolean acceptTask(UUID taskId) {
+        Task task = taskService.getTask(taskId);
 
         if (task != null && task.getResponsible().equals(ClientSession.get().getUser())) {
           task.setAccepted(true);
-          saveTask(task);
+          taskService.saveTask(task);
 
           return true;
         }
 
         return false;
-      }
-
-      private Task getTask(UUID id) {
-        Task task = getTaskService().getTask(id);
-
-        if (task == null) {
-          throw new IllegalArgumentException("invalid taskId '" + id + "': no record found");
-        }
-
-        return task;
-      }
-
-      private void saveTask(Task task) {
-        getTaskService().saveTask(task);
-      }
-
-      private TaskService getTaskService() {
-        final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-        return applicationContext.getBean(TaskService.class);
       }
     }
 
@@ -322,7 +314,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(0)
-    public class IdColumn extends AbstractStringColumn {
+    public class IdColumn extends AbstractColumn<UUID> {
 
       @Override
       protected boolean getConfiguredPrimaryKey() {
@@ -345,7 +337,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(2000)
-    public class CreatorColumn extends AbstractStringColumn {
+    public class CreatorColumn extends AbstractSmartColumn<User> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("Creator");
@@ -354,6 +346,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       @Override
       protected int getConfiguredWidth() {
         return 150;
+      }
+
+      @Override
+      protected Class<? extends ILookupCall<User>> getConfiguredLookupCall() {
+        return UserLookupCall.class;
       }
     }
 
@@ -376,7 +373,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(4000)
-    public class ResponsibleColumn extends AbstractStringColumn {
+    public class ResponsibleColumn extends AbstractSmartColumn<User> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("Responsible");
@@ -390,6 +387,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       @Override
       protected int getConfiguredWidth() {
         return 150;
+      }
+
+      @Override
+      protected Class<? extends ILookupCall<User>> getConfiguredLookupCall() {
+        return UserLookupCall.class;
       }
     }
 

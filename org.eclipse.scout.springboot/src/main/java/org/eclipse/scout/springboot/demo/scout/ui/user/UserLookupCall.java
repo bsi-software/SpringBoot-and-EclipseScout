@@ -23,7 +23,7 @@ public class UserLookupCall extends LocalLookupCall<User> {
     List<ILookupRow<User>> list = new ArrayList<>();
 
     for (User user : userService.getUsers()) {
-      list.add(new LookupRow<>(user, user.toString()));
+      list.add(new LookupRow<>(user, user.toDisplayText()));
     }
 
     return list;

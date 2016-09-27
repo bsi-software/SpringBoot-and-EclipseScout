@@ -1,36 +1,42 @@
 package org.eclipse.scout.springboot.demo.scout.ui.user;
 
-import org.eclipse.scout.rt.client.ui.desktop.bookmark.internal.ManageBookmarksForm.MainBox.UserBox;
+import java.util.Collection;
+
+import javax.inject.Inject;
+
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.IForm;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractCancelButton;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
-import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.springboot.demo.model.Role;
 import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.scout.ui.AbstractDirtyFormHandler;
-import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.CancelButton;
 import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.OkButton;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.AdminField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.FirstNameField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.LastNameField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.PasswordField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.PictureField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.RoleTableField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.UserNameField;
+import org.eclipse.scout.springboot.demo.scout.ui.user.UserForm.MainBox.UserBox;
 import org.eclipse.scout.springboot.demo.spring.service.RoleService;
 import org.eclipse.scout.springboot.demo.spring.service.UserService;
-import org.springframework.context.ApplicationContext;
 
+@Bean
 public class UserForm extends AbstractForm {
+
+  @Inject
+  private UserService userService;
+
+  @Inject
+  private RoleService roleService;
+
+  @Inject
+  private UserPictureProviderService userPictureService;
 
   @Override
   public Object computeExclusiveKey() {
-    return getUsernameField().getValue();
+    return getUserBox().getUserNameField().getValue();
   }
 
   @Override
@@ -59,34 +65,6 @@ public class UserForm extends AbstractForm {
     return getFieldByClass(UserBox.class);
   }
 
-  public RoleTableField getRoleTableField() {
-    return getFieldByClass(RoleTableField.class);
-  }
-
-  PictureField getPictureField() {
-    return getFieldByClass(PictureField.class);
-  }
-
-  FirstNameField getFirstNameField() {
-    return getFieldByClass(FirstNameField.class);
-  }
-
-  LastNameField getLastNameField() {
-    return getFieldByClass(LastNameField.class);
-  }
-
-  UserNameField getUsernameField() {
-    return getFieldByClass(UserNameField.class);
-  }
-
-  PasswordField getPasswordField() {
-    return getFieldByClass(PasswordField.class);
-  }
-
-  AdminField getAdminField() {
-    return getFieldByClass(AdminField.class);
-  }
-
   public OkButton getOkButton() {
     return getFieldByClass(OkButton.class);
   }
@@ -95,7 +73,12 @@ public class UserForm extends AbstractForm {
   public class MainBox extends AbstractGroupBox {
 
     @Order(1000)
-    public class User extends AbstractUserBox {
+    public class UserBox extends AbstractUserBox {
+
+      @Override
+      protected Collection<Role> execFindRoles() {
+        return roleService.getRoles();
+      }
     }
 
     @Order(100000)
@@ -111,41 +94,21 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      User user = getUserService().getUser(getUsernameField().getValue());
-
-      getUsernameField().setEnabled(false);
-      getPictureField().setImage(user.getPicture());
-      getFirstNameField().setValue(user.getFirstName());
-      getLastNameField().setValue(user.getLastName());
-      getPasswordField().setValue(user.getPassword());
-      // TODO fix line below. lazy loading -> failed to lazily initialize a collection of role
-      // getAdminField().setValue(user.getRoles().contains(RoleService.ROOT_ROLE));
-      getRoleTableField().getTable().setInitialRowContent(null);
-      getForm().setSubTitle(calculateSubTitle());
+      User user = userService.getUser(getUserBox().getUserNameField().getValue());
+      importFormFieldData(user);
 
       setEnabledPermission(new UpdateUserPermission());
+      getUserBox().getUserNameField().setEnabled(false);
+      getForm().setSubTitle(calculateSubTitle());
     }
 
     @Override
     protected void execStore() {
-      User user = getUser();
+      User user = userService.getUser(getUserBox().getUserNameField().getValue());
+      exportFormFieldData(user);
 
-      user.setPicture(getPictureField().getByteArrayValue());
-      user.setFirstName(getFirstNameField().getValue());
-      user.setLastName(getLastNameField().getValue());
-      user.setPassword(getPasswordField().getValue());
-
-      // TODO fix code below (same lazy loading problem as with UserTablePage)
-//      if (getAdminField().getValue()) {
-//        user.getRoles().add(RoleService.ROOT_ROLE);
-//      }
-//      else {
-//        user.getRoles().remove(RoleService.ROOT_ROLE);
-//      }
-
-      BEANS.get(UserPictureProviderService.class).addUserPicture(user.getName(), user.getPicture());
-
-      getUserService().saveUser(user);
+      userPictureService.addUserPicture(user.getName(), user.getPicture());
+      userService.saveUser(user);
     }
 
     @Override
@@ -168,29 +131,14 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      User user = getUser();
-
+      User user = userService.getUser(getUserBox().getUserNameField().getValue());
       if (user != null) {
-        getUsernameField().setValue(null);
         throw new VetoException(TEXTS.get("AccountAlreadyExists", user.getName()));
       }
 
-      String userName = getUsernameField().getValue();
-      String firstName = getFirstNameField().getValue();
-      String lastName = getLastNameField().getValue();
-      String password = getPasswordField().getValue();
-
-      user = new User(userName, firstName, lastName, password);
-      user.setPicture(getPictureField().getByteArrayValue());
-
-      if (getAdminField().getValue()) {
-        user.getRoles().add(RoleService.ROOT_ROLE);
-      }
-      else {
-        user.getRoles().remove(RoleService.ROOT_ROLE);
-      }
-
-      getUserService().addUser(user);
+      user = new User();
+      exportFormFieldData(user);
+      userService.addUser(user);
     }
 
     @Override
@@ -199,19 +147,15 @@ public class UserForm extends AbstractForm {
     }
   }
 
+  private void importFormFieldData(User user) {
+    getUserBox().importFormFieldData(user);
+  }
+
+  private void exportFormFieldData(User user) {
+    getUserBox().exportFormFieldData(user);
+  }
+
   private String calculateSubTitle() {
-    return getUsernameField().getValue();
+    return getUserBox().getUserNameField().getValue();
   }
-
-  private User getUser() {
-    UserService userService = getUserService();
-    String username = getUsernameField().getValue();
-    return userService.getUser(username);
-  }
-
-  private UserService getUserService() {
-    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-    return applicationContext.getBean(UserService.class);
-  }
-
 }

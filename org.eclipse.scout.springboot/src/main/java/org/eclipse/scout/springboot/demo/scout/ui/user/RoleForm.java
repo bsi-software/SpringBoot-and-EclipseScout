@@ -2,7 +2,10 @@ package org.eclipse.scout.springboot.demo.scout.ui.user;
 
 import java.security.Permission;
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
+
+import javax.inject.Inject;
 
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
@@ -16,29 +19,33 @@ import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
 import org.eclipse.scout.rt.client.ui.form.fields.tablefield.AbstractTableField;
 import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
 import org.eclipse.scout.springboot.demo.model.Role;
 import org.eclipse.scout.springboot.demo.scout.ui.AbstractDirtyFormHandler;
-import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.CancelButton;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.OkButton;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.RoleBox;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField;
+import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField.Table;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleForm.MainBox.RoleBox.RoleNameField;
 import org.eclipse.scout.springboot.demo.spring.service.RoleService;
-import org.springframework.context.ApplicationContext;
 
+@Bean
 public class RoleForm extends AbstractForm {
 
-  private String id;
+  @Inject
+  private RoleService roleService;
 
-  public String getId() {
+  private UUID id;
+
+  public UUID getId() {
     return id;
   }
 
-  public void setId(String id) {
+  public void setId(UUID id) {
     this.id = id;
   }
 
@@ -124,13 +131,18 @@ public class RoleForm extends AbstractForm {
 
         public class Table extends AbstractTable {
 
-          public void setInitialRowContent(Collection<String> permissionIds) {
+          @Override
+          protected void execInitTable() {
             for (Class<? extends Permission> permission : getPermissions()) {
               String pId = permission.getName();
               String pName = TEXTS.getWithFallback(pId, pId);
-              Boolean assigned = new Boolean(permissionIds.contains(pId));
 
-              getTable().addRowByArray(new Object[]{pId, pName, assigned});
+              Table table = getTable();
+              ITableRow row = table.addRow();
+
+              table.getIdColumn().setValue(row, pId);
+              table.getNameColumn().setValue(row, pName);
+              table.getAssignedColumn().setValue(row, false);
             }
           }
 
@@ -172,7 +184,7 @@ public class RoleForm extends AbstractForm {
 
             @Override
             protected int getConfiguredWidth() {
-              return 100;
+              return 250;
             }
           }
 
@@ -185,7 +197,7 @@ public class RoleForm extends AbstractForm {
 
             @Override
             protected int getConfiguredWidth() {
-              return 50;
+              return 100;
             }
 
             @Override
@@ -210,36 +222,21 @@ public class RoleForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      Role role = getRole();
+      setEnabledPermission(new UpdateUserPermission());
 
-      // TODO fix code below (same lazy loading problem as with UserTablePage)
-//      getRoleNameField().setValue(role.getName());
-//      getPermissionTableField().getTable().setInitialRowContent(role.getPermissions());
+      Role role = roleService.getRole(getId());
+      // TODO comment in once lazy loading is fixed
+//      importFormFieldData(role);
 
       setSubTitle(calculateSubTitle());
-
-      setEnabledPermission(new UpdateUserPermission());
     }
 
     @Override
     protected void execStore() {
-      Role role = getRole();
+      Role role = roleService.getRole(getId());
+      exportFormFieldData(role);
 
-      role.setName(getRoleNameField().getValue());
-
-      for (ITableRow row : getPermissionTableField().getTable().getRows()) {
-        String permission = (String) row.getKeyValues().get(0);
-        boolean assigned = (boolean) row.getCell(2).getValue();
-
-        if (assigned) {
-          role.addPermission(permission);
-        }
-        else {
-          role.removePermission(permission);
-        }
-      }
-
-      getRoleService().saveRole(role);
+      roleService.saveRole(role);
     }
 
     @Override
@@ -262,10 +259,10 @@ public class RoleForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      String name = getRoleNameField().getValue();
-      Role role = new Role(name);
+      Role role = new Role();
+      exportFormFieldData(role);
 
-      getRoleService().addRole(role);
+      roleService.addRole(role);
     }
 
     @Override
@@ -274,18 +271,36 @@ public class RoleForm extends AbstractForm {
     }
   }
 
+  private void importFormFieldData(Role role) {
+    getRoleNameField().setValue(role.getName());
+
+    Set rolePermissions = role.getPermissions();
+    Table table = getPermissionTableField().getTable();
+    for (ITableRow row : table.getRows()) {
+      String permission = table.getIdColumn().getValue(row);
+
+      table.getAssignedColumn().setValue(row, rolePermissions.contains(permission));
+    }
+  }
+
+  private void exportFormFieldData(Role role) {
+    role.setName(getRoleNameField().getValue());
+
+    Table table = getPermissionTableField().getTable();
+    for (ITableRow row : table.getRows()) {
+      String permission = table.getIdColumn().getValue(row);
+      boolean assigned = table.getAssignedColumn().getValue(row);
+
+      if (assigned) {
+        role.addPermission(permission);
+      }
+      else {
+        role.removePermission(permission);
+      }
+    }
+  }
+
   private String calculateSubTitle() {
     return getRoleNameField().getValue();
-  }
-
-  private Role getRole() {
-    RoleService service = getRoleService();
-    UUID uuid = UUID.fromString(getId());
-    return service.getRole(uuid);
-  }
-
-  private RoleService getRoleService() {
-    ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-    return applicationContext.getBean(RoleService.class);
   }
 }

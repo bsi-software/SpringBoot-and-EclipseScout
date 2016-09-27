@@ -30,15 +30,15 @@ public class DefaultUserService implements UserService {
     Role roleUser = roleRepository.save(RoleService.USER_ROLE);
     Role roleAdmin = roleRepository.save(RoleService.ROOT_ROLE);
 
-    User alice = new User("alice", "Alice", "", "test");
+    User alice = new User("alice", "Alice", "test");
     alice.getRoles().add(roleUser);
     userRepository.save(alice);
 
-    User bob = new User("bob", "Bob", "", "test");
+    User bob = new User("bob", "Bob", "test");
     bob.getRoles().add(roleUser);
     userRepository.save(bob);
 
-    User eclipse = new User("eclipse", "Eclipse", "", "scout");
+    User eclipse = new User("eclipse", "Eclipse", "scout");
     eclipse.getRoles().add(roleUser);
     eclipse.getRoles().add(roleAdmin);
     userRepository.save(eclipse);

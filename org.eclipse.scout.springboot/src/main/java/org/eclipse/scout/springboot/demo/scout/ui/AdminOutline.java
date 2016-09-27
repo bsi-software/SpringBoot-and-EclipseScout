@@ -4,18 +4,13 @@ import java.util.List;
 
 import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutline;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
-import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleTablePage;
 import org.eclipse.scout.springboot.demo.scout.ui.user.UserTablePage;
-import org.springframework.context.ApplicationContext;
 
-/**
- * <h3>{@link AdminOutline}</h3>
- *
- * @author mzi
- */
-@Order(3000)
+@Bean
 public class AdminOutline extends AbstractOutline {
 
   @Override
@@ -31,10 +26,7 @@ public class AdminOutline extends AbstractOutline {
 
   @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
-    super.execCreateChildPages(pageList);
-
-    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-    pageList.add(applicationContext.getBean(UserTablePage.class));
-    pageList.add(applicationContext.getBean(RoleTablePage.class));
+    pageList.add(BEANS.get(UserTablePage.class));
+    pageList.add(BEANS.get(RoleTablePage.class));
   }
 }

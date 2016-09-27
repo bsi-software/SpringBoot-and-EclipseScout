@@ -1,62 +1,58 @@
 package org.eclipse.scout.springboot.demo.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+import org.hibernate.annotations.Type;
+import org.springframework.data.domain.Persistable;
+
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-public class Task extends BaseEntity {
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"id"})
+public class Task implements Persistable<UUID> {
 
   private static final long serialVersionUID = 1L;
 
+  @Id
+  @Type(type = "uuid-char")
+  @NonNull
+  private UUID id = UUID.randomUUID();
+
+  @NonNull
+  private String name;
+
   @OneToOne
+  @NonNull
   private User creator;
+
   @OneToOne
+  @NonNull
   private User responsible;
 
-  private Date reminder;
+  @NonNull
   private Date dueDate;
+
+  private Date reminder;
   private boolean accepted;
   private boolean done;
   private String description;
 
-  public Task(String name, User creator, Date dueDate) {
-    super(name);
-
-    setCreator(creator);
-    setResponsible(creator);
-    setDueDate(dueDate);
-  }
-
-  public void setCreator(User creator) {
-    if (creator == null) {
-      throw new IllegalArgumentException("creator must not be null");
-    }
-
-    this.creator = creator;
-  }
-
-  public void setResponsible(User responsible) {
-    if (responsible == null) {
-      throw new IllegalArgumentException("responsible must not be null");
-    }
-
-    this.responsible = responsible;
-  }
-
-  public void setDueDate(Date dueDate) {
-    if (dueDate == null) {
-      throw new IllegalArgumentException("due date must not be null");
-    }
-
-    this.dueDate = dueDate;
+  @Override
+  public boolean isNew() {
+    return getId() == null;
   }
 }

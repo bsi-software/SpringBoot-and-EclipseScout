@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionListener;
 
+import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.server.commons.authentication.FormBasedAccessController;
 import org.eclipse.scout.rt.server.commons.authentication.TrivialAccessController;
 import org.eclipse.scout.rt.ui.html.UiHttpSessionListener;
@@ -17,7 +18,6 @@ import org.eclipse.scout.rt.ui.html.UiServlet;
 import org.eclipse.scout.springboot.demo.scout.auth.CredentialVerifier;
 import org.eclipse.scout.springboot.demo.scout.auth.UiServletFilter;
 import org.eclipse.scout.springboot.demo.scout.platform.ScoutSpringWebappListener;
-import org.eclipse.scout.springboot.demo.spring.service.UserService;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -30,7 +30,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 public class ScoutServletConfig {
 
   private static final String CONTEXT_PATH = "/*";
-  public static final String SERVICES_PATH = "/services";
+  public static final String SERVICES_PATH = "/api";
 
   @Bean
   public ServletListenerRegistrationBean<ServletContextListener> webappEventListener() {
@@ -53,8 +53,8 @@ public class ScoutServletConfig {
   }
 
   @Bean
-  public CredentialVerifier credentialVerifier(UserService userService) {
-    return new CredentialVerifier(userService);
+  public CredentialVerifier credentialVerifier() {
+    return BEANS.get(CredentialVerifier.class);
   }
 
   @Bean

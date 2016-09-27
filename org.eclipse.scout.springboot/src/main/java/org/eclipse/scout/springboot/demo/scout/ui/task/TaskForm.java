@@ -3,6 +3,8 @@ package org.eclipse.scout.springboot.demo.scout.ui.task;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.eclipse.scout.rt.client.dto.FormData;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.IForm;
@@ -15,13 +17,13 @@ import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.sequencebox.AbstractSequenceBox;
 import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.eclipse.scout.springboot.demo.model.Task;
 import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.scout.ui.AbstractDirtyFormHandler;
-import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.ClientSession;
 import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.CancelButton;
 import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.OkButton;
@@ -37,19 +39,22 @@ import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.TopBox.R
 import org.eclipse.scout.springboot.demo.scout.ui.task.TaskForm.MainBox.TopBox.TitleField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.UserLookupCall;
 import org.eclipse.scout.springboot.demo.spring.service.TaskService;
-import org.springframework.context.ApplicationContext;
 
+@Bean
 public class TaskForm extends AbstractForm {
 
-  private String taskId;
+  private UUID taskId;
+
+  @Inject
+  private TaskService taskService;
 
   @FormData
-  public String getTaskId() {
+  public UUID getTaskId() {
     return taskId;
   }
 
   @FormData
-  public void setTaskId(String taskId) {
+  public void setTaskId(UUID taskId) {
     this.taskId = taskId;
   }
 
@@ -69,8 +74,6 @@ public class TaskForm extends AbstractForm {
   }
 
   public void startModify() {
-//    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-//    startInternalExclusive(applicationContext.getBean(ModifyHandler.class));
     startInternal(new ModifyHandler());
   }
 
@@ -283,34 +286,20 @@ public class TaskForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      Task task = getTask();
+      setEnabledPermission(new UpdateTaskPermission());
 
-      getTitleField().setValue(task.getName());
-      getResponsibleField().setValue(task.getResponsible());
-      getReminderField().setValue(task.getReminder());
-      getDueDateField().setValue(task.getDueDate());
-      getAcceptedField().setValue(task.isAccepted());
-      getDoneField().setValue(task.isDone());
-      getDescriptionField().setValue(task.getDescription());
+      Task task = taskService.getTask(getTaskId());
+      importFormFieldData(task);
 
       getForm().setSubTitle(calculateSubTitle());
-
-      setEnabledPermission(new UpdateTaskPermission());
     }
 
     @Override
     protected void execStore() {
-      Task task = getTask();
+      Task task = taskService.getTask(getTaskId());
+      exportFormFieldData(task);
 
-      task.setName(getTitleField().getValue());
-      task.setResponsible(getResponsibleField().getValue());
-      task.setDueDate(getDueDateField().getValue());
-      task.setReminder(getReminderField().getValue());
-      task.setAccepted(getAcceptedField().getValue());
-      task.setDone(getDoneField().getValue());
-      task.setDescription(getDescriptionField().getValue());
-
-      getTaskService().saveTask(task);
+      taskService.saveTask(task);
     }
 
     @Override
@@ -322,58 +311,61 @@ public class TaskForm extends AbstractForm {
     protected boolean getConfiguredOpenExclusive() {
       return true;
     }
-
-    private Task getTask() {
-      UUID id = UUID.fromString(getTaskId());
-      Task task = getTaskService().getTask(id);
-
-      if (task == null) {
-        throw new IllegalArgumentException("invalid taskId '" + id + "': no record found");
-      }
-
-      return task;
-    }
-
-    private TaskService getTaskService() {
-      final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-      return applicationContext.getBean(TaskService.class);
-    }
   }
 
   public class NewHandler extends AbstractDirtyFormHandler {
 
     @Override
     protected void execLoad() {
-      User user = ClientSession.get().getUser();
-
-      // add default values
-      getCreatorField().setValue(user);
-      getResponsibleField().setValue(user);
-      getAcceptedField().setValue(true);
-      getDueDateField().setValue(new Date());
       setEnabledPermission(new CreateTaskPermission());
+
+      User user = ClientSession.get().getUser();
+      setDefaultFieldValues(user);
     }
 
     @Override
     protected void execStore() {
-      String title = getTitleField().getValue();
-      User user = getResponsibleField().getValue();
-      Date date = getDueDateField().getValue();
+      Task task = new Task();
+      exportFormFieldData(task);
 
-      Task task = new Task(title, user, date);
-      task.setReminder(getReminderField().getValue());
-      task.setAccepted(getAcceptedField().getValue());
-      task.setDone(getDoneField().getValue());
-      task.setDescription(getDescriptionField().getValue());
-
-      final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-      applicationContext.getBean(TaskService.class).addTask(task);
+      taskService.addTask(task);
     }
 
     @Override
     protected void execDirtyStatusChanged(boolean dirty) {
       getForm().setSubTitle(calculateSubTitle());
     }
+  }
+
+  private void setDefaultFieldValues(User user) {
+    getCreatorField().setValue(user);
+    getResponsibleField().setValue(user);
+    getAcceptedField().setValue(true);
+    getDueDateField().setValue(new Date());
+  }
+
+  private void importFormFieldData(Task task) {
+    getTitleField().setValue(task.getName());
+    getCreatorField().setValue(task.getCreator());
+    getResponsibleField().setValue(task.getResponsible());
+    getDueDateField().setValue(task.getDueDate());
+
+    getReminderField().setValue(task.getReminder());
+    getAcceptedField().setValue(task.isAccepted());
+    getDoneField().setValue(task.isDone());
+    getDescriptionField().setValue(task.getDescription());
+  }
+
+  private void exportFormFieldData(Task task) {
+    task.setName(getTitleField().getValue());
+    task.setCreator(getCreatorField().getValue());
+    task.setResponsible(getResponsibleField().getValue());
+    task.setDueDate(getDueDateField().getValue());
+
+    task.setReminder(getReminderField().getValue());
+    task.setAccepted(getAcceptedField().getValue());
+    task.setDone(getDoneField().getValue());
+    task.setDescription(getDescriptionField().getValue());
   }
 
   private String calculateSubTitle() {

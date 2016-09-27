@@ -2,16 +2,16 @@ package org.eclipse.scout.springboot.demo.scout.auth;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.eclipse.scout.rt.platform.security.ICredentialVerifier;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.spring.service.UserService;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
 public class CredentialVerifier implements ICredentialVerifier {
 
+  @Inject
   private UserService userService;
 
   @Override

@@ -2,6 +2,7 @@ package org.eclipse.scout.springboot.demo.scout.ui.user;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -10,10 +11,13 @@ import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
 import org.eclipse.scout.rt.client.ui.form.FormListener;
+import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
@@ -21,12 +25,8 @@ import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.springboot.demo.model.Role;
 import org.eclipse.scout.springboot.demo.scout.ui.user.RoleTablePage.Table;
 import org.eclipse.scout.springboot.demo.spring.service.RoleService;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-@Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+@Bean
 public class RoleTablePage extends AbstractPageWithTable<Table> {
 
   @Inject
@@ -45,6 +45,10 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
   @Override
   protected void execLoadData(SearchFilter filter) {
     Collection<Role> roles = roleService.getRoles();
+    importTableRowData(roles);
+  }
+
+  private void importTableRowData(Collection<Role> roles) {
     Table table = getTable();
 
     table.deleteAllRows();
@@ -55,10 +59,8 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
     for (Role role : roles) {
       ITableRow row = table.createRow();
-
-      table.getIdColumn().setValue(row, role.getId().toString());
+      table.getIdColumn().setValue(row, role.getId());
       table.getNameColumn().setValue(row, role.getName());
-
       table.addRow(row);
     }
   }
@@ -100,7 +102,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        RoleForm form = new RoleForm();
+        RoleForm form = BEANS.get(RoleForm.class);
         form.addFormListener(new RoleFormListener());
         form.startNew();
       }
@@ -127,9 +129,9 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        String roleId = (String) getSelectedRow().getKeyValues().get(0);
+        UUID roleId = getIdColumn().getSelectedValue();
 
-        RoleForm form = new RoleForm();
+        RoleForm form = BEANS.get(RoleForm.class);
         form.addFormListener(new RoleFormListener());
         form.setId(roleId);
         form.startModify();
@@ -148,7 +150,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(1000)
-    public class IdColumn extends AbstractStringColumn {
+    public class IdColumn extends AbstractColumn<UUID> {
 
       @Override
       protected boolean getConfiguredDisplayable() {

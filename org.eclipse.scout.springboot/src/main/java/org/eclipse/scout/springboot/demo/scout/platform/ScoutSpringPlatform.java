@@ -5,7 +5,6 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.PlatformStateLatch;
 import org.eclipse.scout.rt.platform.Replace;
 import org.eclipse.scout.rt.platform.interceptor.IBeanDecorator;
-import org.eclipse.scout.rt.platform.internal.BeanFilter;
 import org.eclipse.scout.rt.platform.internal.BeanManagerImplementor;
 import org.eclipse.scout.rt.platform.internal.PlatformImplementor;
 import org.eclipse.scout.rt.platform.inventory.ClassInventory;
@@ -66,16 +65,13 @@ public class ScoutSpringPlatform extends PlatformImplementor implements Applicat
     final BeanDefinitionRegistry springBeanRegistry = (BeanDefinitionRegistry) springApplicationContext.getBeanFactory();
     final ScoutSpringBeanManager beanManager = new ScoutSpringBeanManager(springApplicationContext, springBeanRegistry);
 
-    for (final Class<?> bean : new BeanFilter().collect(ClassInventory.get())) {
-      if (!ignoreBean(bean)) {
-        beanManager.registerClass(bean);
-      }
+    for (final Class<?> bean : new BeanFilter()
+        .withNoArgConstructorRequired(false)
+        .withIgnoredBeanClass(WebappEventListener.ServletContextRegistration.class.getName())
+        .collect(ClassInventory.get())) {
+      beanManager.registerClass(bean);
     }
 
     return beanManager;
-  }
-
-  private boolean ignoreBean(final Class<?> bean) {
-    return bean == WebappEventListener.ServletContextRegistration.class; // Platform listener which registers ServletContext
   }
 }

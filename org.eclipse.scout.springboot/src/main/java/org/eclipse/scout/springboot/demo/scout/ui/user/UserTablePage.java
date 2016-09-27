@@ -15,20 +15,17 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
 import org.eclipse.scout.rt.client.ui.form.FormListener;
+import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.springboot.demo.model.User;
 import org.eclipse.scout.springboot.demo.scout.ui.user.UserTablePage.Table;
-import org.eclipse.scout.springboot.demo.spring.service.RoleService;
 import org.eclipse.scout.springboot.demo.spring.service.UserService;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-@Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+@Bean
 public class UserTablePage extends AbstractPageWithTable<Table> {
 
   @Inject
@@ -47,6 +44,10 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
   @Override
   protected void execLoadData(SearchFilter filter) {
     Collection<User> users = userService.getUsers();
+    importTableRowData(users);
+  }
+
+  private void importTableRowData(Collection<User> users) {
     Table table = getTable();
 
     table.deleteAllRows();
@@ -60,17 +61,10 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       table.getUserNameColumn().setValue(row, user.getName());
       table.getFirstNameColumn().setValue(row, user.getFirstName());
       table.getLastNameColumn().setValue(row, user.getLastName());
-      // TODO fix bug below to show if user has root privileges
+      // TODO fix bug below to show if user has root privileges and/or decide to hard wire root in code
 // table.getAdminColumn().setValue(row, isRoot(user));
       table.addRow(row);
     }
-  }
-
-  // TODO to verify: it seems that this is related to the post below, but the metioned fix doesn't help
-  // http://stackoverflow.com/questions/15359306/how-to-load-lazy-fetched-items-from-hibernate-jpa-in-my-controller
-  private boolean isRoot(User user) {
-    user.getRoles().size();
-    return user.getRoles().contains(RoleService.ROOT_ROLE);
   }
 
   public class Table extends AbstractTable {
@@ -102,7 +96,7 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        UserForm form = new UserForm();
+        UserForm form = BEANS.get(UserForm.class);
         form.addFormListener(new UserFormListener());
         form.startNew();
       }
@@ -131,9 +125,9 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       protected void execAction() {
         String userName = (String) getSelectedRow().getKeyValues().get(0);
 
-        UserForm form = new UserForm();
+        UserForm form = BEANS.get(UserForm.class);
         form.addFormListener(new UserFormListener());
-        form.getUsernameField().setValue(userName);
+        form.getUserBox().getUserNameField().setValue(userName);
         form.startModify();
       }
     }

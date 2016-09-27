@@ -1,93 +1,59 @@
 package org.eclipse.scout.springboot.demo.scout.ui.user;
 
+import java.util.Collection;
+
+import javax.inject.Inject;
+
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
+import org.eclipse.scout.rt.client.ui.form.AbstractFormHandler;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
+import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.springboot.demo.model.Role;
 import org.eclipse.scout.springboot.demo.model.User;
-import org.eclipse.scout.springboot.demo.scout.ui.ApplicationContexts;
 import org.eclipse.scout.springboot.demo.scout.ui.ClientSession;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.AdminField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.FirstNameField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.LastNameField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.PasswordField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.PictureField;
-import org.eclipse.scout.springboot.demo.scout.ui.user.AbstractUserBox.UserNameField;
 import org.eclipse.scout.springboot.demo.scout.ui.user.OptionsForm.MainBox.UserBox;
+import org.eclipse.scout.springboot.demo.spring.service.RoleService;
 import org.eclipse.scout.springboot.demo.spring.service.UserService;
-import org.springframework.context.ApplicationContext;
 
+@Bean
 public class OptionsForm extends AbstractForm {
+
+  @Inject
+  private UserService userService;
+
+  @Inject
+  private RoleService roleService;
 
   @Override
   protected String getConfiguredTitle() {
     return TEXTS.get("Options");
   }
 
-  @Override
-  protected void execInitForm() {
-    User user = getUser();
-
-    getUsernameField().setValue(user.getName());
-    getUsernameField().setEnabled(false);
-
-    getPictureField().setImage(user.getPicture());
-    getFirstNameField().setValue(user.getFirstName());
-    getLastNameField().setValue(user.getLastName());
-    getPasswordField().setValue(user.getPassword());
-
-    getAdminField().setVisible(false);
-  }
-
-  protected void storeOptions() {
-    User user = getUser();
-
-    user.setPicture(getPictureField().getByteArrayValue());
-    user.setFirstName(getFirstNameField().getValue());
-    user.setLastName(getLastNameField().getValue());
-    user.setPassword(getPasswordField().getValue());
-
-    getUserService().saveUser(user);
-  }
-
   public UserBox getUserBox() {
     return getFieldByClass(UserBox.class);
   }
 
-  PictureField getPictureField() {
-    return getFieldByClass(PictureField.class);
+  public void startDefault() {
+    startInternal(new DefaultHandler());
   }
 
-  FirstNameField getFirstNameField() {
-    return getFieldByClass(FirstNameField.class);
-  }
-
-  LastNameField getLastNameField() {
-    return getFieldByClass(LastNameField.class);
-  }
-
-  UserNameField getUsernameField() {
-    return getFieldByClass(UserNameField.class);
-  }
-
-  PasswordField getPasswordField() {
-    return getFieldByClass(PasswordField.class);
-  }
-
-  AdminField getAdminField() {
-    return getFieldByClass(AdminField.class);
-  }
-
-  @Order(1000)
+  @Order(10)
   public class MainBox extends AbstractGroupBox {
 
-    @Order(1000)
+    @Order(10)
     public class UserBox extends AbstractUserBox {
+
+      @Override
+      protected Collection<Role> execFindRoles() {
+        return roleService.getRoles();
+      }
 
     }
 
-    @Order(1000)
+    @Order(20)
     public class ApplyButton extends AbstractOkButton {
 
       @Override
@@ -97,20 +63,24 @@ public class OptionsForm extends AbstractForm {
 
       @Override
       protected void execClickAction() {
-        storeOptions();
+        String username = ClientSession.get().getUser().getName();
+        User user = userService.getUser(username);
+
+        getUserBox().exportFormFieldData(user);
+        userService.saveUser(user);
       }
     }
   }
 
-  private User getUser() {
-    UserService userService = getUserService();
-    String username = ClientSession.get().getUser().getName();
-    return userService.getUser(username);
-  }
+  public class DefaultHandler extends AbstractFormHandler {
 
-  private UserService getUserService() {
-    // TODO: Is OptionsForm not a SpringBean? Is there a better way to retrieve the service?
-    final ApplicationContext applicationContext = ApplicationContexts.getApplicationContext();
-    return applicationContext.getBean(UserService.class);
+    @Override
+    protected void execLoad() {
+      String username = ClientSession.get().getUser().getName();
+      User user = userService.getUser(username);
+
+      getUserBox().importFormFieldData(user);
+      getUserBox().getUserNameField().setEnabled(false);
+    }
   }
 }
