@@ -28,6 +28,7 @@ import org.eclipse.scout.rt.platform.Replace;
 import org.eclipse.scout.rt.platform.SimpleBeanDecorationFactory;
 import org.eclipse.scout.rt.platform.interceptor.IBeanDecorator;
 import org.eclipse.scout.rt.platform.interceptor.IBeanInvocationContext;
+import org.eclipse.scout.tasks.Application;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
