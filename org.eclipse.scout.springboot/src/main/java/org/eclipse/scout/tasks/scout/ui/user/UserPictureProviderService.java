@@ -8,6 +8,7 @@ import org.eclipse.scout.rt.client.services.common.icon.AbstractIconProviderServ
 import org.eclipse.scout.rt.client.services.common.icon.IconSpec;
 import org.eclipse.scout.rt.platform.CreateImmediately;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.resource.BinaryResource;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,31 +17,35 @@ import lombok.extern.slf4j.Slf4j;
 @CreateImmediately // todo: check if necessary
 public class UserPictureProviderService extends AbstractIconProviderService {
 
-  private Map<String, IconSpec> icons;
+  private Map<String, BinaryResource> icons;
 
   public UserPictureProviderService() {
     icons = new ConcurrentHashMap<>();
   }
 
   @Override
-  public IconSpec findIconSpec(String iconName) {
-    log.info("get icon spec for '" + iconName + "'");
-    return icons.get(iconName);
+  public IconSpec findIconSpec(String name) {
+    BinaryResource resource = icons.get(name);
+
+    if (resource == null) {
+      return null;
+    }
+
+    return new IconSpec(name, resource.getContent());
+  }
+
+  public BinaryResource getBinaryResource(String name) {
+    return icons.get(name);
   }
 
   @Override
   protected URL findResource(String relativePath) {
-    log.info("!!! findResource returns null !!!");
+    log.warn("!!! returns null (not implemented) !!!");
     return null;
   }
 
-  public void addUserPicture(String username, byte[] picture) {
-    IconSpec usericon = new IconSpec();
-    usericon.setContent(picture);
-    usericon.setName(username);
-
-    icons.put(username, usericon);
-
-    log.info("user picture added for user '" + username + "'");
+  public void addUserPicture(String name, byte[] picture) {
+    BinaryResource usericon = new BinaryResource(name, picture);
+    icons.put(name, usericon);
   }
 }

@@ -11,3 +11,10 @@
 .font-awesomeIcons {
   font-family: awesomeIcons, @font-default-family;
 }
+
+.usericon-html {
+  border-radius:  12px;
+  height: 24px;
+  margin-top: -6px;
+  margin-bottom: -6px;
+}

@@ -11,13 +11,13 @@ import javax.inject.Inject;
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
+import org.eclipse.scout.rt.client.ui.basic.cell.Cell;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractDateColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractDateTimeColumn;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractIconColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractSmartColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
@@ -26,6 +26,8 @@ import org.eclipse.scout.rt.client.ui.form.FormListener;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.html.HTML;
+import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
@@ -86,8 +88,6 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       table.getIdColumn().setValue(row, task.getId());
       // TODO doesn't work: html has <img> tag -> put image as static resource somewhere?
       // table.getIconColumn().setValue(row, task.getCreator().getName());
-
-      table.getIconColumn().setValue(row, task.getCreator().getName());
 
       table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
       table.getDueDateColumn().setValue(row, task.getDueDate());
@@ -293,12 +293,12 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       return getColumnSet().getColumnByClass(CreatorColumn.class);
     }
 
-    public IconColumn getIconColumn() {
-      return getColumnSet().getColumnByClass(IconColumn.class);
-    }
-
     public DueInColumn getDueInColumn() {
       return getColumnSet().getColumnByClass(DueInColumn.class);
+    }
+
+    public CreatorPictureColumn getCreatorPictureColumn() {
+      return getColumnSet().getColumnByClass(CreatorPictureColumn.class);
     }
 
     public ReminderColumn getReminderColumn() {
@@ -331,8 +331,22 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
-    @Order(1000)
-    public class IconColumn extends AbstractIconColumn {
+    @Order(1500)
+    public class CreatorPictureColumn extends AbstractStringColumn {
+
+      @Override
+      protected boolean getConfiguredHtmlEnabled() {
+        return true;
+      }
+
+      @Override
+      protected void execDecorateCell(Cell cell, ITableRow row) {
+        String resourceName = getCreatorColumn().getValue(row).getName();
+        BinaryResource value = userPictureService.getBinaryResource(resourceName);
+
+        addAttachment(value);
+        cell.setText(HTML.imgByBinaryResource(value.getFilename()).cssClass("usericon-html").toHtml());
+      }
 
       @Override
       protected int getConfiguredWidth() {
