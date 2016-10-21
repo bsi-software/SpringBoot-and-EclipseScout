@@ -264,6 +264,10 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     getUserNameField().parseAndSetValue(user.getName());
     getPasswordField().setValue(user.getPassword());
 
+    importUserRoles(user);
+  }
+
+  private void importUserRoles(User user) {
     // TODO fix exception "could not initialize proxy - no Session"
     // first result on stackoverflow:
     // http://stackoverflow.com/questions/21574236/org-hibernate-lazyinitializationexception-could-not-initialize-proxy-no-sess
@@ -292,6 +296,10 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     user.setPassword(getPasswordField().getValue());
     user.setPicture(getPictureField().getByteArrayValue());
 
+    exportUserRoles(user);
+  }
+
+  private void exportUserRoles(User user) {
     Set<Role> roles = new HashSet<>();
     Table table = getRoleTableField().getTable();
     for (ITableRow row : table.getRows()) {
