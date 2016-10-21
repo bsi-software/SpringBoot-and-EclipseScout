@@ -8,15 +8,11 @@ import org.eclipse.scout.rt.client.session.ClientSessionProvider;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.spring.service.UserService;
-import org.springframework.beans.factory.BeanFactory;
 
 public class ClientSession extends AbstractClientSession {
 
   @Inject
   private UserService userService;
-
-  @Inject
-  private BeanFactory beanFactory;
 
   private User user;
 

@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -24,6 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"id"})
+@ToString
 public class Role implements Persistable<UUID> {
 
   public static final String ROLE_ROOT = "root";

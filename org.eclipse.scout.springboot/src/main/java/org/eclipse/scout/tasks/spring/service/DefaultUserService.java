@@ -13,6 +13,9 @@ import org.eclipse.scout.tasks.spring.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class DefaultUserService implements UserService {
 
@@ -23,25 +26,38 @@ public class DefaultUserService implements UserService {
   private RoleRepository roleRepository;
 
   /**
-   * Add initial demo entities: Roles and users.
+   * Add initial demo entities: roles and users.
    */
   @PostConstruct
   public void init() {
-    Role roleAdmin = roleRepository.save(RoleService.ROOT_ROLE);
-    Role roleUser = roleRepository.save(new Role("user"));
+    log.debug("Check and initialise roles and users");
+    Role roleAdmin = roleRepository.findByName("root");
+    if (roleAdmin == null) {
+      roleAdmin = roleRepository.save(RoleService.ROOT_ROLE);
+    }
+    Role roleUser = roleRepository.findByName("user");
+    if (roleUser == null) {
+      roleUser = roleRepository.save(new Role("user"));
+    }
 
-    User alice = new User("alice", "Alice", "test");
-    alice.getRoles().add(roleUser);
-    userRepository.save(alice);
+    if (userRepository.findByName("alice") == null) {
+      User alice = new User("alice", "Alice", "test");
+      alice.getRoles().add(roleUser);
+      userRepository.save(alice);
+    }
 
-    User bob = new User("bob", "Bob", "test");
-    bob.getRoles().add(roleUser);
-    userRepository.save(bob);
+    if (userRepository.findByName("bob") == null) {
+      User bob = new User("bob", "Bob", "test");
+      bob.getRoles().add(roleUser);
+      userRepository.save(bob);
+    }
 
-    User eclipse = new User("eclipse", "Eclipse", "scout");
-    eclipse.getRoles().add(roleUser);
-    eclipse.getRoles().add(roleAdmin);
-    userRepository.save(eclipse);
+    if (userRepository.findByName("eclipse") == null) {
+      User eclipse = new User("eclipse", "Eclipse", "scout");
+      eclipse.getRoles().add(roleUser);
+      eclipse.getRoles().add(roleAdmin);
+      userRepository.save(eclipse);
+    }
   }
 
   @Override
