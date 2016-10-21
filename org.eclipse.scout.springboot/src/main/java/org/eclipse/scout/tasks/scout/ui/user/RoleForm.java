@@ -2,6 +2,7 @@ package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.security.Permission;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,8 +30,8 @@ import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.OkButton;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField;
-import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.RoleNameField;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField.Table;
+import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.RoleNameField;
 import org.eclipse.scout.tasks.spring.service.RoleService;
 
 @Bean
@@ -226,7 +227,7 @@ public class RoleForm extends AbstractForm {
 
       Role role = roleService.getRole(getId());
       // TODO comment in once lazy loading is fixed
-//      importFormFieldData(role);
+      importFormFieldData(role);
 
       setSubTitle(calculateSubTitle());
     }
@@ -272,9 +273,13 @@ public class RoleForm extends AbstractForm {
   }
 
   private void importFormFieldData(Role role) {
-    getRoleNameField().setValue(role.getName());
+    Set rolePermissions = new HashSet<String>();
 
-    Set rolePermissions = role.getPermissions();
+    // TODO fix exception "could not initialize proxy - no Session"
+    // next two lines commented out to do more testing
+    // getRoleNameField().setValue(role.getName());
+    // rolePermissions = role.getPermissions();
+
     Table table = getPermissionTableField().getTable();
     for (ITableRow row : table.getRows()) {
       String permission = table.getIdColumn().getValue(row);
@@ -284,6 +289,7 @@ public class RoleForm extends AbstractForm {
   }
 
   private void exportFormFieldData(Role role) {
+    // TODO fix exception "could not initialize proxy - no Session"
     role.setName(getRoleNameField().getValue());
 
     Table table = getPermissionTableField().getTable();

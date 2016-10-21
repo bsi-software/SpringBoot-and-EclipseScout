@@ -2,12 +2,15 @@ package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.dnd.ResourceListTransferObject;
 import org.eclipse.scout.rt.client.ui.dnd.TransferObject;
@@ -29,6 +32,8 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
   public static final int PICTURE_MAX_FILE_SIZE = 300 * 1024;
 
   protected abstract Collection<Role> execFindRoles();
+
+  protected abstract Role execFindRole(UUID id);
 
   public PictureField getPictureField() {
     return getFieldByClass(PictureField.class);
@@ -206,7 +211,8 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
       }
 
       @Order(10)
-      public class IdColumn extends AbstractStringColumn {
+      public class IdColumn extends AbstractColumn<UUID> {
+
         @Override
         protected boolean getConfiguredDisplayable() {
           return false;
@@ -258,19 +264,24 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     getUserNameField().parseAndSetValue(user.getName());
     getPasswordField().setValue(user.getPassword());
 
-//    Set<Role> userRoles = user.getRoles();
-    Set<Role> userRoles = Collections.emptySet(); // TODO mzi
+    // TODO fix exception "could not initialize proxy - no Session"
+    // first result on stackoverflow:
+    // http://stackoverflow.com/questions/21574236/org-hibernate-lazyinitializationexception-could-not-initialize-proxy-no-sess
+    Set<Role> userRolesX = user.getRoles();
+    // workaround without reading roles
+    Set<Role> userRoles = Collections.emptySet();
 
     for (Role role : execFindRoles()) {
-      String rId = role.getName();
-      String rName = TEXTS.getWithFallback(rId, rId);
+      UUID rId = role.getId();
+      String rN = role.getName();
+      String rName = TEXTS.getWithFallback(rN, rN);
 
       Table table = getRoleTableField().getTable();
       ITableRow row = table.addRow();
 
       table.getIdColumn().setValue(row, rId);
       table.getNameColumn().setValue(row, rName);
-      table.getAssignedColumn().setValue(row, userRoles.contains(rId));
+      table.getAssignedColumn().setValue(row, userRoles.contains(rN));
     }
   }
 
@@ -281,6 +292,19 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     user.setPassword(getPasswordField().getValue());
     user.setPicture(getPictureField().getByteArrayValue());
 
-    // TODO mzi export user roles
+    Set<Role> roles = new HashSet<>();
+    Table table = getRoleTableField().getTable();
+    for (ITableRow row : table.getRows()) {
+      table.getCell(row, table.getIdColumn());
+      UUID roleId = (UUID) table.getCell(row, table.getIdColumn()).getValue();
+      boolean hasRole = (boolean) table.getCell(row, table.getAssignedColumn()).getValue();
+
+      if (hasRole) {
+        // TODO fix exception "could not initialize proxy - no Session"
+        roles.add(execFindRole(roleId));
+      }
+    }
+
+    user.setRoles(roles);
   }
 }

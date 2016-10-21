@@ -86,9 +86,6 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       ITableRow row = table.createRow();
 
       table.getIdColumn().setValue(row, task.getId());
-      // TODO doesn't work: html has <img> tag -> put image as static resource somewhere?
-      // table.getIconColumn().setValue(row, task.getCreator().getName());
-
       table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
       table.getDueDateColumn().setValue(row, task.getDueDate());
       table.getTitleColumn().setValue(row, task.getName());
@@ -344,8 +341,10 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
         String resourceName = getCreatorColumn().getValue(row).getName();
         BinaryResource value = userPictureService.getBinaryResource(resourceName);
 
-        addAttachment(value);
-        cell.setText(HTML.imgByBinaryResource(value.getFilename()).cssClass("usericon-html").toHtml());
+        if (value != null) {
+          addAttachment(value);
+          cell.setText(HTML.imgByBinaryResource(value.getFilename()).cssClass("usericon-html").toHtml());
+        }
       }
 
       @Override

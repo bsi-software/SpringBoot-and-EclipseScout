@@ -1,6 +1,7 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -54,6 +55,11 @@ public class OptionsForm extends AbstractForm {
       @Override
       protected Collection<Role> execFindRoles() {
         return roleService.getRoles();
+      }
+
+      @Override
+      protected Role execFindRole(UUID id) {
+        return roleService.getRole(id);
       }
     }
 
