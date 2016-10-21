@@ -1,4 +1,4 @@
-package org.eclipse.scout.springboot.demo;
+package org.eclipse.scout.tasks;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
