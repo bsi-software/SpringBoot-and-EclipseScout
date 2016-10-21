@@ -3,7 +3,6 @@ package org.eclipse.scout.tasks;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -14,11 +13,7 @@ import org.springframework.context.annotation.Import;
 public class Application {
 
   public static void main(final String[] args) {
-    start(args);
-  }
-
-  public static ConfigurableApplicationContext start(final String[] args) {
-    return SpringApplication.run(Application.class, args);
+    SpringApplication.run(Application.class, args);
   }
 
 }

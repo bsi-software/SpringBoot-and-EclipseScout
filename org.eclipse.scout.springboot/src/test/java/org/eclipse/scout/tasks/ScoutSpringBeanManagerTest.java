@@ -28,17 +28,23 @@ import org.eclipse.scout.rt.platform.Replace;
 import org.eclipse.scout.rt.platform.SimpleBeanDecorationFactory;
 import org.eclipse.scout.rt.platform.interceptor.IBeanDecorator;
 import org.eclipse.scout.rt.platform.interceptor.IBeanInvocationContext;
-import org.eclipse.scout.tasks.Application;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.eclipse.scout.rt.platform.util.Assertions.AssertionException;
+import org.eclipse.scout.tasks.spring.bean.SomeSpringBean;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 public class ScoutSpringBeanManagerTest {
 
-  private static ConfigurableApplicationContext springContext;
+  @Autowired
+  private ApplicationContext springContext;
 
   //
   // Test setup:
@@ -61,16 +67,6 @@ public class ScoutSpringBeanManagerTest {
   //                          | EGolf (@Replace) |
   //                          +------------------+
   //
-
-  @BeforeClass
-  public static void beforeClass() {
-    springContext = Application.start(new String[0]);
-  }
-
-  @AfterClass
-  public static void afterClass() {
-    springContext.stop();
-  }
 
   @Test
   public void testLookupByInterface() {
@@ -187,9 +183,10 @@ public class ScoutSpringBeanManagerTest {
     assertSame(springContext.getBean(AutoWiredBean.class).getInjectedBean(), springContext.getBean(SomeSpringBean.class));
   }
 
-  @Test
-  public void testSpringFromBeanManager() {
-    assertNotNull(BEANS.get(SomeSpringBean.class));
+  @Test(expected = AssertionException.class)
+  public void testThatSpringIsNotAccessibleFromBeanManager() {
+    // Will throw an AssertionException because spring beans are only supported via @Inject
+    BEANS.get(SomeSpringBean.class);
   }
 
   @SafeVarargs
@@ -312,7 +309,4 @@ public class ScoutSpringBeanManagerTest {
     }
   }
 
-  @Component
-  public static class SomeSpringBean {
-  }
 }
