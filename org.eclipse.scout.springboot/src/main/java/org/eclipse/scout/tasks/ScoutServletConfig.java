@@ -23,6 +23,7 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -62,6 +63,17 @@ public class ScoutServletConfig {
   public FilterRegistrationBean authenticationFilter(UiServletFilter uiServletFilter) {
     final FilterRegistrationBean reg = new FilterRegistrationBean();
     reg.setFilter(uiServletFilter);
+    reg.addUrlPatterns(CONTEXT_PATH);
+    reg.addInitParameter("filter-exclude", "/res/*, " + SERVICES_PATH + "/*, " + CONSOLE_PATH + "/*");
+    reg.setName("authFilter");
+    reg.setDispatcherTypes(DispatcherType.REQUEST); // apply this filter only for requests, but not for forwards or redirects.
+    return reg;
+  }
+
+  @Bean
+  public FilterRegistrationBean openEntityManagerInViewFilter() {
+    final FilterRegistrationBean reg = new FilterRegistrationBean();
+    reg.setFilter(new OpenEntityManagerInViewFilter());
     reg.addUrlPatterns(CONTEXT_PATH);
     reg.addInitParameter("filter-exclude", "/res/*, " + SERVICES_PATH + "/*, " + CONSOLE_PATH + "/*");
     reg.setName("authFilter");
