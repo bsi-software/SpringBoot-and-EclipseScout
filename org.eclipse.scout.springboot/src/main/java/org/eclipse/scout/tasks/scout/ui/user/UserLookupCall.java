@@ -11,6 +11,9 @@ import org.eclipse.scout.rt.shared.services.lookup.LookupRow;
 import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.spring.service.UserService;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode(callSuper = true)
 public class UserLookupCall extends LocalLookupCall<User> {
 
   @Inject
