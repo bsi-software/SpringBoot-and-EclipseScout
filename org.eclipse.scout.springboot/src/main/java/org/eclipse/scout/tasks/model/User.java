@@ -1,6 +1,5 @@
 package org.eclipse.scout.tasks.model;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -54,7 +53,7 @@ public class User implements Persistable<UUID> {
   private boolean active;
 
   @ManyToMany
-  private Set<Role> roles = new HashSet<>();
+  private Set<Role> roles;
 
   @Override
   public boolean isNew() {

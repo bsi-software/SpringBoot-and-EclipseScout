@@ -37,6 +37,7 @@
 	</properties>
 
 	<dependencies>
+	
 		<!-- Scout dependencies -->
 		<dependency>
 			<groupId>org.eclipse.scout.rt</groupId>
@@ -45,7 +46,6 @@
 		</dependency>
 
 		<!-- Springboot dependencies -->
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>

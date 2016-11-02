@@ -8,17 +8,15 @@ import org.eclipse.scout.tasks.model.User;
 
 public interface TaskService {
 
-  Collection<Task> getAllTasks();
+  Collection<Task> getTasks();
+
+  Task getTask(UUID taskId);
+
+  Collection<Task> getInbox(User user);
 
   Collection<Task> getTodaysTasks(User user);
 
   Collection<Task> getOwnTasks(User user);
 
-  Collection<Task> getInbox(User user);
-
-  Task getTask(UUID taskId);
-
   void saveTask(Task task);
-
-  void addTask(Task task);
 }

@@ -41,6 +41,12 @@ public class ClientSession extends AbstractClientSession {
     if (getSubject() != null && !getSubject().getPrincipals().isEmpty()) {
       String username = getSubject().getPrincipals().iterator().next().getName();
       user = userService.getUser(username);
+
     }
+  }
+
+  @Override
+  public String getUserId() {
+    return (user == null) ? "" : user.getName();
   }
 }

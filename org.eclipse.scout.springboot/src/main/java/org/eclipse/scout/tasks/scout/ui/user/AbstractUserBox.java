@@ -1,7 +1,6 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,9 +30,21 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
 
   public static final int PICTURE_MAX_FILE_SIZE = 300 * 1024;
 
-  protected abstract Collection<Role> execFindRoles();
+  /**
+   * @return all available roles
+   */
+  protected abstract Collection<Role> execFindAllRoles();
 
-  protected abstract Role execFindRole(UUID id);
+  /**
+   * @return all roles currently assigned to this user
+   */
+  protected abstract Collection<Role> execFindUserRoles();
+
+  /**
+   * @param name
+   * @return
+   */
+  protected abstract Role execFindRole(String name);
 
   public PictureField getPictureField() {
     return getFieldByClass(PictureField.class);
@@ -268,14 +279,10 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
   }
 
   private void importUserRoles(User user) {
-    // TODO fix exception "could not initialize proxy - no Session"
-    // first result on stackoverflow:
-    // http://stackoverflow.com/questions/21574236/org-hibernate-lazyinitializationexception-could-not-initialize-proxy-no-sess
-    Set<Role> userRolesX = user.getRoles();
-    // workaround without reading roles
-    Set<Role> userRoles = Collections.emptySet();
+    Collection<Role> userRoles = execFindUserRoles();
+    Collection<Role> allRoles = execFindAllRoles();
 
-    for (Role role : execFindRoles()) {
+    for (Role role : allRoles) {
       UUID rId = role.getId();
       String rN = role.getName();
       String rName = TEXTS.getWithFallback(rN, rN);
@@ -285,7 +292,7 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
 
       table.getIdColumn().setValue(row, rId);
       table.getNameColumn().setValue(row, rName);
-      table.getAssignedColumn().setValue(row, userRoles.contains(rN));
+      table.getAssignedColumn().setValue(row, userRoles.contains(role));
     }
   }
 
@@ -303,13 +310,12 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     Set<Role> roles = new HashSet<>();
     Table table = getRoleTableField().getTable();
     for (ITableRow row : table.getRows()) {
-      table.getCell(row, table.getIdColumn());
-      UUID roleId = (UUID) table.getCell(row, table.getIdColumn()).getValue();
-      boolean hasRole = (boolean) table.getCell(row, table.getAssignedColumn()).getValue();
+
+      String role = table.getNameColumn().getValue(row);
+      boolean hasRole = table.getAssignedColumn().getValue(row);
 
       if (hasRole) {
-        // TODO fix exception "could not initialize proxy - no Session"
-        roles.add(execFindRole(roleId));
+        roles.add(execFindRole(role));
       }
     }
 

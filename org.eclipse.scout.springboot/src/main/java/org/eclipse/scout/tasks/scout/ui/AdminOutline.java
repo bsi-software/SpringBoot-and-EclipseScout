@@ -13,6 +13,9 @@ import org.eclipse.scout.tasks.scout.ui.user.UserTablePage;
 @Bean
 public class AdminOutline extends AbstractOutline {
 
+  // get unicode http://fontawesome.io/icon/users/
+  public static final String OUTLINE_ICON = "font:awesomeIcons \uf0c0";
+
   @Override
   protected String getConfiguredTitle() {
     return TEXTS.get("Administration");
@@ -20,8 +23,7 @@ public class AdminOutline extends AbstractOutline {
 
   @Override
   protected String getConfiguredIconId() {
-    // get unicode http://fontawesome.io/icon/users/
-    return "font:awesomeIcons \uf0c0";
+    return OUTLINE_ICON;
   }
 
   @Override

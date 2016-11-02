@@ -18,7 +18,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+// this is a jpa entity
 @Entity
+// lombok annotations
 @Getter
 @Setter
 @NoArgsConstructor

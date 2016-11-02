@@ -73,6 +73,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     importTableRowData(tasks);
   }
 
+  /**
+   * Manual mapping of entity attributes to table columns.
+   *
+   * @param tasks
+   */
   private void importTableRowData(Collection<Task> tasks) {
     Table table = getTable();
 
@@ -86,9 +91,10 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       ITableRow row = table.createRow();
 
       table.getIdColumn().setValue(row, task.getId());
+      table.getTitleColumn().setValue(row, task.getName());
+
       table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
       table.getDueDateColumn().setValue(row, task.getDueDate());
-      table.getTitleColumn().setValue(row, task.getName());
       table.getCreatorColumn().setValue(row, task.getCreator());
       table.getResponsibleColumn().setValue(row, task.getResponsible());
       table.getReminderColumn().setValue(row, task.getReminder());

@@ -10,7 +10,6 @@ import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
@@ -42,6 +41,11 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
   }
 
   @Override
+  protected void execInitPage() {
+    setVisiblePermission(new ReadUserPermission());
+  }
+
+  @Override
   protected void execLoadData(SearchFilter filter) {
     Collection<User> users = userService.getUsers();
     importTableRowData(users);
@@ -61,8 +65,6 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       table.getUserNameColumn().setValue(row, user.getName());
       table.getFirstNameColumn().setValue(row, user.getFirstName());
       table.getLastNameColumn().setValue(row, user.getLastName());
-      // TODO fix bug below to show if user has root privileges and/or decide to hard wire root in code
-// table.getAdminColumn().setValue(row, isRoot(user));
       table.addRow(row);
     }
   }
@@ -123,7 +125,7 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        String userName = (String) getSelectedRow().getKeyValues().get(0);
+        String userName = getUserNameColumn().getSelectedValue();
 
         UserForm form = BEANS.get(UserForm.class);
         form.addFormListener(new UserFormListener());
@@ -145,10 +147,6 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
     public FirstNameColumn getFirstNameColumn() {
       return getColumnSet().getColumnByClass(FirstNameColumn.class);
-    }
-
-    public AdminColumn getAdminColumn() {
-      return getColumnSet().getColumnByClass(AdminColumn.class);
     }
 
     public UserNameColumn getUserNameColumn() {
@@ -195,19 +193,6 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("LastName");
-      }
-
-      @Override
-      protected int getConfiguredWidth() {
-        return 100;
-      }
-    }
-
-    @Order(4000)
-    public class AdminColumn extends AbstractBooleanColumn {
-      @Override
-      protected String getConfiguredHeaderText() {
-        return TEXTS.get("Admin");
       }
 
       @Override

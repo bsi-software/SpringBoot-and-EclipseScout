@@ -43,6 +43,11 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
   }
 
   @Override
+  protected void execInitPage() {
+    setVisiblePermission(new ReadRolePermission());
+  }
+
+  @Override
   protected void execLoadData(SearchFilter filter) {
     Collection<Role> roles = roleService.getRoles();
     importTableRowData(roles);
@@ -129,11 +134,12 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        UUID roleId = getIdColumn().getSelectedValue();
+        String name = getNameColumn().getSelectedValue();
 
         RoleForm form = BEANS.get(RoleForm.class);
         form.addFormListener(new RoleFormListener());
-        form.setId(roleId);
+        form.getRoleNameField().setValue(name);
+        form.getRoleNameField().setEnabled(false);
         form.startModify();
       }
     }

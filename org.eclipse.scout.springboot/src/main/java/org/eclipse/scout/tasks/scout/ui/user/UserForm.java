@@ -1,7 +1,6 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.Collection;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -16,6 +15,7 @@ import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.scout.auth.AccessControlService;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.OkButton;
@@ -31,6 +31,9 @@ public class UserForm extends AbstractForm {
 
   @Inject
   private RoleService roleService;
+
+  @Inject
+  private AccessControlService accessControlService;
 
   @Inject
   private UserPictureProviderService userPictureService;
@@ -77,13 +80,18 @@ public class UserForm extends AbstractForm {
     public class UserBox extends AbstractUserBox {
 
       @Override
-      protected Collection<Role> execFindRoles() {
+      protected Collection<Role> execFindAllRoles() {
         return roleService.getRoles();
       }
 
       @Override
-      protected Role execFindRole(UUID id) {
-        return roleService.getRole(id);
+      protected Role execFindRole(String name) {
+        return roleService.getRole(name);
+      }
+
+      @Override
+      protected Collection<Role> execFindUserRoles() {
+        return userService.getUserRoles(getUserNameField().getValue());
       }
     }
 
@@ -100,7 +108,8 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      User user = userService.getUser(getUserBox().getUserNameField().getValue());
+      String userName = getUserBox().getUserNameField().getValue();
+      User user = userService.getUser(userName);
       importFormFieldData(user);
 
       setEnabledPermission(new UpdateUserPermission());
@@ -113,6 +122,8 @@ public class UserForm extends AbstractForm {
       User user = userService.getUser(getUserBox().getUserNameField().getValue());
       exportFormFieldData(user);
 
+      // TODO should not clear all cache and not cache of logged in user but cache of changed user
+      accessControlService.clearCache();
       userPictureService.addUserPicture(user.getName(), user.getPicture());
       userService.saveUser(user);
     }
@@ -137,14 +148,15 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      User user = userService.getUser(getUserBox().getUserNameField().getValue());
+      String userName = getUserBox().getUserNameField().getValue();
+      User user = userService.getUser(userName);
       if (user != null) {
         throw new VetoException(TEXTS.get("AccountAlreadyExists", user.getName()));
       }
 
       user = new User();
       exportFormFieldData(user);
-      userService.addUser(user);
+      userService.saveUser(user);
     }
 
     @Override

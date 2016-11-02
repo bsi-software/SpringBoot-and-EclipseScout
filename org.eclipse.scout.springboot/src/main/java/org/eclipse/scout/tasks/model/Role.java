@@ -1,6 +1,5 @@
 package org.eclipse.scout.tasks.model;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,11 +23,9 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = {"id"})
+@EqualsAndHashCode(of = {"name"})
 @ToString
 public class Role implements Persistable<UUID> {
-
-  public static final String ROLE_ROOT = "root";
 
   private static final long serialVersionUID = 1L;
 
@@ -41,7 +38,7 @@ public class Role implements Persistable<UUID> {
   private String name;
 
   @ElementCollection
-  private Set<String> permissions = new HashSet<>();
+  private Set<String> permissions;
 
   public void addPermission(String permission) {
     permissions.add(permission);

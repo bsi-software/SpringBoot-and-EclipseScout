@@ -28,14 +28,14 @@ import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.OkButton;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox;
+import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox.AcceptedField;
+import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox.DoneField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.CreatorField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.DescriptionField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.DueDateField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.ReminderField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.ResponsibleField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.TitleField;
-import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox.AcceptedField;
-import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox.DoneField;
 import org.eclipse.scout.tasks.scout.ui.user.UserLookupCall;
 import org.eclipse.scout.tasks.spring.service.TaskService;
 
@@ -295,7 +295,6 @@ public class TaskForm extends AbstractForm {
     protected void execStore() {
       Task task = taskService.getTask(getTaskId());
       exportFormFieldData(task);
-
       taskService.saveTask(task);
     }
 
@@ -324,8 +323,7 @@ public class TaskForm extends AbstractForm {
     protected void execStore() {
       Task task = new Task();
       exportFormFieldData(task);
-
-      taskService.addTask(task);
+      taskService.saveTask(task);
     }
 
     @Override
@@ -341,8 +339,14 @@ public class TaskForm extends AbstractForm {
     getDueDateField().setValue(new Date());
   }
 
+  /**
+   * Manual mapping of entity attributes to form fields.
+   *
+   * @param task
+   */
   private void importFormFieldData(Task task) {
     getTitleField().setValue(task.getName());
+
     getCreatorField().setValue(task.getCreator());
     getResponsibleField().setValue(task.getResponsible());
     getDueDateField().setValue(task.getDueDate());
@@ -353,8 +357,14 @@ public class TaskForm extends AbstractForm {
     getDescriptionField().setValue(task.getDescription());
   }
 
+  /**
+   * Manual mapping of form fields to entity attributes.
+   *
+   * @param task
+   */
   private void exportFormFieldData(Task task) {
     task.setName(getTitleField().getValue());
+
     task.setCreator(getCreatorField().getValue());
     task.setResponsible(getResponsibleField().getValue());
     task.setDueDate(getDueDateField().getValue());

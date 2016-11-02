@@ -20,7 +20,7 @@ public class TaskController {
 
   @RequestMapping(path = {"", "/"})
   public Collection<Task> showTasks() {
-    return taskService.getAllTasks();
+    return taskService.getTasks();
   }
 
   @RequestMapping("/{id}")

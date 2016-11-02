@@ -60,6 +60,11 @@ public class Desktop extends AbstractDesktop {
     }
 
     @Override
+    protected DisplayStyle getConfiguredDisplayStyle() {
+      return DisplayStyle.TAB;
+    }
+
+    @Override
     protected String getConfiguredKeyStroke() {
       return IKeyStroke.F2;
     }
@@ -77,21 +82,25 @@ public class Desktop extends AbstractDesktop {
     }
 
     @Override
+    protected void execInitAction() {
+      setVisiblePermission(new ViewAdminOutlinePermission());
+    }
+
+    @Override
+    protected String getConfiguredIconId() {
+      // get unicode http://fontawesome.io/icon/users/
+      return AdminOutline.OUTLINE_ICON;
+    }
+
+    @Override
     protected DisplayStyle getConfiguredDisplayStyle() {
       return DisplayStyle.TAB;
     }
 
     @Override
     protected String getConfiguredKeyStroke() {
-      return IKeyStroke.F10;
+      return IKeyStroke.F3;
     }
-
-    // TODO is there a display bug? having this method results in hiding the defined icon for this outline
-//    @Override
-//    protected void execInitAction() {
-//      User user = BEANS.get(ToDoListModel.class).loggedInUser();
-//      setVisible(user.roles.contains(ToDoListModel.ROLE_ADMIN));
-//    }
   }
 
   @Order(1000)

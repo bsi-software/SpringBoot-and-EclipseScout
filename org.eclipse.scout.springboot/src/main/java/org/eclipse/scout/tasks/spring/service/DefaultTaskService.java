@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.scout.rt.platform.util.Assertions;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
 import org.eclipse.scout.tasks.model.Task;
 import org.eclipse.scout.tasks.model.User;
@@ -21,28 +20,8 @@ public class DefaultTaskService implements TaskService {
   private TaskRepository taskRepository;
 
   @Override
-  public void addTask(Task task) {
-    if (task == null) {
-      return;
-    }
-
-    // make sure task is not already in list
-    if (taskRepository.exists(task.getId())) {
-      return;
-    }
-
-    taskRepository.save(task);
-  }
-
-  @Override
-  public void saveTask(Task task) {
-    Assertions.assertNotNull(task.getCreator(), "creator must be set");
-
-    taskRepository.save(task);
-  }
-
-  private List<Task> getUserTasks(User user) {
-    return taskRepository.findByResponsible(user);
+  public Collection<Task> getTasks() {
+    return taskRepository.findAll();
   }
 
   @Override
@@ -64,19 +43,6 @@ public class DefaultTaskService implements TaskService {
   }
 
   @Override
-  public Collection<Task> getOwnTasks(User user) {
-    List<Task> ownList = new ArrayList<>();
-
-    for (Task task : getUserTasks(user)) {
-      if (task.isAccepted()) {
-        ownList.add(task);
-      }
-    }
-
-    return ownList;
-  }
-
-  @Override
   public Collection<Task> getTodaysTasks(User user) {
     List<Task> todaysList = new ArrayList<>();
 
@@ -93,6 +59,28 @@ public class DefaultTaskService implements TaskService {
     return todaysList;
   }
 
+  @Override
+  public Collection<Task> getOwnTasks(User user) {
+    List<Task> ownList = new ArrayList<>();
+
+    for (Task task : getUserTasks(user)) {
+      if (task.isAccepted()) {
+        ownList.add(task);
+      }
+    }
+
+    return ownList;
+  }
+
+  @Override
+  public void saveTask(Task task) {
+    taskRepository.save(task);
+  }
+
+  private List<Task> getUserTasks(User user) {
+    return taskRepository.findByResponsible(user);
+  }
+
   private boolean isToday(Date date) {
     if (date == null) {
       return false;
@@ -100,10 +88,4 @@ public class DefaultTaskService implements TaskService {
 
     return DateUtility.isSameDay(new Date(), date);
   }
-
-  @Override
-  public Collection<Task> getAllTasks() {
-    return taskRepository.findAll();
-  }
-
 }

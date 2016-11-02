@@ -2,7 +2,9 @@ package org.eclipse.scout.tasks.scout.auth;
 
 import java.security.BasicPermission;
 import java.security.Permission;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.scout.rt.platform.Order;
@@ -16,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Class copied from scout.rt.server package.
- * <h3>{@link org.eclipse.scout.springboot.demo.scout.auth.services.common.security.PermissionService}</h3>
  */
 @Slf4j
 @Order(4900)
@@ -24,11 +25,21 @@ public class PermissionService implements IPermissionService {
 
   private final Object m_permissionClassesLock = new Object();
   private Set<Class<? extends Permission>> m_permissionClasses;
+  private Map<String, Permission> m_permissionMap = new HashMap<>();
 
   @Override
   public Set<Class<? extends Permission>> getAllPermissionClasses() {
     checkCache();
     return CollectionUtility.hashSet(m_permissionClasses);
+  }
+
+  public Set<String> getPermissionKeys() {
+    checkCache();
+    return m_permissionMap.keySet();
+  }
+
+  public Permission getPermission(String key) {
+    return m_permissionMap.get(key);
   }
 
   private void checkCache() {
@@ -43,9 +54,13 @@ public class PermissionService implements IPermissionService {
               @SuppressWarnings("unchecked")
               Class<? extends Permission> permClass = (Class<? extends Permission>) permInfo.resolveClass();
               discoveredPermissions.add(permClass);
+
+              String name = permClass.getSimpleName();
+              Permission permission = (Permission) Class.forName(permClass.getName()).newInstance();
+              m_permissionMap.put(name, permission);
             }
             catch (Exception e) {
-              log.error("Unable to load permission.", e);
+              log.warn("Unable to load permission: " + e.getLocalizedMessage());
             }
           }
         }
