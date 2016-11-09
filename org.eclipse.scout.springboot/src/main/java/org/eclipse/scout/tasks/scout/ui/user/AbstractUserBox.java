@@ -1,6 +1,7 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.scout.rt.client.ui.dnd.ResourceListTransferObject;
 import org.eclipse.scout.rt.client.ui.dnd.TransferObject;
@@ -17,6 +18,16 @@ import org.eclipse.scout.tasks.data.User;
 public abstract class AbstractUserBox extends AbstractGroupBox {
 
   public static final int PICTURE_MAX_FILE_SIZE = 300 * 1024;
+
+  private UUID userId;
+
+  public UUID getUserId() {
+    return userId;
+  }
+
+  public void setUserId(UUID userId) {
+    this.userId = userId;
+  }
 
   public PictureField getPictureField() {
     return getFieldByClass(PictureField.class);
@@ -80,6 +91,8 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
           // setImage(bi);
           setImage(resource.getContent());
           setImageId(resource.getFilename());
+
+          touch();
         }
       }
     }
@@ -158,11 +171,16 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
   }
 
   public void importFormFieldData(User user) {
-    getPictureField().setImage(user.getPicture());
-    getFirstNameField().setValue(user.getFirstName());
-    getLastNameField().setValue(user.getLastName());
     getUserNameField().parseAndSetValue(user.getName());
-    getPasswordField().setValue(user.getPassword());
+    getFirstNameField().parseAndSetValue(user.getFirstName());
+    getLastNameField().parseAndSetValue(user.getLastName());
+    getPasswordField().parseAndSetValue(user.getPassword());
+  }
+
+  public void importUserPicture(byte[] picture) {
+    if (picture != null) {
+      getPictureField().setImage(picture);
+    }
   }
 
   public void exportFormFieldData(User user) {
@@ -170,7 +188,13 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     user.setFirstName(getFirstNameField().getValue());
     user.setLastName(getLastNameField().getValue());
     user.setPassword(getPasswordField().getValue());
-    user.setPicture(getPictureField().getByteArrayValue());
+  }
+
+  public byte[] exportUserPicture() {
+    if (getPictureField().isSaveNeeded()) {
+      return getPictureField().getByteArrayValue();
+    }
+    return null;
   }
 
 }

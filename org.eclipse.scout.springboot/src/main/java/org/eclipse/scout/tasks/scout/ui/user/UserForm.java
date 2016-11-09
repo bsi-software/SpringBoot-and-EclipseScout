@@ -13,6 +13,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
+import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
@@ -26,16 +27,28 @@ import org.eclipse.scout.tasks.spring.service.UserService;
 public class UserForm extends AbstractForm {
 
   @Inject
-  private UserService userService;
+  protected UserService userService;
 
   @Inject
-  RoleService roleService;
+  protected RoleService roleService;
 
   @Inject
-  private UserPictureProviderService userPictureService;
+  protected UserPictureProviderService userPictureService;
+
+  public UUID getUserId() {
+    return getUserRoleBox().getUserId();
+  }
+
+  public void setUserId(UUID userId) {
+    getUserRoleBox().setUserId(userId);
+  }
 
   @Override
   public Object computeExclusiveKey() {
+    return getUserId();
+  }
+
+  protected String calculateSubTitle() {
     return getUserRoleBox().getUserNameField().getValue();
   }
 
@@ -89,9 +102,14 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      final User user = userService.getUser(getUserRoleBox().getUserNameField().getValue());
+      final User user = userService.getUser(getUserId());
       final Map<UUID, String> roles = roleService.getAllRoleNames();
       importFormFieldData(user, roles);
+
+      final BinaryResource picture = userPictureService.getUserPicture(user.getId());
+      if (picture != null) {
+        importUserPicture(picture.getContent());
+      }
 
       setEnabledPermission(new UpdateUserPermission());
       getUserRoleBox().getUserNameField().setEnabled(false);
@@ -100,11 +118,14 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      User user = userService.getUser(getUserRoleBox().getUserNameField().getValue());
+      final User user = userService.getUser(getUserId());
       exportFormFieldData(user);
-
-      userPictureService.addUserPicture(user.getName(), user.getPicture());
       userService.saveUser(user);
+
+      final byte[] picture = exportUserPicture();
+      if (picture != null) {
+        userPictureService.setUserPicture(user.getId(), picture);
+      }
     }
 
     @Override
@@ -127,7 +148,7 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      User user = userService.getUser(getUserRoleBox().getUserNameField().getValue());
+      User user = userService.getUser(getUserId());
       if (user != null) {
         throw new VetoException(TEXTS.get("AccountAlreadyExists", user.getName()));
       }
@@ -135,6 +156,11 @@ public class UserForm extends AbstractForm {
       user = new User();
       exportFormFieldData(user);
       userService.addUser(user);
+
+      final byte[] picture = exportUserPicture();
+      if (picture != null) {
+        userPictureService.setUserPicture(user.getId(), null);
+      }
     }
 
     @Override
@@ -143,15 +169,20 @@ public class UserForm extends AbstractForm {
     }
   }
 
-  private void importFormFieldData(User user, Map<UUID, String> roles) {
+  protected void importFormFieldData(User user, Map<UUID, String> roles) {
     getUserRoleBox().importFormFieldData(user, roles);
   }
 
-  private void exportFormFieldData(User user) {
+  protected void importUserPicture(byte[] picture) {
+    getUserRoleBox().importUserPicture(picture);
+  }
+
+  protected void exportFormFieldData(User user) {
     getUserRoleBox().exportFormFieldData(user);
   }
 
-  private String calculateSubTitle() {
-    return getUserRoleBox().getUserNameField().getValue();
+  protected byte[] exportUserPicture() {
+    return getUserRoleBox().exportUserPicture();
   }
+
 }

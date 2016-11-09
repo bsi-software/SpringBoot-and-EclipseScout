@@ -24,8 +24,6 @@ public class User implements Serializable {
 
   private String password;
 
-  private byte[] picture;
-
   private boolean active;
 
   private Set<UUID> roles = new HashSet<>();

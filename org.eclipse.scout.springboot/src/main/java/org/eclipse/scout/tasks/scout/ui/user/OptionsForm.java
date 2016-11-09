@@ -1,5 +1,7 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
@@ -8,6 +10,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
@@ -18,7 +21,23 @@ import org.eclipse.scout.tasks.spring.service.UserService;
 public class OptionsForm extends AbstractForm {
 
   @Inject
-  private UserService userService;
+  protected UserService userService;
+
+  @Inject
+  protected UserPictureProviderService userPictureService;
+
+  public OptionsForm() {
+    super();
+    setUserId(ClientSession.get().getUser().getId());
+  }
+
+  public UUID getUserId() {
+    return getUserBox().getUserId();
+  }
+
+  public void setUserId(UUID userId) {
+    getUserBox().setUserId(userId);
+  }
 
   public UserBox getUserBox() {
     return getFieldByClass(UserBox.class);
@@ -48,15 +67,6 @@ public class OptionsForm extends AbstractForm {
       protected String getConfiguredLabel() {
         return TEXTS.get("ApplyChanges");
       }
-
-      @Override
-      protected void execClickAction() {
-        String username = ClientSession.get().getUser().getName();
-        User user = userService.getUser(username);
-
-        getUserBox().exportFormFieldData(user);
-        userService.saveUser(user);
-      }
     }
   }
 
@@ -64,11 +74,43 @@ public class OptionsForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      String username = ClientSession.get().getUser().getName();
-      User user = userService.getUser(username);
+      final User user = userService.getUser(getUserId());
+      importFormFieldData(user);
 
-      getUserBox().importFormFieldData(user);
+      final BinaryResource picture = userPictureService.getUserPicture(user.getId());
+      if (picture != null) {
+        importUserPicture(picture.getContent());
+      }
+
       getUserBox().getUserNameField().setEnabled(false);
     }
+
+    @Override
+    protected void execStore() {
+      final User user = userService.getUser(getUserId());
+      exportFormFieldData(user);
+      userService.saveUser(user);
+
+      final byte[] picture = exportUserPicture();
+      if (picture != null) {
+        userPictureService.setUserPicture(user.getId(), picture);
+      }
+    }
+  }
+
+  protected void importFormFieldData(User user) {
+    getUserBox().importFormFieldData(user);
+  }
+
+  protected void importUserPicture(byte[] picture) {
+    getUserBox().importUserPicture(picture);
+  }
+
+  protected void exportFormFieldData(User user) {
+    getUserBox().exportFormFieldData(user);
+  }
+
+  protected byte[] exportUserPicture() {
+    return getUserBox().exportUserPicture();
   }
 }

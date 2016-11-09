@@ -4,7 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.Basic;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
@@ -46,6 +48,7 @@ public class UserEntity implements Persistable<UUID> {
   private String password;
 
   @Lob
+  @Basic(fetch = FetchType.LAZY)
   private byte[] picture;
 
   private boolean active;

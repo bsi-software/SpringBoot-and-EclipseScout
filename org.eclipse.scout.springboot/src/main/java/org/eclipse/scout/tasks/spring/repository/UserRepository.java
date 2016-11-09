@@ -21,7 +21,6 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
       userEntity.setFirstName(user.getFirstName());
       userEntity.setLastName(user.getLastName());
       userEntity.setPassword(user.getPassword());
-      userEntity.setPicture(user.getPicture());
     }
     return userEntity;
   }
@@ -33,7 +32,6 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     user.setFirstName(userEntity.getFirstName());
     user.setLastName(userEntity.getLastName());
     user.setPassword(userEntity.getPassword());
-    user.setPicture(userEntity.getPicture());
     user.setActive(userEntity.isActive());
     user.setRoles(userEntity.getRoles().stream()
         .map(r -> r.getId())

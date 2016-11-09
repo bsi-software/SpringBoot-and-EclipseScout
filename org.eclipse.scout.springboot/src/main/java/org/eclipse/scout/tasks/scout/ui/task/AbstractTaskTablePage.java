@@ -339,14 +339,14 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       @Override
       protected void execDecorateCell(Cell cell, ITableRow row) {
         if (getCreatorColumn().getValue(row) != null) {
-//          String resourceName = getCreatorColumn().getValue(row).getName();
-//          BinaryResource value = userPictureService.getBinaryResource(resourceName);
-
-          BinaryResource value = null;
-
+          final BinaryResource value = userPictureService.getUserPicture(getCreatorColumn().getValue(row));
           if (value != null) {
             addAttachment(value);
-            cell.setText(HTML.imgByBinaryResource(value.getFilename()).cssClass("usericon-html").toHtml());
+            cell.setText(
+                HTML
+                    .imgByBinaryResource(value.getFilename())
+                    .cssClass("usericon-html")
+                    .toHtml());
           }
         }
       }
