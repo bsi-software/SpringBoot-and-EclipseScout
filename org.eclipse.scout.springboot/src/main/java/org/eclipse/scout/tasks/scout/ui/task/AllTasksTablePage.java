@@ -5,7 +5,7 @@ import java.util.Collection;
 import javax.inject.Inject;
 
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.model.Task;
+import org.eclipse.scout.tasks.data.Task;
 import org.eclipse.scout.tasks.spring.service.TaskService;
 
 public class AllTasksTablePage extends AbstractTaskTablePage {
@@ -23,13 +23,8 @@ public class AllTasksTablePage extends AbstractTaskTablePage {
   }
 
   @Override
-  protected void execInitPage() {
-    setVisiblePermission(new ViewAllTasksPermission());
-  }
-
-  @Override
   protected Collection<Task> getTasks() {
-    return taskService.getTasks();
+    return taskService.getAllTasks();
   }
 
   @Override

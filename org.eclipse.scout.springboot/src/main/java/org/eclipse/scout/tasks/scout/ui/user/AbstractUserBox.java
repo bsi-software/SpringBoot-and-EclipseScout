@@ -1,50 +1,22 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
-import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
-import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.dnd.ResourceListTransferObject;
 import org.eclipse.scout.rt.client.ui.dnd.TransferObject;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.imagefield.AbstractImageField;
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
-import org.eclipse.scout.rt.client.ui.form.fields.tablefield.AbstractTableField;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.model.Role;
-import org.eclipse.scout.tasks.model.User;
-import org.eclipse.scout.tasks.scout.ui.user.AbstractUserBox.RoleTableField.Table;
+import org.eclipse.scout.tasks.data.User;
 
 public abstract class AbstractUserBox extends AbstractGroupBox {
 
   public static final int PICTURE_MAX_FILE_SIZE = 300 * 1024;
-
-  /**
-   * @return all available roles
-   */
-  protected abstract Collection<Role> execFindAllRoles();
-
-  /**
-   * @return all roles currently assigned to this user
-   */
-  protected abstract Collection<Role> execFindUserRoles();
-
-  /**
-   * @param name
-   * @return
-   */
-  protected abstract Role execFindRole(String name);
 
   public PictureField getPictureField() {
     return getFieldByClass(PictureField.class);
@@ -64,10 +36,6 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
 
   public PasswordField getPasswordField() {
     return getFieldByClass(PasswordField.class);
-  }
-
-  public RoleTableField getRoleTableField() {
-    return getFieldByClass(RoleTableField.class);
   }
 
   @Order(10)
@@ -189,111 +157,12 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     }
   }
 
-  @Order(70)
-  public class RoleTableField extends AbstractTableField<RoleTableField.Table> {
-
-    @Override
-    protected boolean getConfiguredLabelVisible() {
-      return false;
-    }
-
-    @Override
-    protected int getConfiguredGridW() {
-      return 2;
-    }
-
-    @Override
-    protected int getConfiguredGridH() {
-      return 4;
-    }
-
-    public class Table extends AbstractTable {
-
-      public AssignedColumn getAssignedColumn() {
-        return getColumnSet().getColumnByClass(AssignedColumn.class);
-      }
-
-      public NameColumn getNameColumn() {
-        return getColumnSet().getColumnByClass(NameColumn.class);
-      }
-
-      public IdColumn getIdColumn() {
-        return getColumnSet().getColumnByClass(IdColumn.class);
-      }
-
-      @Order(10)
-      public class IdColumn extends AbstractColumn<UUID> {
-
-        @Override
-        protected boolean getConfiguredDisplayable() {
-          return false;
-        }
-
-        @Override
-        protected boolean getConfiguredPrimaryKey() {
-          return true;
-        }
-      }
-
-      @Order(20)
-      public class NameColumn extends AbstractStringColumn {
-        @Override
-        protected String getConfiguredHeaderText() {
-          return TEXTS.get("Name");
-        }
-
-        @Override
-        protected int getConfiguredWidth() {
-          return 200;
-        }
-      }
-
-      @Order(30)
-      public class AssignedColumn extends AbstractBooleanColumn {
-        @Override
-        protected String getConfiguredHeaderText() {
-          return TEXTS.get("Assigned");
-        }
-
-        @Override
-        protected int getConfiguredWidth() {
-          return 50;
-        }
-
-        @Override
-        protected boolean getConfiguredEditable() {
-          return true;
-        }
-      }
-    }
-  }
-
   public void importFormFieldData(User user) {
     getPictureField().setImage(user.getPicture());
     getFirstNameField().setValue(user.getFirstName());
     getLastNameField().setValue(user.getLastName());
     getUserNameField().parseAndSetValue(user.getName());
     getPasswordField().setValue(user.getPassword());
-
-    importUserRoles(user);
-  }
-
-  private void importUserRoles(User user) {
-    Collection<Role> userRoles = execFindUserRoles();
-    Collection<Role> allRoles = execFindAllRoles();
-
-    for (Role role : allRoles) {
-      UUID rId = role.getId();
-      String rN = role.getName();
-      String rName = TEXTS.getWithFallback(rN, rN);
-
-      Table table = getRoleTableField().getTable();
-      ITableRow row = table.addRow();
-
-      table.getIdColumn().setValue(row, rId);
-      table.getNameColumn().setValue(row, rName);
-      table.getAssignedColumn().setValue(row, userRoles.contains(role));
-    }
   }
 
   public void exportFormFieldData(User user) {
@@ -302,23 +171,6 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     user.setLastName(getLastNameField().getValue());
     user.setPassword(getPasswordField().getValue());
     user.setPicture(getPictureField().getByteArrayValue());
-
-    exportUserRoles(user);
   }
 
-  private void exportUserRoles(User user) {
-    Set<Role> roles = new HashSet<>();
-    Table table = getRoleTableField().getTable();
-    for (ITableRow row : table.getRows()) {
-
-      String role = table.getNameColumn().getValue(row);
-      boolean hasRole = table.getAssignedColumn().getValue(row);
-
-      if (hasRole) {
-        roles.add(execFindRole(role));
-      }
-    }
-
-    user.setRoles(roles);
-  }
 }

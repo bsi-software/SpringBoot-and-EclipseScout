@@ -1,10 +1,8 @@
 package org.eclipse.scout.tasks.spring.service;
 
 import java.util.List;
-import java.util.Set;
 
-import org.eclipse.scout.tasks.model.Role;
-import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.data.User;
 
 public interface UserService {
 
@@ -12,7 +10,7 @@ public interface UserService {
 
   User getUser(String userName);
 
-  Set<Role> getUserRoles(String userName);
+  void addUser(User user);
 
   void saveUser(User user);
 }

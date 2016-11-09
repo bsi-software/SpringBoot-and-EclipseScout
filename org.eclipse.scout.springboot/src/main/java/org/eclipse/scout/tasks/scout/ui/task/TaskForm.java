@@ -20,8 +20,8 @@ import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.eclipse.scout.tasks.model.Task;
-import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.data.Task;
+import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.CancelButton;
@@ -155,7 +155,7 @@ public class TaskForm extends AbstractForm {
       }
 
       @Order(2000)
-      public class ResponsibleField extends AbstractSmartField<User> {
+      public class ResponsibleField extends AbstractSmartField<UUID> {
         @Override
         protected String getConfiguredLabel() {
           return TEXTS.get("Responsible");
@@ -167,7 +167,7 @@ public class TaskForm extends AbstractForm {
         }
 
         @Override
-        protected Class<? extends ILookupCall<User>> getConfiguredLookupCall() {
+        protected Class<? extends ILookupCall<UUID>> getConfiguredLookupCall() {
           return UserLookupCall.class;
         }
 
@@ -178,7 +178,7 @@ public class TaskForm extends AbstractForm {
       }
 
       @Order(2000)
-      public class CreatorField extends AbstractSmartField<User> {
+      public class CreatorField extends AbstractSmartField<UUID> {
         @Override
         protected String getConfiguredLabel() {
           return TEXTS.get("Creator");
@@ -190,7 +190,7 @@ public class TaskForm extends AbstractForm {
         }
 
         @Override
-        protected Class<? extends ILookupCall<User>> getConfiguredLookupCall() {
+        protected Class<? extends ILookupCall<UUID>> getConfiguredLookupCall() {
           return UserLookupCall.class;
         }
       }
@@ -295,6 +295,7 @@ public class TaskForm extends AbstractForm {
     protected void execStore() {
       Task task = taskService.getTask(getTaskId());
       exportFormFieldData(task);
+
       taskService.saveTask(task);
     }
 
@@ -323,7 +324,8 @@ public class TaskForm extends AbstractForm {
     protected void execStore() {
       Task task = new Task();
       exportFormFieldData(task);
-      taskService.saveTask(task);
+
+      taskService.addTask(task);
     }
 
     @Override
@@ -333,20 +335,14 @@ public class TaskForm extends AbstractForm {
   }
 
   private void setDefaultFieldValues(User user) {
-    getCreatorField().setValue(user);
-    getResponsibleField().setValue(user);
+    getCreatorField().setValue(user.getId());
+    getResponsibleField().setValue(user.getId());
     getAcceptedField().setValue(true);
     getDueDateField().setValue(new Date());
   }
 
-  /**
-   * Manual mapping of entity attributes to form fields.
-   *
-   * @param task
-   */
   private void importFormFieldData(Task task) {
     getTitleField().setValue(task.getName());
-
     getCreatorField().setValue(task.getCreator());
     getResponsibleField().setValue(task.getResponsible());
     getDueDateField().setValue(task.getDueDate());
@@ -357,14 +353,8 @@ public class TaskForm extends AbstractForm {
     getDescriptionField().setValue(task.getDescription());
   }
 
-  /**
-   * Manual mapping of form fields to entity attributes.
-   *
-   * @param task
-   */
   private void exportFormFieldData(Task task) {
     task.setName(getTitleField().getValue());
-
     task.setCreator(getCreatorField().getValue());
     task.setResponsible(getResponsibleField().getValue());
     task.setDueDate(getDueDateField().getValue());

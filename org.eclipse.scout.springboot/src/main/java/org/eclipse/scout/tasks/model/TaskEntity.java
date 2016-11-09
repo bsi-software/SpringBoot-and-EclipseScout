@@ -1,11 +1,11 @@
 package org.eclipse.scout.tasks.model;
 
-import java.util.Set;
+import java.util.Date;
 import java.util.UUID;
 
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.domain.Persistable;
@@ -23,10 +23,9 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = {"name"})
+@EqualsAndHashCode(of = {"id"})
 @ToString
-public class Role implements Persistable<UUID> {
-
+public class TaskEntity implements Persistable<UUID> {
   private static final long serialVersionUID = 1L;
 
   @Id
@@ -36,20 +35,26 @@ public class Role implements Persistable<UUID> {
 
   @NonNull
   private String name;
+  private String description;
 
-  @ElementCollection
-  private Set<String> permissions;
+  @OneToOne
+  @NonNull
+  private UserEntity creator;
 
-  public void addPermission(String permission) {
-    permissions.add(permission);
-  }
+  @OneToOne
+  @NonNull
+  private UserEntity responsible;
 
-  public void removePermission(String permission) {
-    permissions.remove(permission);
-  }
+  @NonNull
+  private Date dueDate;
+  private Date reminder;
+
+  private boolean accepted;
+  private boolean done;
 
   @Override
   public boolean isNew() {
     return getId() == null;
   }
+
 }

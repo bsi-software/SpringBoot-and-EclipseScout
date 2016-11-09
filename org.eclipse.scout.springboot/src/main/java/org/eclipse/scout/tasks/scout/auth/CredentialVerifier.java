@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.eclipse.scout.rt.platform.security.ICredentialVerifier;
 import org.eclipse.scout.rt.platform.util.StringUtility;
-import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.spring.service.UserService;
 
 public class CredentialVerifier implements ICredentialVerifier {
@@ -20,7 +20,7 @@ public class CredentialVerifier implements ICredentialVerifier {
       return AUTH_CREDENTIALS_REQUIRED;
     }
 
-    User user = userService.getUser(username);
+    final User user = userService.getUser(username);
     if (user == null || !user.getPassword().equals(String.valueOf(passwordPlainText))) {
       return AUTH_FORBIDDEN;
     }

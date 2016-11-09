@@ -1,6 +1,7 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
-import java.util.Collection;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -13,13 +14,11 @@ import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.model.Role;
-import org.eclipse.scout.tasks.model.User;
-import org.eclipse.scout.tasks.scout.auth.AccessControlService;
+import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.OkButton;
-import org.eclipse.scout.tasks.scout.ui.user.UserForm.MainBox.UserBox;
+import org.eclipse.scout.tasks.scout.ui.user.UserForm.MainBox.UserRoleBox;
 import org.eclipse.scout.tasks.spring.service.RoleService;
 import org.eclipse.scout.tasks.spring.service.UserService;
 
@@ -30,17 +29,14 @@ public class UserForm extends AbstractForm {
   private UserService userService;
 
   @Inject
-  private RoleService roleService;
-
-  @Inject
-  private AccessControlService accessControlService;
+  RoleService roleService;
 
   @Inject
   private UserPictureProviderService userPictureService;
 
   @Override
   public Object computeExclusiveKey() {
-    return getUserBox().getUserNameField().getValue();
+    return getUserRoleBox().getUserNameField().getValue();
   }
 
   @Override
@@ -65,8 +61,8 @@ public class UserForm extends AbstractForm {
     return getFieldByClass(CancelButton.class);
   }
 
-  public UserBox getUserBox() {
-    return getFieldByClass(UserBox.class);
+  public UserRoleBox getUserRoleBox() {
+    return getFieldByClass(UserRoleBox.class);
   }
 
   public OkButton getOkButton() {
@@ -77,22 +73,7 @@ public class UserForm extends AbstractForm {
   public class MainBox extends AbstractGroupBox {
 
     @Order(1000)
-    public class UserBox extends AbstractUserBox {
-
-      @Override
-      protected Collection<Role> execFindAllRoles() {
-        return roleService.getRoles();
-      }
-
-      @Override
-      protected Role execFindRole(String name) {
-        return roleService.getRole(name);
-      }
-
-      @Override
-      protected Collection<Role> execFindUserRoles() {
-        return userService.getUserRoles(getUserNameField().getValue());
-      }
+    public class UserRoleBox extends AbstractUserRoleBox {
     }
 
     @Order(100000)
@@ -108,22 +89,20 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      String userName = getUserBox().getUserNameField().getValue();
-      User user = userService.getUser(userName);
-      importFormFieldData(user);
+      final User user = userService.getUser(getUserRoleBox().getUserNameField().getValue());
+      final Map<UUID, String> roles = roleService.getAllRoleNames();
+      importFormFieldData(user, roles);
 
       setEnabledPermission(new UpdateUserPermission());
-      getUserBox().getUserNameField().setEnabled(false);
+      getUserRoleBox().getUserNameField().setEnabled(false);
       getForm().setSubTitle(calculateSubTitle());
     }
 
     @Override
     protected void execStore() {
-      User user = userService.getUser(getUserBox().getUserNameField().getValue());
+      User user = userService.getUser(getUserRoleBox().getUserNameField().getValue());
       exportFormFieldData(user);
 
-      // TODO should not clear all cache and not cache of logged in user but cache of changed user
-      accessControlService.clearCache();
       userPictureService.addUserPicture(user.getName(), user.getPicture());
       userService.saveUser(user);
     }
@@ -148,15 +127,14 @@ public class UserForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      String userName = getUserBox().getUserNameField().getValue();
-      User user = userService.getUser(userName);
+      User user = userService.getUser(getUserRoleBox().getUserNameField().getValue());
       if (user != null) {
         throw new VetoException(TEXTS.get("AccountAlreadyExists", user.getName()));
       }
 
       user = new User();
       exportFormFieldData(user);
-      userService.saveUser(user);
+      userService.addUser(user);
     }
 
     @Override
@@ -165,15 +143,15 @@ public class UserForm extends AbstractForm {
     }
   }
 
-  private void importFormFieldData(User user) {
-    getUserBox().importFormFieldData(user);
+  private void importFormFieldData(User user, Map<UUID, String> roles) {
+    getUserRoleBox().importFormFieldData(user, roles);
   }
 
   private void exportFormFieldData(User user) {
-    getUserBox().exportFormFieldData(user);
+    getUserRoleBox().exportFormFieldData(user);
   }
 
   private String calculateSubTitle() {
-    return getUserBox().getUserNameField().getValue();
+    return getUserRoleBox().getUserNameField().getValue();
   }
 }

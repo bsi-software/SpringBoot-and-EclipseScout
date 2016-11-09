@@ -10,6 +10,7 @@ import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
@@ -20,7 +21,7 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.user.UserTablePage.Table;
 import org.eclipse.scout.tasks.spring.service.UserService;
 
@@ -38,11 +39,6 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
   @Override
   protected boolean getConfiguredLeaf() {
     return true;
-  }
-
-  @Override
-  protected void execInitPage() {
-    setVisiblePermission(new ReadUserPermission());
   }
 
   @Override
@@ -65,6 +61,8 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       table.getUserNameColumn().setValue(row, user.getName());
       table.getFirstNameColumn().setValue(row, user.getFirstName());
       table.getLastNameColumn().setValue(row, user.getLastName());
+      // TODO fix bug below to show if user has root privileges and/or decide to hard wire root in code
+// table.getAdminColumn().setValue(row, isRoot(user));
       table.addRow(row);
     }
   }
@@ -125,11 +123,11 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        String userName = getUserNameColumn().getSelectedValue();
+        String userName = (String) getSelectedRow().getKeyValues().get(0);
 
         UserForm form = BEANS.get(UserForm.class);
         form.addFormListener(new UserFormListener());
-        form.getUserBox().getUserNameField().setValue(userName);
+        form.getUserRoleBox().getUserNameField().setValue(userName);
         form.startModify();
       }
     }
@@ -147,6 +145,10 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
     public FirstNameColumn getFirstNameColumn() {
       return getColumnSet().getColumnByClass(FirstNameColumn.class);
+    }
+
+    public AdminColumn getAdminColumn() {
+      return getColumnSet().getColumnByClass(AdminColumn.class);
     }
 
     public UserNameColumn getUserNameColumn() {
@@ -193,6 +195,19 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("LastName");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
+      }
+    }
+
+    @Order(4000)
+    public class AdminColumn extends AbstractBooleanColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("Admin");
       }
 
       @Override

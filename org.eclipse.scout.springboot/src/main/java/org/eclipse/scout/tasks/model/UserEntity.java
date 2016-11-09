@@ -1,5 +1,6 @@
 package org.eclipse.scout.tasks.model;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -8,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 
-import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.hibernate.annotations.Type;
 import org.springframework.data.domain.Persistable;
 
@@ -27,8 +27,7 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @ToString(of = {"firstName", "lastName"})
-public class User implements Persistable<UUID> {
-
+public class UserEntity implements Persistable<UUID> {
   private static final long serialVersionUID = 1L;
 
   @Id
@@ -41,7 +40,6 @@ public class User implements Persistable<UUID> {
 
   @NonNull
   private String firstName;
-
   private String lastName;
 
   @NonNull
@@ -53,14 +51,11 @@ public class User implements Persistable<UUID> {
   private boolean active;
 
   @ManyToMany
-  private Set<Role> roles;
+  private Set<RoleEntity> roles = new HashSet<>();
 
   @Override
   public boolean isNew() {
     return getId() == null;
   }
 
-  public String toDisplayText() {
-    return StringUtility.join(" ", firstName, lastName);
-  }
 }

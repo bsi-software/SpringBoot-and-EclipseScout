@@ -1,7 +1,7 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.security.Permission;
+import java.util.Collection;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -21,9 +21,8 @@ import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.model.Role;
-import org.eclipse.scout.tasks.scout.auth.AccessControlService;
-import org.eclipse.scout.tasks.scout.auth.PermissionService;
+import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
+import org.eclipse.scout.tasks.data.Role;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.OkButton;
@@ -39,17 +38,14 @@ public class RoleForm extends AbstractForm {
   @Inject
   private RoleService roleService;
 
-  @Inject
-  private AccessControlService accessControlService;
+  private UUID id;
 
-  private UUID roleId;
-
-  public UUID getRoleId() {
-    return roleId;
+  public UUID getId() {
+    return id;
   }
 
-  public void setRoleId(UUID roleId) {
-    this.roleId = roleId;
+  public void setId(UUID id) {
+    this.id = id;
   }
 
   @Override
@@ -134,23 +130,6 @@ public class RoleForm extends AbstractForm {
 
         public class Table extends AbstractTable {
 
-          @Override
-          protected void execInitTable() {
-            Set<String> pKeys = BEANS.get(PermissionService.class).getPermissionKeys();
-            Table table = getTable();
-
-            if (isRoot()) {
-              table.getAssignedColumn().setEditable(false);
-            }
-
-            for (String pKey : pKeys) {
-              ITableRow row = table.addRow();
-
-              table.getNameColumn().setValue(row, TEXTS.getWithFallback(pKey, pKey));
-              table.getAssignedColumn().setValue(row, false);
-            }
-          }
-
           public AssignedColumn getAssignedColumn() {
             return getColumnSet().getColumnByClass(AssignedColumn.class);
           }
@@ -159,7 +138,24 @@ public class RoleForm extends AbstractForm {
             return getColumnSet().getColumnByClass(NameColumn.class);
           }
 
+          public IdColumn getIdColumn() {
+            return getColumnSet().getColumnByClass(IdColumn.class);
+          }
+
           @Order(1000)
+          public class IdColumn extends AbstractStringColumn {
+            @Override
+            protected boolean getConfiguredDisplayable() {
+              return false;
+            }
+
+            @Override
+            protected boolean getConfiguredPrimaryKey() {
+              return true;
+            }
+          }
+
+          @Order(2000)
           public class NameColumn extends AbstractStringColumn {
             @Override
             protected String getConfiguredHeaderText() {
@@ -170,19 +166,9 @@ public class RoleForm extends AbstractForm {
             protected int getConfiguredWidth() {
               return 250;
             }
-
-            @Override
-            protected boolean getConfiguredPrimaryKey() {
-              return true;
-            }
-
-            @Override
-            protected boolean getConfiguredSortAscending() {
-              return true;
-            }
           }
 
-          @Order(2000)
+          @Order(3000)
           public class AssignedColumn extends AbstractBooleanColumn {
             @Override
             protected String getConfiguredHeaderText() {
@@ -216,10 +202,10 @@ public class RoleForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      setEnabledPermission(new UpdateRolePermission());
+      setEnabledPermission(new UpdateUserPermission());
 
-      String name = getRoleNameField().getValue();
-      Role role = roleService.getRole(name);
+      Role role = roleService.getRole(getId());
+      // TODO comment in once lazy loading is fixed
       importFormFieldData(role);
 
       setSubTitle(calculateSubTitle());
@@ -227,10 +213,9 @@ public class RoleForm extends AbstractForm {
 
     @Override
     protected void execStore() {
-      String roleName = getRoleNameField().getValue();
-      Role role = roleService.getRole(roleName);
+      Role role = roleService.getRole(getId());
       exportFormFieldData(role);
-      accessControlService.clearCacheOfCurrentUser();
+
       roleService.saveRole(role);
     }
 
@@ -249,14 +234,15 @@ public class RoleForm extends AbstractForm {
 
     @Override
     protected void execLoad() {
-      setEnabledPermission(new CreateRolePermission());
+      setEnabledPermission(new CreateUserPermission());
     }
 
     @Override
     protected void execStore() {
-      Role role = new Role();
+      Role role = new Role("");
       exportFormFieldData(role);
-      roleService.saveRole(role);
+
+      roleService.addRole(role);
     }
 
     @Override
@@ -266,56 +252,43 @@ public class RoleForm extends AbstractForm {
   }
 
   private void importFormFieldData(Role role) {
-    Set<String> rolePermissions = roleService.getRolePermissions(role.getName());
-    Table table = getPermissionTableField().getTable();
+    getRoleNameField().setValue(role.getName());
 
-    // special case for root role
-    if (isRoot()) {
-      getRoleNameField().setEnabled(false);
-      table.getAssignedColumn().setEditable(false);
-    }
+    final Table table = getPermissionTableField().getTable();
+    getPermissions().stream().forEach(permission -> {
+      final ITableRow row = table.createRow();
 
-    // fill assigned column in permission table field
-    for (ITableRow row : table.getRows()) {
-      String permission = table.getNameColumn().getValue(row);
+      String pId = permission.getName();
+      String pName = TEXTS.getWithFallback(pId, pId);
 
-      if (isRoot()) {
+      table.getIdColumn().setValue(row, pId);
+      table.getNameColumn().setValue(row, pName);
+
+      if (role.getPermissions().contains(permission.getName())) {
         table.getAssignedColumn().setValue(row, true);
       }
-      else {
-        table.getAssignedColumn().setValue(row, rolePermissions.contains(permission));
-      }
-    }
+      table.addRow(row);
+    });
+  }
+
+  protected Collection<Class<? extends Permission>> getPermissions() {
+    return BEANS.get(IPermissionService.class).getAllPermissionClasses();
   }
 
   private void exportFormFieldData(Role role) {
     role.setName(getRoleNameField().getValue());
 
-    Set<String> permissions = new HashSet<>();
     Table table = getPermissionTableField().getTable();
     for (ITableRow row : table.getRows()) {
-      String permission = table.getNameColumn().getValue(row);
+      String permission = table.getIdColumn().getValue(row);
       boolean assigned = table.getAssignedColumn().getValue(row);
 
       if (assigned) {
-        permissions.add(permission);
+        role.getPermissions().add(permission);
       }
       else {
-        permissions.remove(permission);
+        role.getPermissions().remove(permission);
       }
-    }
-
-    role.setPermissions(permissions);
-  }
-
-  private boolean isRoot() {
-    String name = getRoleNameField().getValue();
-
-    if (name == null) {
-      return false;
-    }
-    else {
-      return name.equals(RoleService.ROOT);
     }
   }
 
