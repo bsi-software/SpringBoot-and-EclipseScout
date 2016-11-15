@@ -22,7 +22,7 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tasks.model.Role;
+import org.eclipse.scout.tasks.data.Role;
 import org.eclipse.scout.tasks.scout.ui.user.RoleTablePage.Table;
 import org.eclipse.scout.tasks.spring.service.RoleService;
 
@@ -40,11 +40,6 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
   @Override
   protected boolean getConfiguredLeaf() {
     return true;
-  }
-
-  @Override
-  protected void execInitPage() {
-    setVisiblePermission(new ReadRolePermission());
   }
 
   @Override
@@ -134,12 +129,11 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        String name = getNameColumn().getSelectedValue();
+        UUID roleId = getIdColumn().getSelectedValue();
 
         RoleForm form = BEANS.get(RoleForm.class);
         form.addFormListener(new RoleFormListener());
-        form.getRoleNameField().setValue(name);
-        form.getRoleNameField().setEnabled(false);
+        form.setId(roleId);
         form.startModify();
       }
     }

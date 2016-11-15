@@ -2,6 +2,7 @@ package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -10,6 +11,8 @@ import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
@@ -20,7 +23,7 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.user.UserTablePage.Table;
 import org.eclipse.scout.tasks.spring.service.UserService;
 
@@ -41,11 +44,6 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
   }
 
   @Override
-  protected void execInitPage() {
-    setVisiblePermission(new ReadUserPermission());
-  }
-
-  @Override
   protected void execLoadData(SearchFilter filter) {
     Collection<User> users = userService.getUsers();
     importTableRowData(users);
@@ -62,9 +60,12 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
     for (User user : users) {
       ITableRow row = table.createRow();
+      table.getUserIdColumn().setValue(row, user.getId());
       table.getUserNameColumn().setValue(row, user.getName());
       table.getFirstNameColumn().setValue(row, user.getFirstName());
       table.getLastNameColumn().setValue(row, user.getLastName());
+      // TODO fix bug below to show if user has root privileges and/or decide to hard wire root in code
+      // table.getAdminColumn().setValue(row, isRoot(user));
       table.addRow(row);
     }
   }
@@ -74,6 +75,92 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
     @Override
     protected void execRowAction(ITableRow row) {
       getMenuByClass(EditMenu.class).execAction();
+    }
+
+    public UserIdColumn getUserIdColumn() {
+      return getColumnSet().getColumnByClass(UserIdColumn.class);
+    }
+
+    public FirstNameColumn getFirstNameColumn() {
+      return getColumnSet().getColumnByClass(FirstNameColumn.class);
+    }
+
+    public AdminColumn getAdminColumn() {
+      return getColumnSet().getColumnByClass(AdminColumn.class);
+    }
+
+    public UserNameColumn getUserNameColumn() {
+      return getColumnSet().getColumnByClass(UserNameColumn.class);
+    }
+
+    public LastNameColumn getLastNameColumn() {
+      return getColumnSet().getColumnByClass(LastNameColumn.class);
+    }
+
+    @Order(-1000)
+    public class UserIdColumn extends AbstractColumn<UUID> {
+
+      @Override
+      protected boolean getConfiguredPrimaryKey() {
+        return true;
+      }
+
+      @Override
+      protected boolean getConfiguredVisible() {
+        return false;
+      }
+    }
+
+    @Order(1000)
+    public class UserNameColumn extends AbstractStringColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("UserName");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
+      }
+    }
+
+    @Order(2000)
+    public class FirstNameColumn extends AbstractStringColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("FirstName");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
+      }
+    }
+
+    @Order(3000)
+    public class LastNameColumn extends AbstractStringColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("LastName");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
+      }
+    }
+
+    @Order(4000)
+    public class AdminColumn extends AbstractBooleanColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("Admin");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
+      }
     }
 
     @Order(1000)
@@ -125,16 +212,14 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        String userName = getUserNameColumn().getSelectedValue();
-
         UserForm form = BEANS.get(UserForm.class);
         form.addFormListener(new UserFormListener());
-        form.getUserBox().getUserNameField().setValue(userName);
+        form.setUserId(getTable().getUserIdColumn().getSelectedValue());
         form.startModify();
       }
     }
 
-    private class UserFormListener implements FormListener {
+    protected class UserFormListener implements FormListener {
 
       @Override
       public void formChanged(FormEvent e) {
@@ -142,62 +227,6 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
         if (FormEvent.TYPE_CLOSED == e.getType() && e.getForm().isFormStored()) {
           reloadPage();
         }
-      }
-    }
-
-    public FirstNameColumn getFirstNameColumn() {
-      return getColumnSet().getColumnByClass(FirstNameColumn.class);
-    }
-
-    public UserNameColumn getUserNameColumn() {
-      return getColumnSet().getColumnByClass(UserNameColumn.class);
-    }
-
-    public LastNameColumn getLastNameColumn() {
-      return getColumnSet().getColumnByClass(LastNameColumn.class);
-    }
-
-    @Order(1000)
-    public class UserNameColumn extends AbstractStringColumn {
-      @Override
-      protected String getConfiguredHeaderText() {
-        return TEXTS.get("UserName");
-      }
-
-      @Override
-      protected boolean getConfiguredPrimaryKey() {
-        return true;
-      }
-
-      @Override
-      protected int getConfiguredWidth() {
-        return 100;
-      }
-    }
-
-    @Order(2000)
-    public class FirstNameColumn extends AbstractStringColumn {
-      @Override
-      protected String getConfiguredHeaderText() {
-        return TEXTS.get("FirstName");
-      }
-
-      @Override
-      protected int getConfiguredWidth() {
-        return 100;
-      }
-    }
-
-    @Order(3000)
-    public class LastNameColumn extends AbstractStringColumn {
-      @Override
-      protected String getConfiguredHeaderText() {
-        return TEXTS.get("LastName");
-      }
-
-      @Override
-      protected int getConfiguredWidth() {
-        return 100;
       }
     }
   }

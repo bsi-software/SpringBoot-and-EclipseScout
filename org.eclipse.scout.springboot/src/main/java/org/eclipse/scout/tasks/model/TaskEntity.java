@@ -18,17 +18,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-// this is a jpa entity
 @Entity
-// lombok annotations
 @Getter
 @Setter
 @NoArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @ToString
-public class Task implements Persistable<UUID> {
-
+public class TaskEntity implements Persistable<UUID> {
   private static final long serialVersionUID = 1L;
 
   @Id
@@ -38,25 +35,26 @@ public class Task implements Persistable<UUID> {
 
   @NonNull
   private String name;
+  private String description;
 
   @OneToOne
   @NonNull
-  private User creator;
+  private UserEntity creator;
 
   @OneToOne
   @NonNull
-  private User responsible;
+  private UserEntity responsible;
 
   @NonNull
   private Date dueDate;
-
   private Date reminder;
+
   private boolean accepted;
   private boolean done;
-  private String description;
 
   @Override
   public boolean isNew() {
     return getId() == null;
   }
+
 }

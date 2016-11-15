@@ -6,14 +6,22 @@ import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfigura
 import org.springframework.context.annotation.Import;
 
 /**
- * Spring Boot start class.
+ * Spring Boot start class
  */
 @SpringBootApplication(exclude = DispatcherServletAutoConfiguration.class)
 @Import({ScoutServletConfig.class, WebMvcConfig.class})
 public class Application {
 
   public static void main(final String[] args) {
+    applySystemProperties();
     SpringApplication.run(Application.class, args);
+  }
+
+  /**
+   * Apply system properties that have to bet set before the boot application starts
+   */
+  protected static void applySystemProperties() {
+    System.setProperty("spring.devtools.restart.enabled", "true");
   }
 
 }

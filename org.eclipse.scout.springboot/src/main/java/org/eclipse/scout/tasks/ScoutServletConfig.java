@@ -1,13 +1,7 @@
 package org.eclipse.scout.tasks;
 
-import java.io.IOException;
-
 import javax.servlet.DispatcherType;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.scout.rt.platform.BEANS;
@@ -23,9 +17,7 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.DispatcherServlet;
 
 @Configuration
 public class ScoutServletConfig {
@@ -46,7 +38,7 @@ public class ScoutServletConfig {
 
   @Bean
   public ServletRegistrationBean dispatcherRegistration(WebApplicationContext webApplicationContext) {
-    return new ServletRegistrationBean(new DispatcherServletEx(webApplicationContext), CONTEXT_PATH);
+    return new ServletRegistrationBean(new UiServlet(), CONTEXT_PATH);
   }
 
   @Bean
@@ -70,46 +62,4 @@ public class ScoutServletConfig {
     return reg;
   }
 
-  @Bean
-  public FilterRegistrationBean openEntityManagerInViewFilter() {
-    final FilterRegistrationBean reg = new FilterRegistrationBean();
-    reg.setFilter(new OpenEntityManagerInViewFilter());
-    reg.addUrlPatterns(CONTEXT_PATH);
-    reg.addInitParameter("filter-exclude", "/res/*, " + SERVICES_PATH + "/*, " + CONSOLE_PATH + "/*");
-    reg.setName("authFilter");
-    reg.setDispatcherTypes(DispatcherType.REQUEST); // apply this filter only for requests, but not for forwards or redirects.
-    return reg;
-  }
-
-  //TODO [Patrick Baumgartner] Remove this dispatcher servlet.
-  //                           Implement via Spring request handler (adapter) and not by extending the Spring DispatcherServlet
-  public static class DispatcherServletEx extends DispatcherServlet {
-
-    private static final long serialVersionUID = 1L;
-
-    private final UiServlet uiServlet = new UiServlet();
-
-    public DispatcherServletEx(final WebApplicationContext webApplicationContext) {
-      super(webApplicationContext);
-    }
-
-    @Override
-    public void init(final ServletConfig config) throws ServletException {
-      super.init(config);
-      uiServlet.init(config);
-    }
-
-    @Override
-    protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
-      if (request.getRequestURI().startsWith(SERVICES_PATH)) {
-        super.service(request, response);
-      }
-      else if (request.getRequestURI().startsWith(CONSOLE_PATH)) {
-        super.service(request, response);
-      }
-      else {
-        uiServlet.service(request, response);
-      }
-    }
-  }
 }

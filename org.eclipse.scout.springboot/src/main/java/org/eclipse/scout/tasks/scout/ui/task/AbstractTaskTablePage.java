@@ -33,8 +33,8 @@ import org.eclipse.scout.rt.platform.util.date.DateUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.eclipse.scout.tasks.model.Task;
-import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.data.Task;
+import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.task.AbstractTaskTablePage.Table;
 import org.eclipse.scout.tasks.scout.ui.user.UserLookupCall;
@@ -73,11 +73,6 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     importTableRowData(tasks);
   }
 
-  /**
-   * Manual mapping of entity attributes to table columns.
-   *
-   * @param tasks
-   */
   private void importTableRowData(Collection<Task> tasks) {
     Table table = getTable();
 
@@ -91,10 +86,9 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       ITableRow row = table.createRow();
 
       table.getIdColumn().setValue(row, task.getId());
-      table.getTitleColumn().setValue(row, task.getName());
-
       table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
       table.getDueDateColumn().setValue(row, task.getDueDate());
+      table.getTitleColumn().setValue(row, task.getName());
       table.getCreatorColumn().setValue(row, task.getCreator());
       table.getResponsibleColumn().setValue(row, task.getResponsible());
       table.getReminderColumn().setValue(row, task.getReminder());
@@ -344,12 +338,16 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execDecorateCell(Cell cell, ITableRow row) {
-        String resourceName = getCreatorColumn().getValue(row).getName();
-        BinaryResource value = userPictureService.getBinaryResource(resourceName);
-
-        if (value != null) {
-          addAttachment(value);
-          cell.setText(HTML.imgByBinaryResource(value.getFilename()).cssClass("usericon-html").toHtml());
+        if (getCreatorColumn().getValue(row) != null) {
+          final BinaryResource value = userPictureService.getUserPicture(getCreatorColumn().getValue(row));
+          if (value != null) {
+            addAttachment(value);
+            cell.setText(
+                HTML
+                    .imgByBinaryResource(value.getFilename())
+                    .cssClass("usericon-html")
+                    .toHtml());
+          }
         }
       }
 
@@ -360,7 +358,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(2000)
-    public class CreatorColumn extends AbstractSmartColumn<User> {
+    public class CreatorColumn extends AbstractSmartColumn<UUID> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("Creator");
@@ -372,7 +370,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
-      protected Class<? extends ILookupCall<User>> getConfiguredLookupCall() {
+      protected Class<? extends ILookupCall<UUID>> getConfiguredLookupCall() {
         return UserLookupCall.class;
       }
     }
@@ -396,7 +394,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(4000)
-    public class ResponsibleColumn extends AbstractSmartColumn<User> {
+    public class ResponsibleColumn extends AbstractSmartColumn<UUID> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("Responsible");
@@ -413,7 +411,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
-      protected Class<? extends ILookupCall<User>> getConfiguredLookupCall() {
+      protected Class<? extends ILookupCall<UUID>> getConfiguredLookupCall() {
         return UserLookupCall.class;
       }
     }

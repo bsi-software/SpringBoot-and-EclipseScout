@@ -7,6 +7,7 @@ import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.tasks.scout.ui.db.H2ConsolePage;
 import org.eclipse.scout.tasks.scout.ui.user.RoleTablePage;
 import org.eclipse.scout.tasks.scout.ui.user.UserTablePage;
 
@@ -30,5 +31,6 @@ public class AdminOutline extends AbstractOutline {
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     pageList.add(BEANS.get(UserTablePage.class));
     pageList.add(BEANS.get(RoleTablePage.class));
+    pageList.add(BEANS.get(H2ConsolePage.class));
   }
 }

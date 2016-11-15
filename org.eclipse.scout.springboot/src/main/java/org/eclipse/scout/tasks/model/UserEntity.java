@@ -1,11 +1,15 @@
 package org.eclipse.scout.tasks.model;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.ElementCollection;
+import javax.persistence.Basic;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.domain.Persistable;
@@ -23,10 +27,9 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = {"name"})
-@ToString
-public class Role implements Persistable<UUID> {
-
+@EqualsAndHashCode(of = {"id"})
+@ToString(of = {"firstName", "lastName"})
+public class UserEntity implements Persistable<UUID> {
   private static final long serialVersionUID = 1L;
 
   @Id
@@ -37,19 +40,25 @@ public class Role implements Persistable<UUID> {
   @NonNull
   private String name;
 
-  @ElementCollection
-  private Set<String> permissions;
+  @NonNull
+  private String firstName;
+  private String lastName;
 
-  public void addPermission(String permission) {
-    permissions.add(permission);
-  }
+  @NonNull
+  private String password;
 
-  public void removePermission(String permission) {
-    permissions.remove(permission);
-  }
+  @Lob
+  @Basic(fetch = FetchType.LAZY)
+  private byte[] picture;
+
+  private boolean active;
+
+  @ManyToMany
+  private Set<RoleEntity> roles = new HashSet<>();
 
   @Override
   public boolean isNew() {
     return getId() == null;
   }
+
 }

@@ -11,33 +11,13 @@
 		<version>1.4.1.RELEASE</version>
 	</parent>
 
-	<!-- eclipse repositories for snapshot builds -->
-	<repositories>
-		<repository>
-			<snapshots></snapshots>
-			<id>eclipse.snapshot</id>
-			<name>eclipse-snapshot-repo</name>
-			<url>https://repo.eclipse.org/content/groups/snapshots/</url>
-		</repository>
-	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<snapshots></snapshots>
-			<id>eclipse.snapshot</id>
-			<name>eclipse-snapshot-repo</name>
-			<url>https://repo.eclipse.org/content/groups/snapshots/</url>
-		</pluginRepository>
-	</pluginRepositories>
-
 	<properties>
-		<scout.version>6.1.0-SNAPSHOT</scout.version>
+		<scout.version>6.1.0.M3</scout.version>
 		<java.version>1.8</java.version>
 		<javax.inject.version>1</javax.inject.version>
 	</properties>
 
 	<dependencies>
-	
 		<!-- Scout dependencies -->
 		<dependency>
 			<groupId>org.eclipse.scout.rt</groupId>
@@ -54,14 +34,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-		</dependency>
-		<!-- // TODO Make devtools work again <dependency> <groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-devtools</artifactId> <optional>true</optional> // 
-			more infos: http://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-devtools.html 
-			</dependency> -->
 
 		<!-- Miscellaneous dependencies -->
 		<dependency>
@@ -75,12 +47,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->
@@ -89,11 +61,21 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- Development dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 	</dependencies>
