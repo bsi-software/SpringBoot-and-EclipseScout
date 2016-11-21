@@ -12,6 +12,7 @@ import org.eclipse.scout.rt.ui.html.UiServlet;
 import org.eclipse.scout.tasks.scout.auth.CredentialVerifier;
 import org.eclipse.scout.tasks.scout.auth.UiServletFilter;
 import org.eclipse.scout.tasks.scout.platform.ScoutSpringWebappListener;
+import org.eclipse.scout.tasks.scout.platform.dev.ScoutSpringDevAccessController;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -21,10 +22,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Configuration
 public class ScoutServletConfig {
-
-  private static final String CONTEXT_PATH = "/*";
-  public static final String SERVICES_PATH = "/api";
-  public static final String CONSOLE_PATH = "/h2-console";
 
   @Bean
   public ServletListenerRegistrationBean<ServletContextListener> webappEventListener() {
@@ -38,12 +35,16 @@ public class ScoutServletConfig {
 
   @Bean
   public ServletRegistrationBean dispatcherRegistration(WebApplicationContext webApplicationContext) {
-    return new ServletRegistrationBean(new UiServlet(), CONTEXT_PATH);
+    return new ServletRegistrationBean(new UiServlet(), WebMvcConfig.SCOUT_CONTEXT_PATH + "/*");
   }
 
   @Bean
-  public UiServletFilter uiServletFilter(TrivialAccessController trivialAccessController, FormBasedAccessController formBasedAccessController, CredentialVerifier credentialVerifier) {
-    return new UiServletFilter(trivialAccessController, formBasedAccessController, credentialVerifier);
+  public UiServletFilter uiServletFilter(
+      TrivialAccessController trivialAccessController,
+      FormBasedAccessController formBasedAccessController,
+      ScoutSpringDevAccessController scoutSpringDevAccessController,
+      CredentialVerifier credentialVerifier) {
+    return new UiServletFilter(trivialAccessController, formBasedAccessController, scoutSpringDevAccessController, credentialVerifier);
   }
 
   @Bean
@@ -55,8 +56,10 @@ public class ScoutServletConfig {
   public FilterRegistrationBean authenticationFilter(UiServletFilter uiServletFilter) {
     final FilterRegistrationBean reg = new FilterRegistrationBean();
     reg.setFilter(uiServletFilter);
-    reg.addUrlPatterns(CONTEXT_PATH);
-    reg.addInitParameter("filter-exclude", "/res/*, " + SERVICES_PATH + "/*, " + CONSOLE_PATH + "/*");
+    reg.addUrlPatterns(WebMvcConfig.SCOUT_CONTEXT_PATH + "/*");
+    reg.addInitParameter("filter-exclude", WebMvcConfig.SCOUT_CONTEXT_PATH + "/res/*,"
+        + WebMvcConfig.SCOUT_CONTEXT_PATH + "/login.html,"
+        + WebMvcConfig.SCOUT_CONTEXT_PATH + "/logout.html");
     reg.setName("authFilter");
     reg.setDispatcherTypes(DispatcherType.REQUEST); // apply this filter only for requests, but not for forwards or redirects.
     return reg;

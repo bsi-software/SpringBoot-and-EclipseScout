@@ -1,4 +1,4 @@
-package org.eclipse.scout.tasks.scout.platform;
+package org.eclipse.scout.tasks.scout.platform.dev;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,22 +24,37 @@ public class ScoutSpringDevToolsPropertyDefaultsPostProcessor implements Environ
     final Map<String, Object> properties = new HashMap<String, Object>();
     // Scout doesn't support persistent sessions
     properties.put("server.session.persistent", "false");
+
+    // Make session timeout greater
+    properties.put("server.session.timeout", "900");
+
     // Print all SQL statements during development time
-    //TODO [msm] 'spring.jpa.show-sql' is not working here
-    properties.put("spring.jpa.show-sql", "true");
-    //TODO [msm] add scout auth filter, "?debug=true" etc.
+    properties.put("spring.jpa.properties.hibernate.show_sql", "true");
+    properties.put("spring.jpa.properties.hibernate.format_sql", "false");
+
     PROPERTIES = Collections.unmodifiableMap(properties);
   }
 
   @Override
   public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-    if (isLocalApplication(environment)) {
-      final PropertySource<?> propertySource = new MapPropertySource("refresh", PROPERTIES);
+    if (isSpringDevToolsAvailable()) {
+      final PropertySource<?> propertySource = new MapPropertySource("scout-dev", PROPERTIES);
       environment.getPropertySources().addLast(propertySource);
+
+      // Enable Scout Development-Mode
+      System.setProperty("scout.dev.mode", "true");
     }
   }
 
-  protected boolean isLocalApplication(ConfigurableEnvironment environment) {
-    return environment.getPropertySources().get("remoteUrl") == null;
+  protected boolean isSpringDevToolsAvailable() {
+    Class<?> devToolsPropertyDefaultsPostProcessor;
+    try {
+      devToolsPropertyDefaultsPostProcessor = Class.forName("org.springframework.boot.devtools.env.DevToolsPropertyDefaultsPostProcessor", true, this.getClass().getClassLoader());
+    }
+    catch (ClassNotFoundException e) {
+      return false;
+    }
+    return devToolsPropertyDefaultsPostProcessor != null;
   }
+
 }

@@ -17,6 +17,7 @@ import org.eclipse.scout.rt.server.commons.authentication.FormBasedAccessControl
 import org.eclipse.scout.rt.server.commons.authentication.ServletFilterHelper;
 import org.eclipse.scout.rt.server.commons.authentication.TrivialAccessController;
 import org.eclipse.scout.rt.server.commons.authentication.TrivialAccessController.TrivialAuthConfig;
+import org.eclipse.scout.tasks.scout.platform.dev.ScoutSpringDevAccessController;
 
 import lombok.AllArgsConstructor;
 
@@ -24,8 +25,8 @@ import lombok.AllArgsConstructor;
 public class UiServletFilter implements Filter {
 
   private TrivialAccessController trivialAccessController;
-
   private FormBasedAccessController formBasedAccessController;
+  private ScoutSpringDevAccessController m_scoutSpringDevAccessController;
 
   private CredentialVerifier credentialVerifier;
 
@@ -36,6 +37,7 @@ public class UiServletFilter implements Filter {
         .withLoginPageInstalled(true));
     formBasedAccessController.init(new FormBasedAuthConfig()
         .withCredentialVerifier(credentialVerifier));
+    m_scoutSpringDevAccessController = BEANS.get(ScoutSpringDevAccessController.class).init();
   }
 
   @Override
@@ -51,11 +53,16 @@ public class UiServletFilter implements Filter {
       return;
     }
 
+    if (m_scoutSpringDevAccessController.handle(req, resp, chain)) {
+      return;
+    }
+
     BEANS.get(ServletFilterHelper.class).forwardToLoginForm(req, resp);
   }
 
   @Override
   public void destroy() {
+    m_scoutSpringDevAccessController.destroy();
     formBasedAccessController.destroy();
     trivialAccessController.destroy();
   }
