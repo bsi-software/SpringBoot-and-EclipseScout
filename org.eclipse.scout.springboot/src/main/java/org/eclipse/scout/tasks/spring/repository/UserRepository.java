@@ -1,5 +1,6 @@
 package org.eclipse.scout.tasks.spring.repository;
 
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.eclipse.scout.tasks.data.User;
@@ -18,6 +19,10 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
       userEntity.setLastName(user.getLastName());
       userEntity.setPictureId(user.getPictureId());
 
+      if (user.getLocale() != null) {
+        userEntity.setLocale(user.getLocale().toLanguageTag());
+      }
+
       userEntity.setRoles(user.getRoles()
           .stream()
           .map(r -> new RoleEntity(r))
@@ -34,6 +39,10 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     user.setFirstName(userEntity.getFirstName());
     user.setLastName(userEntity.getLastName());
     user.setPictureId(userEntity.getPictureId());
+
+    if (userEntity.getLocale() != null) {
+      user.setLocale(Locale.forLanguageTag(userEntity.getLocale()));
+    }
 
     user.setRoles(userEntity.getRoles()
         .stream()

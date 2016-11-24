@@ -15,15 +15,15 @@ import org.eclipse.scout.rt.platform.inventory.IClassInfo;
 import org.eclipse.scout.rt.platform.inventory.IClassInventory;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
-
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class copied from scout.rt.server package.
  */
-@Slf4j
 @Order(4900)
 public class PermissionService implements IPermissionService {
+  private static final Logger LOG = LoggerFactory.getLogger(PermissionService.class);
 
   private final Object m_permissionClassesLock = new Object();
   private Set<Class<? extends Permission>> m_permissionClasses;
@@ -77,7 +77,7 @@ public class PermissionService implements IPermissionService {
               m_permissionMap.put(name, permission);
             }
             catch (Exception e) {
-              log.warn("Unable to load permission: " + e.getLocalizedMessage());
+              LOG.warn("Unable to load permission: " + e.getLocalizedMessage());
             }
           }
         }

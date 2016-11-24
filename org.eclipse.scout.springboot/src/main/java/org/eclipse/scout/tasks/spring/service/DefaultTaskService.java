@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.eclipse.scout.rt.platform.util.Assertions;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
 import org.eclipse.scout.tasks.data.Task;
-import org.eclipse.scout.tasks.model.TaskEntity;
 import org.eclipse.scout.tasks.spring.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,11 +38,7 @@ public class DefaultTaskService implements TaskService {
   @Override
   @Transactional
   public void saveTask(Task task) {
-    Assertions.assertNotNull(task.getCreator(), "creator must be set");
-
-    TaskEntity taskEntity = taskRepository.save(taskRepository.convert(task));
-    taskEntity.setCreator(task.getCreator());
-    taskEntity.setResponsible(task.getResponsible());
+    taskRepository.save(taskRepository.convert(task));
   }
 
   protected List<Task> getUserTasks(String userId) {

@@ -25,6 +25,7 @@ public class UserEntity implements Persistable<String> {
 
   @NotNull
   private String password;
+  private String locale;
 
   @Type(type = "uuid-char")
   private UUID pictureId;
@@ -63,6 +64,14 @@ public class UserEntity implements Persistable<String> {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public String getLocale() {
+    return locale;
+  }
+
+  public void setLocale(String locale) {
+    this.locale = locale;
   }
 
   public UUID getPictureId() {

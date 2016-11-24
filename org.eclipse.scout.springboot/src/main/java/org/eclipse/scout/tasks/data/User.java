@@ -1,6 +1,7 @@
 package org.eclipse.scout.tasks.data;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ public class User {
 
   private String id;
   private String password;
+  private Locale locale;
   private String firstName;
   private String lastName;
   private UUID pictureId;
@@ -36,6 +38,14 @@ public class User {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public Locale getLocale() {
+    return locale;
+  }
+
+  public void setLocale(Locale locale) {
+    this.locale = locale;
   }
 
   public String getFirstName() {

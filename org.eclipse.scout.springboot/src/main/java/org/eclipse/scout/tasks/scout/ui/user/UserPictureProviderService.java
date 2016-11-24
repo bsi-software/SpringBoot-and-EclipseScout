@@ -9,13 +9,13 @@ import org.eclipse.scout.rt.client.services.common.icon.IconSpec;
 import org.eclipse.scout.rt.platform.CreateImmediately;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.resource.BinaryResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Order(1000)
 @CreateImmediately // todo: check if necessary
 public class UserPictureProviderService extends AbstractIconProviderService {
+  private static final Logger LOG = LoggerFactory.getLogger(UserPictureProviderService.class);
 
   private Map<String, BinaryResource> icons;
 
@@ -40,7 +40,7 @@ public class UserPictureProviderService extends AbstractIconProviderService {
 
   @Override
   protected URL findResource(String relativePath) {
-    log.warn("!!! returns null (not implemented) !!!");
+    LOG.warn("!!! returns null (not implemented) !!!");
     return null;
   }
 

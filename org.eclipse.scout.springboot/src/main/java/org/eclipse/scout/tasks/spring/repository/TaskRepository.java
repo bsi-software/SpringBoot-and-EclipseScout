@@ -16,10 +16,11 @@ public interface TaskRepository extends JpaRepository<TaskEntity, UUID> {
 
     taskEntity.setId(task.getId());
     taskEntity.setName(task.getName());
-    taskEntity.setCreator(task.getCreator());
+    taskEntity.setAssignedBy(task.getAssignedBy());
     taskEntity.setResponsible(task.getResponsible());
     taskEntity.setReminder(task.getReminder());
     taskEntity.setDueDate(task.getDueDate());
+    taskEntity.setAssignedAt(task.getAssignedAt());
     taskEntity.setReminder(task.getReminder());
     taskEntity.setAccepted(task.isAccepted());
     taskEntity.setDone(task.isDone());
@@ -33,10 +34,11 @@ public interface TaskRepository extends JpaRepository<TaskEntity, UUID> {
 
     task.setId(taskEntity.getId());
     task.setName(taskEntity.getName());
-    task.setCreator(taskEntity.getCreator());
+    task.setAssignedBy(taskEntity.getAssignedBy());
     task.setReminder(taskEntity.getReminder());
     task.setResponsible(taskEntity.getResponsible());
     task.setDueDate(taskEntity.getDueDate());
+    task.setAssignedAt(taskEntity.getAssignedAt());
     task.setReminder(taskEntity.getReminder());
     task.setAccepted(taskEntity.isAccepted());
     task.setDone(taskEntity.isDone());

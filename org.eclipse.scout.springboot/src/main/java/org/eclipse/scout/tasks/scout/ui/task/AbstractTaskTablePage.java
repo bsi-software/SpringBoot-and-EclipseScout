@@ -32,6 +32,7 @@ import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
+import org.eclipse.scout.rt.shared.services.common.security.IAccessControlService;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.eclipse.scout.tasks.data.Task;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
@@ -42,8 +43,6 @@ import org.eclipse.scout.tasks.spring.service.TaskService;
 
 @Bean
 public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
-
-  private static final SimpleDateFormat WEEKDAY_FORMATTER = new SimpleDateFormat("EEEE");
 
   @Inject
   private TaskService taskService;
@@ -73,22 +72,23 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
   }
 
   private void importTableRowData(Collection<Task> tasks) {
-    Table table = getTable();
-
-    table.deleteAllRows();
-
     if (tasks == null || tasks.size() == 0) {
       return;
     }
 
+    Table table = getTable();
+    table.deleteAllRows();
+
+    SimpleDateFormat formatter = getFormatter();
     for (Task task : tasks) {
       ITableRow row = table.createRow();
 
       table.getIdColumn().setValue(row, task.getId());
-      table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate()));
+      table.getDueInColumn().setValue(row, getDueInValue(task.getDueDate(), formatter));
       table.getDueDateColumn().setValue(row, task.getDueDate());
       table.getTitleColumn().setValue(row, task.getName());
-      table.getCreatorColumn().setValue(row, task.getCreator());
+      table.getAssignedByColumn().setValue(row, task.getAssignedBy());
+      table.getAssignedAtColumn().setValue(row, task.getAssignedAt());
       table.getResponsibleColumn().setValue(row, task.getResponsible());
       table.getReminderColumn().setValue(row, task.getReminder());
       table.getAcceptedColumn().setValue(row, task.isAccepted());
@@ -102,7 +102,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     return ClientSession.get().getUserId();
   }
 
-  private String getDueInValue(Date date) {
+  private String getDueInValue(Date date, SimpleDateFormat formatter) {
     Date today = new Date();
     int days = DateUtility.getDaysBetween(new Date(), date);
 
@@ -112,32 +112,36 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
     if (days < 0) {
       if (days == -1) {
-        return "Yesterday";
+        return TEXTS.get("Yesterday");
       }
       else if (days >= -7) {
-        return "Last " + WEEKDAY_FORMATTER.format(date);
+        return TEXTS.get("Last", formatter.format(date));
       }
       else {
-        return "" + (-days) + " days ago";
+        return TEXTS.get("DaysAgo", Integer.toString(-days));
       }
     }
 
     if (days > 0) {
       if (days == 1) {
-        return "Tomorrow";
+        return TEXTS.get("Tomorrow");
       }
       else if (days < 7) {
-        return WEEKDAY_FORMATTER.format(date);
+        return formatter.format(date);
       }
       else if (days < 14) {
-        return "Next " + WEEKDAY_FORMATTER.format(date);
+        return TEXTS.get("Next", formatter.format(date));
       }
       else {
-        return "In " + days + " days";
+        return TEXTS.get("InDays", Integer.toString(days));
       }
     }
 
-    return "Today";
+    return TEXTS.get("Today");
+  }
+
+  private SimpleDateFormat getFormatter() {
+    return new SimpleDateFormat("EEEE", ClientSession.get().getLocale());
   }
 
   /**
@@ -182,10 +186,23 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
+      protected boolean getConfiguredVisible() {
+        return accessAllowed();
+      }
+
+      @Override
       protected void execAction() {
+        if (!accessAllowed()) {
+          return;
+        }
+
         TaskForm form = BEANS.get(TaskForm.class);
         form.addFormListener(new TaskFormListener());
         form.startNew();
+      }
+
+      private boolean accessAllowed() {
+        return BEANS.get(IAccessControlService.class).checkPermission(new CreateTaskPermission());
       }
     }
 
@@ -214,13 +231,26 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
+      protected boolean getConfiguredVisible() {
+        return accessAllowed();
+      }
+
+      @Override
       protected void execAction() {
+        if (!accessAllowed()) {
+          return;
+        }
+
         UUID taskId = getIdColumn().getSelectedValue();
 
         TaskForm form = BEANS.get(TaskForm.class);
         form.addFormListener(new TaskFormListener());
         form.setTaskId(taskId);
         form.startModify();
+      }
+
+      private boolean accessAllowed() {
+        return BEANS.get(IAccessControlService.class).checkPermission(new ReadTaskPermission());
       }
     }
 
@@ -300,16 +330,20 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       return getColumnSet().getColumnByClass(AcceptedColumn.class);
     }
 
-    public CreatorColumn getCreatorColumn() {
-      return getColumnSet().getColumnByClass(CreatorColumn.class);
+    public AssignedByColumn getAssignedByColumn() {
+      return getColumnSet().getColumnByClass(AssignedByColumn.class);
+    }
+
+    public AssignedAtColumn getAssignedAtColumn() {
+      return getColumnSet().getColumnByClass(AssignedAtColumn.class);
     }
 
     public DueInColumn getDueInColumn() {
       return getColumnSet().getColumnByClass(DueInColumn.class);
     }
 
-    public CreatorPictureColumn getCreatorPictureColumn() {
-      return getColumnSet().getColumnByClass(CreatorPictureColumn.class);
+    public AssignedByIconColumn getCreatorPictureColumn() {
+      return getColumnSet().getColumnByClass(AssignedByIconColumn.class);
     }
 
     public ReminderColumn getReminderColumn() {
@@ -343,7 +377,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(1500)
-    public class CreatorPictureColumn extends AbstractStringColumn {
+    public class AssignedByIconColumn extends AbstractStringColumn {
 
       @Override
       protected boolean getConfiguredHtmlEnabled() {
@@ -352,7 +386,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execDecorateCell(Cell cell, ITableRow row) {
-        final String resourceName = getCreatorColumn().getValue(row);
+        final String resourceName = getAssignedByColumn().getValue(row);
         if (resourceName != null) {
           final BinaryResource value = userPictureService.getBinaryResource(resourceName);
 
@@ -374,10 +408,10 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(2000)
-    public class CreatorColumn extends AbstractSmartColumn<String> {
+    public class AssignedByColumn extends AbstractSmartColumn<String> {
       @Override
       protected String getConfiguredHeaderText() {
-        return TEXTS.get("Creator");
+        return TEXTS.get("AssignedBy");
       }
 
       @Override
@@ -388,6 +422,19 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       @Override
       protected Class<? extends ILookupCall<String>> getConfiguredLookupCall() {
         return UserLookupCall.class;
+      }
+    }
+
+    @Order(2500)
+    public class AssignedAtColumn extends AbstractDateTimeColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("AssignedAt");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
       }
     }
 

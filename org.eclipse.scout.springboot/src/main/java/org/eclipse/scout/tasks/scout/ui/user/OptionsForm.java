@@ -15,12 +15,12 @@ import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.user.OptionsForm.MainBox.UserBox;
 import org.eclipse.scout.tasks.spring.service.DocumentService;
 import org.eclipse.scout.tasks.spring.service.UserService;
-
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Bean
-@Slf4j
 public class OptionsForm extends AbstractForm {
+  private static final Logger LOG = LoggerFactory.getLogger(OptionsForm.class);
 
   @Inject
   protected UserService userService;
@@ -51,7 +51,8 @@ public class OptionsForm extends AbstractForm {
   }
 
   public void reload() {
-    log.info("reloading user data now");
+    LOG.info("reloading user data");
+    LOG.info("client session locale: " + ClientSession.get().getLocale().toString());
 
     final User user = userService.get(getUserId());
     final Document picture = userService.getPicture(getUserId());

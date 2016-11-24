@@ -29,7 +29,8 @@ import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox.AcceptedField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AcceptedAndDoneBox.DoneField;
-import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.CreatorField;
+import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AssignedAtField;
+import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.AssignedByField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.DescriptionField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.DueDateField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.ReminderField;
@@ -97,12 +98,16 @@ public class TaskForm extends AbstractForm {
     return getFieldByClass(ResponsibleField.class);
   }
 
-  public CreatorField getCreatorField() {
-    return getFieldByClass(CreatorField.class);
+  public AssignedByField getAssignedByField() {
+    return getFieldByClass(AssignedByField.class);
   }
 
   public DueDateField getDueDateField() {
     return getFieldByClass(DueDateField.class);
+  }
+
+  public AssignedAtField getAssignedAtField() {
+    return getFieldByClass(AssignedAtField.class);
   }
 
   public DoneField getDoneField() {
@@ -153,7 +158,7 @@ public class TaskForm extends AbstractForm {
         }
       }
 
-      @Order(2000)
+      @Order(1500)
       public class ResponsibleField extends AbstractSmartField<String> {
         @Override
         protected String getConfiguredLabel() {
@@ -172,15 +177,19 @@ public class TaskForm extends AbstractForm {
 
         @Override
         protected void execChangedValue() {
-          getAcceptedField().setValue(false);
+          if (!getForm().isFormLoading()) {
+            getAcceptedField().setValue(false);
+            getAssignedByField().setValue(ClientSession.get().getUserId());
+            getAssignedAtField().setValue(new Date());
+          }
         }
       }
 
-      @Order(2000)
-      public class CreatorField extends AbstractSmartField<String> {
+      @Order(1800)
+      public class AssignedByField extends AbstractSmartField<String> {
         @Override
         protected String getConfiguredLabel() {
-          return TEXTS.get("Creator");
+          return TEXTS.get("AssignedBy");
         }
 
         @Override
@@ -191,6 +200,19 @@ public class TaskForm extends AbstractForm {
         @Override
         protected Class<? extends ILookupCall<String>> getConfiguredLookupCall() {
           return UserLookupCall.class;
+        }
+      }
+
+      @Order(2500)
+      public class AssignedAtField extends AbstractDateTimeField {
+        @Override
+        protected String getConfiguredLabel() {
+          return TEXTS.get("AssignedAt");
+        }
+
+        @Override
+        protected boolean getConfiguredEnabled() {
+          return false;
         }
       }
 
@@ -334,17 +356,19 @@ public class TaskForm extends AbstractForm {
   }
 
   private void setDefaultFieldValues(String userId) {
-    getCreatorField().setValue(userId);
+    getAssignedByField().setValue(userId);
     getResponsibleField().setValue(userId);
     getAcceptedField().setValue(true);
     getDueDateField().setValue(new Date());
+    getAssignedAtField().setValue(new Date());
   }
 
   private void importFormFieldData(Task task) {
     getTitleField().setValue(task.getName());
-    getCreatorField().setValue(task.getCreator());
+    getAssignedByField().setValue(task.getAssignedBy());
     getResponsibleField().setValue(task.getResponsible());
     getDueDateField().setValue(task.getDueDate());
+    getAssignedAtField().setValue(task.getAssignedAt());
 
     getReminderField().setValue(task.getReminder());
     getAcceptedField().setValue(task.isAccepted());
@@ -354,9 +378,10 @@ public class TaskForm extends AbstractForm {
 
   private void exportFormFieldData(Task task) {
     task.setName(getTitleField().getValue());
-    task.setCreator(getCreatorField().getValue());
+    task.setAssignedBy(getAssignedByField().getValue());
     task.setResponsible(getResponsibleField().getValue());
     task.setDueDate(getDueDateField().getValue());
+    task.setAssignedAt(getAssignedAtField().getValue());
 
     task.setReminder(getReminderField().getValue());
     task.setAccepted(getAcceptedField().getValue());

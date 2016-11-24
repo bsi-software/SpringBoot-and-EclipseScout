@@ -17,15 +17,15 @@ import org.eclipse.scout.rt.shared.services.common.security.AbstractAccessContro
 import org.eclipse.scout.rt.shared.services.common.security.IAccessControlService;
 import org.eclipse.scout.tasks.data.Role;
 import org.eclipse.scout.tasks.spring.service.UserService;
-
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <h3>{@link AccessControlService}</h3> {@link IAccessControlService} service that uses {@link ISession#getUserId()} as
  * internal cache key required by {@link AbstractAccessControlService} implementation.
  */
-@Slf4j
 public class AccessControlService extends AbstractAccessControlService<String> {
+  private static final Logger LOG = LoggerFactory.getLogger(AccessControlService.class);
 
   @Inject
   private UserService userService;
@@ -49,13 +49,13 @@ public class AccessControlService extends AbstractAccessControlService<String> {
 
   @Override
   public void clearCache() {
-    log.info("clearing cache");
+    LOG.info("clearing cache");
     super.clearCache();
   }
 
   @Override
   protected PermissionCollection execLoadPermissions(String userId) {
-    log.info("loading permissions for user '" + userId + "'");
+    LOG.info("loading permissions for user '" + userId + "'");
 
     Collection<Role> roles = userService.getRoles(userId);
     Permissions permissions = new Permissions();

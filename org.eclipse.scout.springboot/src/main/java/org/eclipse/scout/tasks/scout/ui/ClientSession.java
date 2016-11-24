@@ -1,13 +1,20 @@
 package org.eclipse.scout.tasks.scout.ui;
 
+import javax.inject.Inject;
+
 import org.eclipse.scout.rt.client.AbstractClientSession;
 import org.eclipse.scout.rt.client.IClientSession;
 import org.eclipse.scout.rt.client.session.ClientSessionProvider;
 import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.tasks.data.User;
+import org.eclipse.scout.tasks.spring.service.UserService;
 
 public class ClientSession extends AbstractClientSession {
 
   private String userId = "";
+
+  @Inject
+  protected UserService userService;
 
   public ClientSession() {
     super(true);
@@ -29,6 +36,11 @@ public class ClientSession extends AbstractClientSession {
   private void initCurrentUser() {
     if (getSubject() != null && !getSubject().getPrincipals().isEmpty()) {
       userId = getSubject().getPrincipals().iterator().next().getName();
+
+      User user = userService.get(userId);
+      if (user.getLocale() != null) {
+        setLocale(user.getLocale());
+      }
     }
   }
 

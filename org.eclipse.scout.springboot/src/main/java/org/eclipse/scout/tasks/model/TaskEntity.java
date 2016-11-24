@@ -23,13 +23,14 @@ public class TaskEntity implements Persistable<UUID> {
   private String description;
 
   @NotNull
-  private String creator;
+  private String assignedBy;
 
   @NotNull
   private String responsible;
 
   @NotNull
   private Date dueDate;
+  private Date assignedAt;
   private Date reminder;
 
   private boolean accepted;
@@ -60,12 +61,12 @@ public class TaskEntity implements Persistable<UUID> {
     this.description = description;
   }
 
-  public String getCreator() {
-    return creator;
+  public String getAssignedBy() {
+    return assignedBy;
   }
 
-  public void setCreator(String creator) {
-    this.creator = creator;
+  public void setAssignedBy(String assignedBy) {
+    this.assignedBy = assignedBy;
   }
 
   public String getResponsible() {
@@ -82,6 +83,14 @@ public class TaskEntity implements Persistable<UUID> {
 
   public void setDueDate(Date dueDate) {
     this.dueDate = dueDate;
+  }
+
+  public Date getAssignedAt() {
+    return assignedAt;
+  }
+
+  public void setAssignedAt(Date assignedAt) {
+    this.assignedAt = assignedAt;
   }
 
   public Date getReminder() {

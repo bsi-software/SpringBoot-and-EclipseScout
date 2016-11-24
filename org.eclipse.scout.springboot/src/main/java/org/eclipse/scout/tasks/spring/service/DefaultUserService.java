@@ -24,15 +24,15 @@ import org.eclipse.scout.tasks.scout.ui.user.UserPictureProviderService;
 import org.eclipse.scout.tasks.spring.repository.DocumentRepository;
 import org.eclipse.scout.tasks.spring.repository.RoleRepository;
 import org.eclipse.scout.tasks.spring.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Service
 public class DefaultUserService implements UserService {
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultUserService.class);
 
   protected static final String SUPER_USER = "SuperUser";
   protected static final String USER = "User";
@@ -67,7 +67,7 @@ public class DefaultUserService implements UserService {
       return picture;
     }
     catch (IOException e) {
-      log.error("Error while loading " + image, e);
+      LOG.error("Error while loading " + image, e);
     }
 
     return null;
@@ -175,7 +175,7 @@ public class DefaultUserService implements UserService {
    * Add roles: root, super user and user.
    */
   private void initRoles() {
-    log.info("Check and initialise roles");
+    LOG.info("Check and initialise roles");
 
     if (!roleRepository.exists(Role.ROOT_ID)) {
       roleRepository.save(roleRepository.convert(Role.ROOT));
@@ -211,7 +211,7 @@ public class DefaultUserService implements UserService {
    * Add users: root, alice and bob.
    */
   private void initUsers() {
-    log.info("Check and initialise users");
+    LOG.info("Check and initialise users");
 
     if (!userRepository.exists(USER_ROOT)) {
       User root = new User(USER_ROOT, "Root", "cando");

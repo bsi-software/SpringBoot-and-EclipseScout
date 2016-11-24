@@ -13,12 +13,12 @@ import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.server.commons.authentication.AnonymousAccessController;
 import org.eclipse.scout.rt.server.commons.authentication.AnonymousAccessController.AnonymousAuthConfig;
 import org.eclipse.scout.rt.server.commons.authentication.IAccessController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Bean
 public class ScoutSpringDevAccessController implements IAccessController {
+  private static final Logger LOG = LoggerFactory.getLogger(ScoutSpringDevAccessController.class);
 
   private static final String USERNAME = "bob";
 
@@ -38,7 +38,7 @@ public class ScoutSpringDevAccessController implements IAccessController {
   @Override
   public boolean handle(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException, ServletException {
     if (m_config.isEnabled() && m_warningLogged.compareAndSet(false, true)) {
-      log.warn("+++ Development access control with user {}", m_config.getUsername());
+      LOG.warn("+++ Development access control with user {}", m_config.getUsername());
     }
     return m_anonymousAccessController.handle(request, response, chain);
   }

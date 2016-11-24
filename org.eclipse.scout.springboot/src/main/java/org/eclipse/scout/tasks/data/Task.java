@@ -9,10 +9,11 @@ public class Task {
   private String name;
   private String description;
 
-  private String creator;
+  private String assignedBy;
   private String responsible;
 
   private Date dueDate;
+  private Date assignedAt;
   private Date reminder;
 
   private boolean accepted;
@@ -42,12 +43,12 @@ public class Task {
     this.description = description;
   }
 
-  public String getCreator() {
-    return creator;
+  public String getAssignedBy() {
+    return assignedBy;
   }
 
-  public void setCreator(String creator) {
-    this.creator = creator;
+  public void setAssignedBy(String assignedBy) {
+    this.assignedBy = assignedBy;
   }
 
   public String getResponsible() {
@@ -64,6 +65,14 @@ public class Task {
 
   public void setDueDate(Date dueDate) {
     this.dueDate = dueDate;
+  }
+
+  public Date getAssignedAt() {
+    return assignedAt;
+  }
+
+  public void setAssignedAt(Date assignedAt) {
+    this.assignedAt = assignedAt;
   }
 
   public Date getReminder() {

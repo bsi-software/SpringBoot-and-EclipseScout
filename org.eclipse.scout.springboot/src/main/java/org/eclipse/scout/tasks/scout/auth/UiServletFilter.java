@@ -19,16 +19,21 @@ import org.eclipse.scout.rt.server.commons.authentication.TrivialAccessControlle
 import org.eclipse.scout.rt.server.commons.authentication.TrivialAccessController.TrivialAuthConfig;
 import org.eclipse.scout.tasks.scout.platform.dev.ScoutSpringDevAccessController;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
 public class UiServletFilter implements Filter {
 
   private TrivialAccessController trivialAccessController;
   private FormBasedAccessController formBasedAccessController;
-  private ScoutSpringDevAccessController m_scoutSpringDevAccessController;
+  private ScoutSpringDevAccessController scoutSpringDevAccessController;
 
   private CredentialVerifier credentialVerifier;
+
+  // TODO [mzi] check if this is really needed
+  public UiServletFilter(TrivialAccessController tac, FormBasedAccessController fac, ScoutSpringDevAccessController dac, CredentialVerifier cv) {
+    trivialAccessController = tac;
+    formBasedAccessController = fac;
+    scoutSpringDevAccessController = dac;
+    credentialVerifier = cv;
+  }
 
   @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
@@ -37,7 +42,7 @@ public class UiServletFilter implements Filter {
         .withLoginPageInstalled(true));
     formBasedAccessController.init(new FormBasedAuthConfig()
         .withCredentialVerifier(credentialVerifier));
-    m_scoutSpringDevAccessController = BEANS.get(ScoutSpringDevAccessController.class).init();
+    scoutSpringDevAccessController = BEANS.get(ScoutSpringDevAccessController.class).init();
   }
 
   @Override
@@ -53,7 +58,7 @@ public class UiServletFilter implements Filter {
       return;
     }
 
-    if (m_scoutSpringDevAccessController.handle(req, resp, chain)) {
+    if (scoutSpringDevAccessController.handle(req, resp, chain)) {
       return;
     }
 
@@ -62,7 +67,7 @@ public class UiServletFilter implements Filter {
 
   @Override
   public void destroy() {
-    m_scoutSpringDevAccessController.destroy();
+    scoutSpringDevAccessController.destroy();
     formBasedAccessController.destroy();
     trivialAccessController.destroy();
   }
