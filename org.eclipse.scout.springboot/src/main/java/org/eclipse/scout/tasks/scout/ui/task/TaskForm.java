@@ -21,7 +21,6 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.eclipse.scout.tasks.data.Task;
-import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.CancelButton;
@@ -155,7 +154,7 @@ public class TaskForm extends AbstractForm {
       }
 
       @Order(2000)
-      public class ResponsibleField extends AbstractSmartField<UUID> {
+      public class ResponsibleField extends AbstractSmartField<String> {
         @Override
         protected String getConfiguredLabel() {
           return TEXTS.get("Responsible");
@@ -167,7 +166,7 @@ public class TaskForm extends AbstractForm {
         }
 
         @Override
-        protected Class<? extends ILookupCall<UUID>> getConfiguredLookupCall() {
+        protected Class<? extends ILookupCall<String>> getConfiguredLookupCall() {
           return UserLookupCall.class;
         }
 
@@ -178,7 +177,7 @@ public class TaskForm extends AbstractForm {
       }
 
       @Order(2000)
-      public class CreatorField extends AbstractSmartField<UUID> {
+      public class CreatorField extends AbstractSmartField<String> {
         @Override
         protected String getConfiguredLabel() {
           return TEXTS.get("Creator");
@@ -190,7 +189,7 @@ public class TaskForm extends AbstractForm {
         }
 
         @Override
-        protected Class<? extends ILookupCall<UUID>> getConfiguredLookupCall() {
+        protected Class<? extends ILookupCall<String>> getConfiguredLookupCall() {
           return UserLookupCall.class;
         }
       }
@@ -316,8 +315,8 @@ public class TaskForm extends AbstractForm {
     protected void execLoad() {
       setEnabledPermission(new CreateTaskPermission());
 
-      User user = ClientSession.get().getUser();
-      setDefaultFieldValues(user);
+      String userId = ClientSession.get().getUserId();
+      setDefaultFieldValues(userId);
     }
 
     @Override
@@ -334,9 +333,9 @@ public class TaskForm extends AbstractForm {
     }
   }
 
-  private void setDefaultFieldValues(User user) {
-    getCreatorField().setValue(user.getId());
-    getResponsibleField().setValue(user.getId());
+  private void setDefaultFieldValues(String userId) {
+    getCreatorField().setValue(userId);
+    getResponsibleField().setValue(userId);
     getAcceptedField().setValue(true);
     getDueDateField().setValue(new Date());
   }

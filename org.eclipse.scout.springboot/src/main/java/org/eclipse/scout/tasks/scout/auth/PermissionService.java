@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.inventory.ClassInventory;
 import org.eclipse.scout.rt.platform.inventory.IClassInfo;
@@ -27,6 +29,14 @@ public class PermissionService implements IPermissionService {
   private Set<Class<? extends Permission>> m_permissionClasses;
   private Map<String, Permission> m_permissionMap = new HashMap<>();
 
+  /**
+   * Populates permission cache before it is accessed by the application.
+   */
+  @PostConstruct
+  public void populatePermissionCache() {
+    checkCache();
+  }
+
   @Override
   public Set<Class<? extends Permission>> getAllPermissionClasses() {
     checkCache();
@@ -38,6 +48,13 @@ public class PermissionService implements IPermissionService {
     return m_permissionMap.keySet();
   }
 
+  /**
+   * Gets permission from cache via it's class name (i.e. permissionclass.getName()).
+   *
+   * @param key
+   *          the fully classified class name of the permission
+   * @return the permission class
+   */
   public Permission getPermission(String key) {
     return m_permissionMap.get(key);
   }
@@ -55,7 +72,7 @@ public class PermissionService implements IPermissionService {
               Class<? extends Permission> permClass = (Class<? extends Permission>) permInfo.resolveClass();
               discoveredPermissions.add(permClass);
 
-              String name = permClass.getSimpleName();
+              String name = permClass.getName();
               Permission permission = (Permission) Class.forName(permClass.getName()).newInstance();
               m_permissionMap.put(name, permission);
             }

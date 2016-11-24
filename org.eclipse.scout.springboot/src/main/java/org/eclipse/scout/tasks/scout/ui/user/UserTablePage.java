@@ -2,17 +2,16 @@ package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
+import org.eclipse.scout.rt.client.ui.basic.cell.Cell;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
@@ -20,6 +19,8 @@ import org.eclipse.scout.rt.client.ui.form.FormListener;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.html.HTML;
+import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
@@ -33,6 +34,9 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
   @Inject
   private UserService userService;
 
+  @Inject
+  private UserPictureProviderService userPictureService;
+
   @Override
   protected String getConfiguredTitle() {
     return TEXTS.get("UserTablePage");
@@ -45,7 +49,7 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
   @Override
   protected void execLoadData(SearchFilter filter) {
-    Collection<User> users = userService.getUsers();
+    Collection<User> users = userService.getAll();
     importTableRowData(users);
   }
 
@@ -59,13 +63,12 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
     }
 
     for (User user : users) {
+      boolean isRoot = userService.isRoot(user.getId());
       ITableRow row = table.createRow();
       table.getUserIdColumn().setValue(row, user.getId());
-      table.getUserNameColumn().setValue(row, user.getName());
       table.getFirstNameColumn().setValue(row, user.getFirstName());
       table.getLastNameColumn().setValue(row, user.getLastName());
-      // TODO fix bug below to show if user has root privileges and/or decide to hard wire root in code
-      // table.getAdminColumn().setValue(row, isRoot(user));
+      table.isRootColumn().setValue(row, isRoot);
       table.addRow(row);
     }
   }
@@ -85,34 +88,53 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       return getColumnSet().getColumnByClass(FirstNameColumn.class);
     }
 
-    public AdminColumn getAdminColumn() {
-      return getColumnSet().getColumnByClass(AdminColumn.class);
-    }
-
-    public UserNameColumn getUserNameColumn() {
-      return getColumnSet().getColumnByClass(UserNameColumn.class);
+    public IsRootColumn isRootColumn() {
+      return getColumnSet().getColumnByClass(IsRootColumn.class);
     }
 
     public LastNameColumn getLastNameColumn() {
       return getColumnSet().getColumnByClass(LastNameColumn.class);
     }
 
-    @Order(-1000)
-    public class UserIdColumn extends AbstractColumn<UUID> {
+    @Order(0)
+    public class UserPictureColumn extends AbstractStringColumn {
+
+      @Override
+      protected boolean getConfiguredHtmlEnabled() {
+        return true;
+      }
+
+      @Override
+      protected void execDecorateCell(Cell cell, ITableRow row) {
+        final String resourceName = getUserIdColumn().getValue(row);
+        if (resourceName != null) {
+          final BinaryResource value = userPictureService.getBinaryResource(resourceName);
+
+          if (value != null) {
+            addAttachment(value);
+            cell.setText(
+                HTML
+                    .imgByBinaryResource(value.getFilename())
+                    .cssClass("usericon-html")
+                    .toHtml());
+          }
+        }
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 50;
+      }
+    }
+
+    @Order(1000)
+    public class UserIdColumn extends AbstractStringColumn {
 
       @Override
       protected boolean getConfiguredPrimaryKey() {
         return true;
       }
 
-      @Override
-      protected boolean getConfiguredVisible() {
-        return false;
-      }
-    }
-
-    @Order(1000)
-    public class UserNameColumn extends AbstractStringColumn {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("UserName");
@@ -126,6 +148,7 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
 
     @Order(2000)
     public class FirstNameColumn extends AbstractStringColumn {
+
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("FirstName");
@@ -151,15 +174,15 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(4000)
-    public class AdminColumn extends AbstractBooleanColumn {
+    public class IsRootColumn extends AbstractBooleanColumn {
       @Override
       protected String getConfiguredHeaderText() {
-        return TEXTS.get("Admin");
+        return TEXTS.get("RootColumn");
       }
 
       @Override
       protected int getConfiguredWidth() {
-        return 100;
+        return 150;
       }
     }
 

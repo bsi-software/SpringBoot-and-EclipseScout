@@ -34,7 +34,6 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.eclipse.scout.tasks.data.Task;
-import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.task.AbstractTaskTablePage.Table;
 import org.eclipse.scout.tasks.scout.ui.user.UserLookupCall;
@@ -99,8 +98,8 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
   }
 
-  protected User getUser() {
-    return ClientSession.get().getUser();
+  protected String getUserId() {
+    return ClientSession.get().getUserId();
   }
 
   private String getDueInValue(Date date) {
@@ -173,6 +172,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
+      protected String getConfiguredKeyStroke() {
+        return "alt-n";
+      }
+
+      @Override
       protected Set<? extends IMenuType> getConfiguredMenuTypes() {
         return CollectionUtility.hashSet(TableMenuType.EmptySpace, TableMenuType.SingleSelection, TableMenuType.MultiSelection);
       }
@@ -197,6 +201,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       protected String getConfiguredIconId() {
         // get unicode from http://fontawesome.io/icon/pencil/
         return "font:awesomeIcons \uf040";
+      }
+
+      @Override
+      protected String getConfiguredKeyStroke() {
+        return "alt-e";
       }
 
       @Override
@@ -230,6 +239,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
+      protected String getConfiguredKeyStroke() {
+        return "alt-a";
+      }
+
+      @Override
       protected Set<? extends IMenuType> getConfiguredMenuTypes() {
         return CollectionUtility.hashSet(TableMenuType.SingleSelection, TableMenuType.MultiSelection);
       }
@@ -252,7 +266,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       private boolean acceptTask(UUID taskId) {
         Task task = taskService.getTask(taskId);
 
-        if (task != null && task.getResponsible().equals(ClientSession.get().getUser())) {
+        if (task != null && task.getResponsible().equals(ClientSession.get().getUserId())) {
           task.setAccepted(true);
           taskService.saveTask(task);
 
@@ -338,8 +352,10 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execDecorateCell(Cell cell, ITableRow row) {
-        if (getCreatorColumn().getValue(row) != null) {
-          final BinaryResource value = userPictureService.getUserPicture(getCreatorColumn().getValue(row));
+        final String resourceName = getCreatorColumn().getValue(row);
+        if (resourceName != null) {
+          final BinaryResource value = userPictureService.getBinaryResource(resourceName);
+
           if (value != null) {
             addAttachment(value);
             cell.setText(
@@ -358,7 +374,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(2000)
-    public class CreatorColumn extends AbstractSmartColumn<UUID> {
+    public class CreatorColumn extends AbstractSmartColumn<String> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("Creator");
@@ -370,7 +386,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
-      protected Class<? extends ILookupCall<UUID>> getConfiguredLookupCall() {
+      protected Class<? extends ILookupCall<String>> getConfiguredLookupCall() {
         return UserLookupCall.class;
       }
     }
@@ -394,7 +410,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(4000)
-    public class ResponsibleColumn extends AbstractSmartColumn<UUID> {
+    public class ResponsibleColumn extends AbstractSmartColumn<String> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("Responsible");
@@ -411,7 +427,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
-      protected Class<? extends ILookupCall<UUID>> getConfiguredLookupCall() {
+      protected Class<? extends ILookupCall<String>> getConfiguredLookupCall() {
         return UserLookupCall.class;
       }
     }

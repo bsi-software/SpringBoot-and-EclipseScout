@@ -28,6 +28,6 @@ public class TodaysTaskTablePage extends AbstractTaskTablePage {
 
   @Override
   protected Collection<Task> getTasks() {
-    return taskService.getTodaysTasks(getUser());
+    return taskService.getTodaysTasks(getUserId());
   }
 }

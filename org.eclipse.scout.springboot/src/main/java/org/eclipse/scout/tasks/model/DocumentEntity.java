@@ -1,17 +1,18 @@
 package org.eclipse.scout.tasks.model;
 
-import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.domain.Persistable;
 
 @Entity
-public class TaskEntity implements Persistable<UUID> {
+public class DocumentEntity implements Persistable<UUID> {
+
   private static final long serialVersionUID = 1L;
 
   @Id
@@ -20,20 +21,24 @@ public class TaskEntity implements Persistable<UUID> {
 
   @NotNull
   private String name;
-  private String description;
 
-  @NotNull
-  private String creator;
+  @Lob
+  private byte[] data;
 
-  @NotNull
-  private String responsible;
+  private int type;
 
-  @NotNull
-  private Date dueDate;
-  private Date reminder;
+  public DocumentEntity() {
+  }
 
-  private boolean accepted;
-  private boolean done;
+  /**
+   * @param name
+   * @param data
+   */
+  public DocumentEntity(String name, byte[] data) {
+    super();
+    setName(name);
+    setData(data);
+  }
 
   @Override
   public UUID getId() {
@@ -52,60 +57,20 @@ public class TaskEntity implements Persistable<UUID> {
     this.name = name;
   }
 
-  public String getDescription() {
-    return description;
+  public byte[] getData() {
+    return data;
   }
 
-  public void setDescription(String description) {
-    this.description = description;
+  public void setData(byte[] data) {
+    this.data = data;
   }
 
-  public String getCreator() {
-    return creator;
+  public int getType() {
+    return type;
   }
 
-  public void setCreator(String creator) {
-    this.creator = creator;
-  }
-
-  public String getResponsible() {
-    return responsible;
-  }
-
-  public void setResponsible(String responsible) {
-    this.responsible = responsible;
-  }
-
-  public Date getDueDate() {
-    return dueDate;
-  }
-
-  public void setDueDate(Date dueDate) {
-    this.dueDate = dueDate;
-  }
-
-  public Date getReminder() {
-    return reminder;
-  }
-
-  public void setReminder(Date reminder) {
-    this.reminder = reminder;
-  }
-
-  public boolean isAccepted() {
-    return accepted;
-  }
-
-  public void setAccepted(boolean accepted) {
-    this.accepted = accepted;
-  }
-
-  public boolean isDone() {
-    return done;
-  }
-
-  public void setDone(boolean done) {
-    this.done = done;
+  public void setType(int type) {
+    this.type = type;
   }
 
   /**
@@ -138,5 +103,4 @@ public class TaskEntity implements Persistable<UUID> {
   public boolean isNew() {
     return getId() == null;
   }
-
 }

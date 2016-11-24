@@ -10,10 +10,8 @@ import java.util.stream.Collectors;
 import org.eclipse.scout.rt.platform.util.Assertions;
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
 import org.eclipse.scout.tasks.data.Task;
-import org.eclipse.scout.tasks.data.User;
 import org.eclipse.scout.tasks.model.TaskEntity;
 import org.eclipse.scout.tasks.spring.repository.TaskRepository;
-import org.eclipse.scout.tasks.spring.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,9 +21,6 @@ public class DefaultTaskService implements TaskService {
 
   @Autowired
   private TaskRepository taskRepository;
-
-  @Autowired
-  private UserRepository userRepository;
 
   @Override
   @Transactional
@@ -39,9 +34,7 @@ public class DefaultTaskService implements TaskService {
       return;
     }
 
-    TaskEntity taskEntity = taskRepository.save(taskRepository.convert(task));
-    taskEntity.setCreator(userRepository.getOne(task.getCreator()));
-    taskEntity.setResponsible(userRepository.getOne(task.getResponsible()));
+    taskRepository.save(taskRepository.convert(task));
   }
 
   @Override
@@ -50,12 +43,12 @@ public class DefaultTaskService implements TaskService {
     Assertions.assertNotNull(task.getCreator(), "creator must be set");
 
     TaskEntity taskEntity = taskRepository.save(taskRepository.convert(task));
-    taskEntity.setCreator(userRepository.getOne(task.getCreator()));
-    taskEntity.setResponsible(userRepository.getOne(task.getResponsible()));
+    taskEntity.setCreator(task.getCreator());
+    taskEntity.setResponsible(task.getResponsible());
   }
 
-  protected List<Task> getUserTasks(User user) {
-    return taskRepository.findByResponsible(userRepository.convert(user))
+  protected List<Task> getUserTasks(String userId) {
+    return taskRepository.findByResponsible(userId)
         .stream()
         .map(t -> taskRepository.convert(t))
         .collect(Collectors.toList());
@@ -69,10 +62,10 @@ public class DefaultTaskService implements TaskService {
 
   @Override
   @Transactional(readOnly = true)
-  public Collection<Task> getInbox(User user) {
+  public Collection<Task> getInbox(String userId) {
     List<Task> inboxList = new ArrayList<>();
 
-    for (Task task : getUserTasks(user)) {
+    for (Task task : getUserTasks(userId)) {
       if (!task.isAccepted()) {
         inboxList.add(task);
       }
@@ -83,10 +76,10 @@ public class DefaultTaskService implements TaskService {
 
   @Override
   @Transactional(readOnly = true)
-  public Collection<Task> getOwnTasks(User user) {
+  public Collection<Task> getOwnTasks(String userId) {
     List<Task> ownList = new ArrayList<>();
 
-    for (Task task : getUserTasks(user)) {
+    for (Task task : getUserTasks(userId)) {
       if (task.isAccepted()) {
         ownList.add(task);
       }
@@ -97,10 +90,10 @@ public class DefaultTaskService implements TaskService {
 
   @Override
   @Transactional(readOnly = true)
-  public Collection<Task> getTodaysTasks(User user) {
+  public Collection<Task> getTodaysTasks(String userId) {
     List<Task> todaysList = new ArrayList<>();
 
-    for (Task task : getUserTasks(user)) {
+    for (Task task : getUserTasks(userId)) {
       if (!task.isAccepted() || task.isDone()) {
         continue;
       }

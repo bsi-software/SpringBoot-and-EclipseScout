@@ -2,7 +2,6 @@ package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.security.Permission;
 import java.util.Collection;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -20,6 +19,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.tablefield.AbstractTableField;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
 import org.eclipse.scout.tasks.data.Role;
@@ -29,7 +29,7 @@ import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.OkButton;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField.Table;
-import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.RoleNameField;
+import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.RoleIdField;
 import org.eclipse.scout.tasks.spring.service.RoleService;
 
 @Bean
@@ -38,14 +38,21 @@ public class RoleForm extends AbstractForm {
   @Inject
   private RoleService roleService;
 
-  private UUID id;
-
-  public UUID getId() {
-    return id;
+  public String getRoleId() {
+    return getRoleIdField().getValue();
   }
 
-  public void setId(UUID id) {
-    this.id = id;
+  public void setRoleId(String roleId) {
+    getRoleIdField().setValue(roleId);
+  }
+
+  @Override
+  public Object computeExclusiveKey() {
+    return getRoleId();
+  }
+
+  protected String calculateSubTitle() {
+    return getRoleId();
   }
 
   @Override
@@ -70,8 +77,8 @@ public class RoleForm extends AbstractForm {
     return getFieldByClass(CancelButton.class);
   }
 
-  public RoleNameField getRoleNameField() {
-    return getFieldByClass(RoleNameField.class);
+  public RoleIdField getRoleIdField() {
+    return getFieldByClass(RoleIdField.class);
   }
 
   public PermissionTableField getPermissionTableField() {
@@ -93,7 +100,8 @@ public class RoleForm extends AbstractForm {
     public class RoleBox extends AbstractGroupBox {
 
       @Order(1000)
-      public class RoleNameField extends AbstractStringField {
+      public class RoleIdField extends AbstractStringField {
+
         @Override
         protected String getConfiguredLabel() {
           return TEXTS.get("RoleName");
@@ -203,20 +211,24 @@ public class RoleForm extends AbstractForm {
     @Override
     protected void execLoad() {
       setEnabledPermission(new UpdateUserPermission());
+      getRoleIdField().setEnabled(false);
 
-      Role role = roleService.getRole(getId());
-      // TODO comment in once lazy loading is fixed
+      Role role = roleService.get(getRoleId());
       importFormFieldData(role);
+
+      if (role.equals(Role.ROOT)) {
+        getPermissionTableField().setEnabled(false);
+      }
 
       setSubTitle(calculateSubTitle());
     }
 
     @Override
     protected void execStore() {
-      Role role = roleService.getRole(getId());
+      Role role = roleService.get(getRoleIdField().getValue());
       exportFormFieldData(role);
 
-      roleService.saveRole(role);
+      roleService.save(role);
     }
 
     @Override
@@ -235,14 +247,19 @@ public class RoleForm extends AbstractForm {
     @Override
     protected void execLoad() {
       setEnabledPermission(new CreateUserPermission());
+      importFormFieldData(null);
     }
 
     @Override
     protected void execStore() {
-      Role role = new Role("");
+      if (roleService.exists(getRoleId())) {
+        throw new VetoException(TEXTS.get("AccountAlreadyExists", getRoleId()));
+      }
+
+      Role role = new Role();
       exportFormFieldData(role);
 
-      roleService.addRole(role);
+      roleService.save(role);
     }
 
     @Override
@@ -252,7 +269,9 @@ public class RoleForm extends AbstractForm {
   }
 
   private void importFormFieldData(Role role) {
-    getRoleNameField().setValue(role.getName());
+    if (role != null) {
+      getRoleIdField().setValue(role.getId());
+    }
 
     final Table table = getPermissionTableField().getTable();
     getPermissions().stream().forEach(permission -> {
@@ -264,9 +283,12 @@ public class RoleForm extends AbstractForm {
       table.getIdColumn().setValue(row, pId);
       table.getNameColumn().setValue(row, pName);
 
-      if (role.getPermissions().contains(permission.getName())) {
-        table.getAssignedColumn().setValue(row, true);
+      if (role != null) {
+        if (role.equals(Role.ROOT) || role.getPermissions().contains(permission.getName())) {
+          table.getAssignedColumn().setValue(row, true);
+        }
       }
+
       table.addRow(row);
     });
   }
@@ -276,7 +298,7 @@ public class RoleForm extends AbstractForm {
   }
 
   private void exportFormFieldData(Role role) {
-    role.setName(getRoleNameField().getValue());
+    role.setId(getRoleIdField().getValue());
 
     Table table = getPermissionTableField().getTable();
     for (ITableRow row : table.getRows()) {
@@ -290,9 +312,5 @@ public class RoleForm extends AbstractForm {
         role.getPermissions().remove(permission);
       }
     }
-  }
-
-  private String calculateSubTitle() {
-    return getRoleNameField().getValue();
   }
 }

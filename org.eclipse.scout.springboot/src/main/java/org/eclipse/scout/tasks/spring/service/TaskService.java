@@ -4,17 +4,16 @@ import java.util.Collection;
 import java.util.UUID;
 
 import org.eclipse.scout.tasks.data.Task;
-import org.eclipse.scout.tasks.data.User;
 
-public interface TaskService {
+public interface TaskService extends ValidatorService {
 
   Collection<Task> getAllTasks();
 
-  Collection<Task> getTodaysTasks(User user);
+  Collection<Task> getTodaysTasks(String userId);
 
-  Collection<Task> getOwnTasks(User user);
+  Collection<Task> getOwnTasks(String userId);
 
-  Collection<Task> getInbox(User user);
+  Collection<Task> getInbox(String userId);
 
   Task getTask(UUID taskId);
 

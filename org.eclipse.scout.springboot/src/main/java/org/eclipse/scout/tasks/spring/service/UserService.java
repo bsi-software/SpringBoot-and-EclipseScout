@@ -1,23 +1,72 @@
 package org.eclipse.scout.tasks.spring.service;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
+import org.eclipse.scout.tasks.data.Document;
+import org.eclipse.scout.tasks.data.Role;
 import org.eclipse.scout.tasks.data.User;
 
-public interface UserService {
+public interface UserService extends ValidatorService<User> {
 
-  List<User> getUsers();
+  /**
+   * Returns a list including all available Users.
+   */
+  List<User> getAll();
 
-  User getUser(UUID user);
+  /**
+   * Checks if the user specified by the provided user id exists.
+   *
+   * @param userId
+   * @return True if the specified user exits, false otherwise.
+   */
+  boolean exists(String userId);
 
-  User getUser(String userName);
+  /**
+   * Returns the user object for the user specified by the provided user id.
+   *
+   * @param userId
+   * @return
+   */
+  User get(String userId);
 
-  void addUser(User user);
+  /**
+   * Returns true if the user specified by the provided user id has the root role.
+   *
+   * @param userId
+   * @return
+   */
+  boolean isRoot(String userId);
 
-  void saveUser(User user);
+  /**
+   * Returns the set of roles for the user specified by the provided user id.
+   *
+   * @param userId
+   */
+  Set<Role> getRoles(String userId);
 
-  byte[] getUserPicture(UUID user);
+  /**
+   * Returns the picture associated with the user specified by the provided user id. If the specified user does not
+   * exist or does not have a picture associated null is returned.
+   *
+   * @param userId
+   * @return The picture in the form of the byte array (corresponds to the respective image file content)
+   */
+  Document getPicture(String userId);
 
-  void setUserPicture(UUID user, byte[] picture);
+  /**
+   * Persists the provided user, including associated roles. To save the user picture use method {@link setPicture}.
+   *
+   * @param user
+   */
+  void save(User user);
+
+  /**
+   * Persists the picture for the user specified by the provided user id.
+   *
+   * @param userId
+   * @param picture
+   *          The picture in the form of a document
+   */
+  void setPicture(String userId, Document picture);
 }

@@ -1,13 +1,11 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.form.fields.tablefield.AbstractTableField;
 import org.eclipse.scout.rt.platform.Order;
@@ -45,30 +43,18 @@ public class AbstractUserRoleBox extends AbstractUserBox {
         return getColumnSet().getColumnByClass(AssignedColumn.class);
       }
 
-      public NameColumn getNameColumn() {
-        return getColumnSet().getColumnByClass(NameColumn.class);
-      }
-
       public IdColumn getIdColumn() {
         return getColumnSet().getColumnByClass(IdColumn.class);
       }
 
       @Order(10)
-      public class IdColumn extends AbstractColumn<UUID> {
-
-        @Override
-        protected boolean getConfiguredDisplayable() {
-          return false;
-        }
+      public class IdColumn extends AbstractStringColumn {
 
         @Override
         protected boolean getConfiguredPrimaryKey() {
           return true;
         }
-      }
 
-      @Order(20)
-      public class NameColumn extends AbstractStringColumn {
         @Override
         protected String getConfiguredHeaderText() {
           return TEXTS.get("Name");
@@ -80,7 +66,7 @@ public class AbstractUserRoleBox extends AbstractUserBox {
         }
       }
 
-      @Order(30)
+      @Order(20)
       public class AssignedColumn extends AbstractBooleanColumn {
         @Override
         protected String getConfiguredHeaderText() {
@@ -100,16 +86,17 @@ public class AbstractUserRoleBox extends AbstractUserBox {
     }
   }
 
-  public void importFormFieldData(User user, Map<UUID, String> roles) {
+  public void importFormFieldData(User user, List<String> roles) {
     importFormFieldData(user);
 
     final Table table = getRoleTableField().getTable();
-    roles.entrySet().stream().forEach(e -> {
+    roles.stream().forEach(e -> {
       final ITableRow row = table.createRow();
-      table.getIdColumn().setValue(row, e.getKey());
-      table.getNameColumn().setValue(row, e.getValue());
-      if (user.getRoles().contains(e.getKey())) {
-        table.getAssignedColumn().setValue(row, true);
+      table.getIdColumn().setValue(row, e);
+      if (user != null) {
+        if (user.getRoles().contains(e)) {
+          table.getAssignedColumn().setValue(row, true);
+        }
       }
       table.addRow(row);
     });

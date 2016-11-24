@@ -1,24 +1,20 @@
 package org.eclipse.scout.tasks.spring.service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 import org.eclipse.scout.tasks.data.Role;
 
-public interface RoleService {
+public interface RoleService extends ValidatorService {
 
-  static final String ROOT_ID = "root";
-  static final Role ROOT_ROLE = new Role(ROOT_ID);
+  List<Role> getAll();
 
-  void addRole(Role role);
+  boolean exists(String roleId);
 
-  void saveRole(Role role);
+  void save(Role role);
 
-  Role getRole(UUID id);
+  Role get(String roleId);
 
-  List<Role> getRoles();
-
-  Map<UUID, String> getAllRoleNames();
+  Set<String> getPermissions(String roleId);
 
 }

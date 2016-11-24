@@ -23,6 +23,11 @@ public class AllTasksTablePage extends AbstractTaskTablePage {
   }
 
   @Override
+  protected void execInitPage() {
+    setVisiblePermission(new ViewAllTasksPermission());
+  }
+
+  @Override
   protected Collection<Task> getTasks() {
     return taskService.getAllTasks();
   }

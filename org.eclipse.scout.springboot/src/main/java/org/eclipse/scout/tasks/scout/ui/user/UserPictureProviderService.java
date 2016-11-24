@@ -1,44 +1,51 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
+import java.net.URL;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.inject.Inject;
-
+import org.eclipse.scout.rt.client.services.common.icon.AbstractIconProviderService;
+import org.eclipse.scout.rt.client.services.common.icon.IconSpec;
+import org.eclipse.scout.rt.platform.CreateImmediately;
+import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.resource.BinaryResource;
-import org.eclipse.scout.rt.platform.service.IService;
-import org.eclipse.scout.tasks.spring.service.UserService;
 
-public class UserPictureProviderService implements IService {
+import lombok.extern.slf4j.Slf4j;
 
-  @Inject
-  private UserService userService;
+@Slf4j
+@Order(1000)
+@CreateImmediately // todo: check if necessary
+public class UserPictureProviderService extends AbstractIconProviderService {
 
-  protected Map<UUID, BinaryResource> userPictureCache = new ConcurrentHashMap<>();
+  private Map<String, BinaryResource> icons;
 
-  public BinaryResource getUserPicture(UUID user) {
-    // try to resolve from cache
-    if (userPictureCache.containsKey(user)) {
-      return userPictureCache.get(user);
-    }
-    else {
-      // try to resolve from data store
-      byte[] picture = userService.getUserPicture(user);
-      if (picture != null) {
-        final BinaryResource binaryResource = new BinaryResource(user.toString(), picture);
-        userPictureCache.put(user, binaryResource);
-        return binaryResource;
-      }
-      return null;
-    }
+  public UserPictureProviderService() {
+    icons = new ConcurrentHashMap<>();
   }
 
-  public void setUserPicture(UUID user, byte[] picture) {
-    // store picture in data store
-    userService.setUserPicture(user, picture);
-    // store picture in cache
-    BinaryResource binaryResource = new BinaryResource(user.toString(), picture);
-    userPictureCache.put(user, binaryResource);
+  @Override
+  public IconSpec findIconSpec(String name) {
+    BinaryResource resource = icons.get(name);
+
+    if (resource == null) {
+      return null;
+    }
+
+    return new IconSpec(name, resource.getContent());
+  }
+
+  public BinaryResource getBinaryResource(String name) {
+    return icons.get(name);
+  }
+
+  @Override
+  protected URL findResource(String relativePath) {
+    log.warn("!!! returns null (not implemented) !!!");
+    return null;
+  }
+
+  public void addUserPicture(String name, byte[] picture) {
+    BinaryResource usericon = new BinaryResource(name, picture);
+    icons.put(name, usericon);
   }
 }

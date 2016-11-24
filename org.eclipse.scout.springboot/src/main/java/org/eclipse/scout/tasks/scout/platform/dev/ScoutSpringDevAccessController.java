@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Bean;
-import org.eclipse.scout.rt.platform.Platform;
 import org.eclipse.scout.rt.server.commons.authentication.AnonymousAccessController;
 import org.eclipse.scout.rt.server.commons.authentication.AnonymousAccessController.AnonymousAuthConfig;
 import org.eclipse.scout.rt.server.commons.authentication.IAccessController;
@@ -30,7 +29,8 @@ public class ScoutSpringDevAccessController implements IAccessController {
 
   public ScoutSpringDevAccessController init() {
     m_anonymousAccessController.init(m_config
-        .withEnabled(Platform.get().inDevelopmentMode())
+//        .withEnabled(Platform.get().inDevelopmentMode())
+        .withEnabled(false)
         .withUsername(USERNAME));
     return this;
   }

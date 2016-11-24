@@ -1,7 +1,6 @@
 package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.scout.rt.client.ui.dnd.ResourceListTransferObject;
 import org.eclipse.scout.rt.client.ui.dnd.TransferObject;
@@ -13,21 +12,12 @@ import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.tasks.data.Document;
 import org.eclipse.scout.tasks.data.User;
 
 public abstract class AbstractUserBox extends AbstractGroupBox {
 
   public static final int PICTURE_MAX_FILE_SIZE = 300 * 1024;
-
-  private UUID userId;
-
-  public UUID getUserId() {
-    return userId;
-  }
-
-  public void setUserId(UUID userId) {
-    this.userId = userId;
-  }
 
   public PictureField getPictureField() {
     return getFieldByClass(PictureField.class);
@@ -41,8 +31,8 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     return getFieldByClass(LastNameField.class);
   }
 
-  public UserNameField getUserNameField() {
-    return getFieldByClass(UserNameField.class);
+  public UserIdField getUserIdField() {
+    return getFieldByClass(UserIdField.class);
   }
 
   public PasswordField getPasswordField() {
@@ -51,6 +41,33 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
 
   @Order(10)
   public class PictureField extends AbstractImageField {
+
+    private Document picture;
+
+    public Document getPicture() {
+      return picture;
+    }
+
+    public void setPicture(Document picture) {
+      this.picture = picture;
+
+      if (picture != null) {
+        setImage(picture.getData());
+        setImageId(picture.getName());
+      }
+      else {
+        setImage(new byte[]{});
+        setImageId("");
+      }
+
+      touch();
+    }
+
+    @Override
+    protected String getConfiguredTooltipText() {
+      return TEXTS.get("DropImageFile");
+    }
+
     @Override
     protected boolean getConfiguredLabelVisible() {
       return false;
@@ -86,13 +103,7 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
             throw new VetoException(TEXTS.get("ImageFileTooLarge", "" + (PICTURE_MAX_FILE_SIZE / 1024)));
           }
 
-          // if you want to work with buffered images
-          // BufferedImage bi = ImageIO.read(new FileInputStream(fileName[0]));
-          // setImage(bi);
-          setImage(resource.getContent());
-          setImageId(resource.getFilename());
-
-          touch();
+          setPicture(new Document(resource.getFilename(), resource.getContent(), Document.TYPE_PICTURE));
         }
       }
     }
@@ -130,7 +141,7 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
   }
 
   @Order(40)
-  public class UserNameField extends AbstractStringField {
+  public class UserIdField extends AbstractStringField {
     @Override
     protected String getConfiguredLabel() {
       return TEXTS.get("UserName");
@@ -171,30 +182,32 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
   }
 
   public void importFormFieldData(User user) {
-    getUserNameField().parseAndSetValue(user.getName());
+    if (user == null) {
+      return;
+    }
+
+    getUserIdField().parseAndSetValue(user.getId());
     getFirstNameField().parseAndSetValue(user.getFirstName());
     getLastNameField().parseAndSetValue(user.getLastName());
     getPasswordField().parseAndSetValue(user.getPassword());
   }
 
-  public void importUserPicture(byte[] picture) {
-    if (picture != null) {
-      getPictureField().setImage(picture);
-    }
-  }
-
   public void exportFormFieldData(User user) {
-    user.setName(getUserNameField().getValue());
+    user.setId(getUserIdField().getValue());
     user.setFirstName(getFirstNameField().getValue());
     user.setLastName(getLastNameField().getValue());
     user.setPassword(getPasswordField().getValue());
   }
 
-  public byte[] exportUserPicture() {
-    if (getPictureField().isSaveNeeded()) {
-      return getPictureField().getByteArrayValue();
-    }
-    return null;
+  public void importUserPicture(Document picture) {
+    getPictureField().setPicture(picture);
   }
 
+  public Document exportUserPicture() {
+    if (getPictureField().isSaveNeeded()) {
+      return getPictureField().getPicture();
+    }
+
+    return null;
+  }
 }

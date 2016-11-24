@@ -27,7 +27,7 @@ public class MyTaskTablePage extends AbstractTaskTablePage {
 
   @Override
   protected Collection<Task> getTasks() {
-    return taskService.getOwnTasks(getUser());
+    return taskService.getOwnTasks(getUserId());
   }
 
   @Override

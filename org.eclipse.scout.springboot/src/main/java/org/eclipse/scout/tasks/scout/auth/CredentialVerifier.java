@@ -20,7 +20,7 @@ public class CredentialVerifier implements ICredentialVerifier {
       return AUTH_CREDENTIALS_REQUIRED;
     }
 
-    final User user = userService.getUser(username);
+    final User user = userService.get(username);
     if (user == null || !user.getPassword().equals(String.valueOf(passwordPlainText))) {
       return AUTH_FORBIDDEN;
     }

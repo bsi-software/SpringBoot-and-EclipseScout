@@ -1,24 +1,13 @@
 package org.eclipse.scout.tasks.scout.ui;
 
-import javax.inject.Inject;
-
 import org.eclipse.scout.rt.client.AbstractClientSession;
 import org.eclipse.scout.rt.client.IClientSession;
 import org.eclipse.scout.rt.client.session.ClientSessionProvider;
 import org.eclipse.scout.rt.platform.BEANS;
-import org.eclipse.scout.tasks.data.User;
-import org.eclipse.scout.tasks.spring.service.UserService;
 
 public class ClientSession extends AbstractClientSession {
 
-  @Inject
-  private UserService userService;
-
-  private User user;
-
-  public User getUser() {
-    return user;
-  }
+  private String userId = "";
 
   public ClientSession() {
     super(true);
@@ -39,13 +28,12 @@ public class ClientSession extends AbstractClientSession {
 
   private void initCurrentUser() {
     if (getSubject() != null && !getSubject().getPrincipals().isEmpty()) {
-      String username = getSubject().getPrincipals().iterator().next().getName();
-      user = userService.getUser(username);
+      userId = getSubject().getPrincipals().iterator().next().getName();
     }
   }
 
   @Override
   public String getUserId() {
-    return (user == null) ? "" : user.getName();
+    return userId;
   }
 }

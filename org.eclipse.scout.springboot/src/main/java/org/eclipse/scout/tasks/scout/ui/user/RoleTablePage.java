@@ -2,7 +2,6 @@ package org.eclipse.scout.tasks.scout.ui.user;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -11,7 +10,6 @@ import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
@@ -23,6 +21,7 @@ import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.tasks.data.Role;
+import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField.Table.NameColumn;
 import org.eclipse.scout.tasks.scout.ui.user.RoleTablePage.Table;
 import org.eclipse.scout.tasks.spring.service.RoleService;
 
@@ -44,7 +43,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
   @Override
   protected void execLoadData(SearchFilter filter) {
-    Collection<Role> roles = roleService.getRoles();
+    Collection<Role> roles = roleService.getAll();
     importTableRowData(roles);
   }
 
@@ -60,7 +59,6 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
     for (Role role : roles) {
       ITableRow row = table.createRow();
       table.getIdColumn().setValue(row, role.getId());
-      table.getNameColumn().setValue(row, role.getName());
       table.addRow(row);
     }
   }
@@ -129,11 +127,11 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected void execAction() {
-        UUID roleId = getIdColumn().getSelectedValue();
+        String roleId = getIdColumn().getSelectedValue();
 
         RoleForm form = BEANS.get(RoleForm.class);
         form.addFormListener(new RoleFormListener());
-        form.setId(roleId);
+        form.setRoleId(roleId);
         form.startModify();
       }
     }
@@ -150,21 +148,13 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(1000)
-    public class IdColumn extends AbstractColumn<UUID> {
-
-      @Override
-      protected boolean getConfiguredDisplayable() {
-        return false;
-      }
+    public class IdColumn extends AbstractStringColumn {
 
       @Override
       protected boolean getConfiguredPrimaryKey() {
         return true;
       }
-    }
 
-    @Order(2000)
-    public class NameColumn extends AbstractStringColumn {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("RoleName");

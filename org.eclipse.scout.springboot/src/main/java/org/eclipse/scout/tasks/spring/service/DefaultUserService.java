@@ -1,19 +1,27 @@
 package org.eclipse.scout.tasks.spring.service;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.util.IOUtility;
-import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.tasks.data.Document;
+import org.eclipse.scout.tasks.data.Role;
 import org.eclipse.scout.tasks.data.User;
-import org.eclipse.scout.tasks.model.RoleEntity;
 import org.eclipse.scout.tasks.model.UserEntity;
+import org.eclipse.scout.tasks.scout.auth.AccessControlService;
 import org.eclipse.scout.tasks.scout.ui.ResourceBase;
+import org.eclipse.scout.tasks.scout.ui.task.CreateTaskPermission;
+import org.eclipse.scout.tasks.scout.ui.task.ReadTaskPermission;
+import org.eclipse.scout.tasks.scout.ui.task.UpdateTaskPermission;
+import org.eclipse.scout.tasks.scout.ui.task.ViewAllTasksPermission;
+import org.eclipse.scout.tasks.scout.ui.user.UserPictureProviderService;
+import org.eclipse.scout.tasks.spring.repository.DocumentRepository;
 import org.eclipse.scout.tasks.spring.repository.RoleRepository;
 import org.eclipse.scout.tasks.spring.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,125 +34,214 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class DefaultUserService implements UserService {
 
+  protected static final String SUPER_USER = "SuperUser";
+  protected static final String USER = "User";
+
+  protected static final String USER_ROOT = "root";
+  protected static final String USER_ALICE = "alice";
+  protected static final String USER_BOB = "bob";
+
   @Autowired
   private UserRepository userRepository;
 
   @Autowired
   private RoleRepository roleRepository;
 
+  @Autowired
+  private DocumentRepository documentRepository;
+
+  @Autowired
+  private UserPictureProviderService userPictureProviderService;
+
+  @Autowired
+  private AccessControlService accessControlService;
+
+  protected Document getDefaultUserPicture(String userId, String image) {
+    try {
+      byte[] data = IOUtility.readFromUrl(ResourceBase.class.getResource("img/user/" + image));
+      Document picture = new Document(image, data, Document.TYPE_PICTURE);
+
+      userPictureProviderService.addUserPicture(userId, picture.getData());
+      documentRepository.save(documentRepository.convert(picture));
+
+      return picture;
+    }
+    catch (IOException e) {
+      log.error("Error while loading " + image, e);
+    }
+
+    return null;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<User> getAll() {
+    return userRepository.findAll()
+        .stream()
+        .map(u -> userRepository.convert(u))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public boolean exists(String userId) {
+    return userRepository.exists(userId);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public User get(String userId) {
+    return userRepository.getOne(userId) != null ? userRepository.convert(userRepository.getOne(userId)) : null;
+  }
+
+  @Override
+  @Transactional
+  public void save(User user) {
+    if (user == null) {
+      return;
+    }
+
+    validate(user);
+
+    UserEntity userEntity = userRepository.save(userRepository.convert(user));
+    userEntity.setRoles(user.getRoles()
+        .stream()
+        .map(r -> roleRepository.getOne(r))
+        .collect(Collectors.toSet()));
+
+    accessControlService.clearCache();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Set<Role> getRoles(String userId) {
+    final UserEntity userEntity = userRepository.getOne(userId);
+
+    if (userEntity != null) {
+      return userEntity.getRoles()
+          .stream()
+          .map(r -> roleRepository.convert(r))
+          .collect(Collectors.toSet());
+    }
+
+    return new HashSet<Role>();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public boolean isRoot(String userId) {
+    Set<Role> roles = getRoles(userId);
+    return roles.contains(Role.ROOT);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Document getPicture(String userId) {
+    final UserEntity userEntity = userRepository.getOne(userId);
+    if (userEntity != null) {
+      UUID pictureId = userEntity.getPictureId();
+
+      if (pictureId != null && documentRepository.exists(pictureId)) {
+        return documentRepository.convert(documentRepository.getOne(pictureId));
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  @Transactional
+  public void setPicture(String userId, Document picture) {
+    final UserEntity userEntity = userRepository.getOne(userId);
+    if (userEntity != null) {
+      if (picture != null) {
+        userEntity.setPictureId(picture.getId());
+        documentRepository.save(documentRepository.convert(picture));
+        userPictureProviderService.addUserPicture(userId, picture.getData());
+        userRepository.save(userEntity);
+      }
+    }
+  }
+
   /**
    * Add initial demo entities: roles and users.
    */
   @PostConstruct
   public void init() {
-    log.debug("Check and initialise roles and users");
-    RoleEntity roleAdmin = roleRepository.findByName("root");
-    if (roleAdmin == null) {
-      roleAdmin = roleRepository.save(roleRepository.convert(RoleService.ROOT_ROLE));
-    }
-    RoleEntity roleUser = roleRepository.findByName("user");
-    if (roleUser == null) {
-      roleUser = roleRepository.save(new RoleEntity("user"));
+    initRoles();
+    initUsers();
+  }
+
+  /**
+   * Add roles: root, super user and user.
+   */
+  private void initRoles() {
+    log.info("Check and initialise roles");
+
+    if (!roleRepository.exists(Role.ROOT_ID)) {
+      roleRepository.save(roleRepository.convert(Role.ROOT));
     }
 
-    if (userRepository.findByName("alice") == null) {
-      UserEntity alice = new UserEntity("alice", "Alice", "test");
-      alice.setPicture(readDefaultUserPicture("alice.jpg"));
-      alice.getRoles().add(roleUser);
-      userRepository.save(alice);
+    if (!roleRepository.exists(SUPER_USER)) {
+      Role roleSuperUser = new Role(SUPER_USER);
+      Set<String> permissions = new HashSet<>();
+
+      permissions.add(ReadTaskPermission.class.getName());
+      permissions.add(CreateTaskPermission.class.getName());
+      permissions.add(UpdateTaskPermission.class.getName());
+      permissions.add(ViewAllTasksPermission.class.getName());
+      roleSuperUser.setPermissions(permissions);
+
+      roleRepository.save(roleRepository.convert(roleSuperUser));
     }
 
-    if (userRepository.findByName("bob") == null) {
-      UserEntity bob = new UserEntity("bob", "Bob", "test");
-      bob.setPicture(readDefaultUserPicture("bob.jpg"));
-      bob.getRoles().add(roleUser);
-      userRepository.save(bob);
-    }
+    if (!roleRepository.exists(USER)) {
+      Role roleUser = new Role(USER);
+      Set<String> permissions = new HashSet<>();
 
-    if (userRepository.findByName("eclipse") == null) {
-      UserEntity eclipse = new UserEntity("eclipse", "Eclipse", "scout");
-      eclipse.setPicture(readDefaultUserPicture("eclipse.jpg"));
-      eclipse.getRoles().add(roleUser);
-      eclipse.getRoles().add(roleAdmin);
-      userRepository.save(eclipse);
+      permissions.add(ReadTaskPermission.class.getName());
+      permissions.add(CreateTaskPermission.class.getName());
+      permissions.add(UpdateTaskPermission.class.getName());
+      roleUser.setPermissions(permissions);
+
+      roleRepository.save(roleRepository.convert(roleUser));
     }
   }
 
-  protected byte[] readDefaultUserPicture(String image) {
-    try {
-      return IOUtility.readFromUrl(ResourceBase.class.getResource("img/user/" + image));
-    }
-    catch (IOException e) {
-      log.error("Error while loading " + image, e);
-    }
-    return null;
-  }
+  /**
+   * Add users: root, alice and bob.
+   */
+  private void initUsers() {
+    log.info("Check and initialise users");
 
-  @Override
-  @Transactional
-  public void addUser(User user) {
-    save(user, true);
-  }
+    if (!userRepository.exists(USER_ROOT)) {
+      User root = new User(USER_ROOT, "Root", "cando");
+      root.getRoles().add(Role.ROOT_ID);
 
-  @Override
-  @Transactional
-  public void saveUser(User user) {
-    save(user, false);
-  }
+      Document picture = getDefaultUserPicture(USER_ROOT, "eclipse.jpg");
+      root.setPictureId(picture.getId());
 
-  @Override
-  @Transactional(readOnly = true)
-  public User getUser(UUID user) {
-    return userRepository.getOne(user) != null ? userRepository.convert(userRepository.getOne(user)) : null;
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public User getUser(String userName) {
-    return userRepository.findByName(userName) != null ? userRepository.convert(userRepository.findByName(userName)) : null;
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public List<User> getUsers() {
-    return userRepository.findAll().stream().map(u -> userRepository.convert(u)).collect(Collectors.toList());
-  }
-
-  protected void save(User user, boolean addUser) {
-    if (user == null) {
-      throw new VetoException(TEXTS.get("UserToSaveIsNull"));
+      userRepository.save(userRepository.convert(root));
     }
 
-    UserEntity existingUser = userRepository.findByName(user.getName());
-    if (addUser && existingUser != null) {
-      throw new VetoException(TEXTS.get("UserToSaveExists"), user.getName());
-    }
-    else if (existingUser == null && !addUser) {
-      throw new VetoException(TEXTS.get("UserToSaveIsMissing"), user.getName());
+    if (!userRepository.exists(USER_ALICE)) {
+      User alice = new User(USER_ALICE, "Alice", "test");
+      alice.getRoles().add(USER);
+      alice.getRoles().add(SUPER_USER);
+
+      Document picture = getDefaultUserPicture(USER_ALICE, "alice.jpg");
+      alice.setPictureId(picture.getId());
+
+      userRepository.save(userRepository.convert(alice));
     }
 
-    UserEntity userEntity = userRepository.save(userRepository.convert(user));
-    userEntity.setRoles(user.getRoles().stream()
-        .map(r -> roleRepository.getOne(r))
-        .collect(Collectors.toSet()));
-  }
+    if (!userRepository.exists(USER_BOB)) {
+      User bob = new User(USER_BOB, "Bob", "test");
+      bob.getRoles().add(USER);
 
-  @Override
-  @Transactional(readOnly = true)
-  public byte[] getUserPicture(UUID user) {
-    final UserEntity userEntity = userRepository.getOne(user);
-    if (userEntity != null) {
-      return userEntity.getPicture();
-    }
-    return null;
-  }
+      Document picture = getDefaultUserPicture(USER_BOB, "bob.jpg");
+      bob.setPictureId(picture.getId());
 
-  @Override
-  @Transactional
-  public void setUserPicture(UUID user, byte[] picture) {
-    final UserEntity userEntity = userRepository.getOne(user);
-    if (userEntity != null) {
-      userEntity.setPicture(picture);
+      userRepository.save(userRepository.convert(bob));
     }
   }
 }

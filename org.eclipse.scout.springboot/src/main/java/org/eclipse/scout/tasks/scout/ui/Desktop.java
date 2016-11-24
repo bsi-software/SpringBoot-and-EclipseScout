@@ -113,13 +113,25 @@ public class Desktop extends AbstractDesktop {
     }
 
     @Override
+    protected String getConfiguredKeyStroke() {
+      return IKeyStroke.F10;
+    }
+
+    @Override
     protected String getConfiguredTooltipText() {
       return TEXTS.get("Options");
     }
 
+    /**
+     * Force a reload of the user data when the options form is shown again.
+     */
     @Override
-    protected void startForm() {
-      getForm().startDefault();
+    protected void execSelectionChanged(boolean selected) {
+      super.execSelectionChanged(selected);
+
+      if (selected && getForm().isFormStarted()) {
+        ((OptionsForm) getForm()).reload();
+      }
     }
 
     @Override
