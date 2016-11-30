@@ -5,8 +5,8 @@ import java.util.Collection;
 import javax.inject.Inject;
 
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.data.Task;
-import org.eclipse.scout.tasks.spring.service.TaskService;
+import org.eclipse.scout.tasks.model.Task;
+import org.eclipse.scout.tasks.service.TaskService;
 
 public class InboxTablePage extends AbstractTaskTablePage {
 

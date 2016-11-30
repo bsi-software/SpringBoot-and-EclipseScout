@@ -1,25 +1,23 @@
-package org.eclipse.scout.tasks.model;
+package org.eclipse.scout.tasks.spring.persistence;
 
 import java.util.UUID;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Type;
-import org.springframework.data.domain.Persistable;
+import org.eclipse.scout.tasks.spring.persistence.converter.UuidConverter;
 
 @Entity
-public class DocumentEntity implements Persistable<UUID> {
-
-  private static final long serialVersionUID = 1L;
+public class DocumentEntity {
 
   @Id
-  @Type(type = "uuid-char")
+  @Convert(converter = UuidConverter.class)
   private UUID id = UUID.randomUUID();
 
-  @NotNull
+  @Column(nullable = false)
   private String name;
 
   @Lob
@@ -40,7 +38,6 @@ public class DocumentEntity implements Persistable<UUID> {
     setData(data);
   }
 
-  @Override
   public UUID getId() {
     return id;
   }
@@ -97,10 +94,5 @@ public class DocumentEntity implements Persistable<UUID> {
   @Override
   public int hashCode() {
     return id == null ? 0 : id.hashCode();
-  }
-
-  @Override
-  public boolean isNew() {
-    return getId() == null;
   }
 }

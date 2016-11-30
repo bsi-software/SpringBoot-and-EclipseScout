@@ -1,41 +1,44 @@
-package org.eclipse.scout.tasks.model;
+package org.eclipse.scout.tasks.spring.persistence;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Type;
-import org.springframework.data.domain.Persistable;
+import org.eclipse.scout.tasks.spring.persistence.converter.LocaleConverter;
+import org.eclipse.scout.tasks.spring.persistence.converter.UuidConverter;
 
+// TODO [mzi] follow pattern used for role, extend Role class here
 @Entity
-public class UserEntity implements Persistable<String> {
-  private static final long serialVersionUID = 1L;
+public class UserEntity {
 
   @Id
   private String id;
 
-  @NotNull
+  @Column(nullable = false)
   private String firstName;
   private String lastName;
 
-  @NotNull
+  @Column(nullable = false)
   private String passwordHash;
-  @NotNull
+  @Column(nullable = false)
   private String passwordSalt;
-  private String locale;
 
-  @Type(type = "uuid-char")
+  @Convert(converter = LocaleConverter.class)
+  private Locale locale;
+
+  @Convert(converter = UuidConverter.class)
   private UUID pictureId;
 
   @ManyToMany
   private Set<RoleEntity> roles = new HashSet<>();
 
-  @Override
   public String getId() {
     return id;
   }
@@ -76,11 +79,11 @@ public class UserEntity implements Persistable<String> {
     this.passwordSalt = passwordSalt;
   }
 
-  public String getLocale() {
+  public Locale getLocale() {
     return locale;
   }
 
-  public void setLocale(String locale) {
+  public void setLocale(Locale locale) {
     this.locale = locale;
   }
 
@@ -124,11 +127,6 @@ public class UserEntity implements Persistable<String> {
   @Override
   public int hashCode() {
     return id == null ? 0 : id.hashCode();
-  }
-
-  @Override
-  public boolean isNew() {
-    return getId() == null;
   }
 
 }

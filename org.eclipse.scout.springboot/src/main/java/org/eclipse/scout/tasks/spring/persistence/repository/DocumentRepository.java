@@ -1,9 +1,9 @@
-package org.eclipse.scout.tasks.spring.repository;
+package org.eclipse.scout.tasks.spring.persistence.repository;
 
 import java.util.UUID;
 
-import org.eclipse.scout.tasks.data.Document;
-import org.eclipse.scout.tasks.model.DocumentEntity;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.spring.persistence.DocumentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DocumentRepository extends JpaRepository<DocumentEntity, UUID> {

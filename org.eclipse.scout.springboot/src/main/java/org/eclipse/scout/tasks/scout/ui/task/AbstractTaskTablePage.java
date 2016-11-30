@@ -34,12 +34,12 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.common.security.IAccessControlService;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.eclipse.scout.tasks.data.Task;
+import org.eclipse.scout.tasks.model.Task;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.task.AbstractTaskTablePage.Table;
 import org.eclipse.scout.tasks.scout.ui.user.UserLookupCall;
 import org.eclipse.scout.tasks.scout.ui.user.UserPictureProviderService;
-import org.eclipse.scout.tasks.spring.service.TaskService;
+import org.eclipse.scout.tasks.service.TaskService;
 
 @Bean
 public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
@@ -279,7 +279,16 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
+      protected boolean getConfiguredVisible() {
+        return accessAllowed();
+      }
+
+      @Override
       protected void execAction() {
+        if (!accessAllowed()) {
+          return;
+        }
+
         boolean listHasChanged = false;
 
         for (UUID taskId : getIdColumn().getSelectedValues()) {
@@ -304,6 +313,10 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
         }
 
         return false;
+      }
+
+      private boolean accessAllowed() {
+        return BEANS.get(IAccessControlService.class).checkPermission(new UpdateTaskPermission());
       }
     }
 

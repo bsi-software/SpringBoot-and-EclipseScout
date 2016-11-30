@@ -1,17 +1,33 @@
-package org.eclipse.scout.tasks.data;
+package org.eclipse.scout.tasks.spring.persistence;
 
 import java.util.Date;
 import java.util.UUID;
 
-public class Task {
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+import org.eclipse.scout.tasks.spring.persistence.converter.UuidConverter;
+
+@Entity
+public class TaskEntity {
+
+  @Id
+  @Convert(converter = UuidConverter.class)
   private UUID id = UUID.randomUUID();
 
+  @Column(nullable = false)
   private String name;
   private String description;
 
+  @Column(nullable = false)
   private String assignedBy;
+
+  @Column(nullable = false)
   private String responsible;
 
+  @Column(nullable = false)
   private Date dueDate;
   private Date assignedAt;
   private Date reminder;
@@ -104,17 +120,17 @@ public class Task {
    */
   @Override
   public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof Task)) {
+    if (obj == null || !(obj instanceof DocumentEntity)) {
       return false;
     }
 
-    Task task = (Task) obj;
+    DocumentEntity user = (DocumentEntity) obj;
 
-    if (task.getId() == null) {
+    if (user.getId() == null) {
       return false;
     }
 
-    return task.getId().equals(id);
+    return user.getId().equals(id);
   }
 
   /**

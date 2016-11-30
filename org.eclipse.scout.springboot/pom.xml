@@ -15,6 +15,7 @@
 		<scout.version>6.1.0.M3</scout.version>
 		<java.version>1.8</java.version>
 		<javax.inject.version>1</javax.inject.version>
+		<modelmapper.version>0.7.5</modelmapper.version>
 	</properties>
 
 	<dependencies>
@@ -36,6 +37,11 @@
 		</dependency>
 
 		<!-- Miscellaneous dependencies -->
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>${modelmapper.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>

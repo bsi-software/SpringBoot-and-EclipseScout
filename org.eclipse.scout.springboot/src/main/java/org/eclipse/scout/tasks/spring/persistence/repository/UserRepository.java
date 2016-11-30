@@ -1,11 +1,10 @@
-package org.eclipse.scout.tasks.spring.repository;
+package org.eclipse.scout.tasks.spring.persistence.repository;
 
-import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.eclipse.scout.tasks.data.User;
-import org.eclipse.scout.tasks.model.RoleEntity;
-import org.eclipse.scout.tasks.model.UserEntity;
+import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.spring.persistence.RoleEntity;
+import org.eclipse.scout.tasks.spring.persistence.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<UserEntity, String> {
@@ -19,10 +18,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
       userEntity.setFirstName(user.getFirstName());
       userEntity.setLastName(user.getLastName());
       userEntity.setPictureId(user.getPictureId());
-
-      if (user.getLocale() != null) {
-        userEntity.setLocale(user.getLocale().toLanguageTag());
-      }
+      userEntity.setLocale(user.getLocale());
 
       userEntity.setRoles(user.getRoles()
           .stream()
@@ -41,10 +37,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     user.setFirstName(userEntity.getFirstName());
     user.setLastName(userEntity.getLastName());
     user.setPictureId(userEntity.getPictureId());
-
-    if (userEntity.getLocale() != null) {
-      user.setLocale(Locale.forLanguageTag(userEntity.getLocale()));
-    }
+    user.setLocale(userEntity.getLocale());
 
     user.setRoles(userEntity.getRoles()
         .stream()

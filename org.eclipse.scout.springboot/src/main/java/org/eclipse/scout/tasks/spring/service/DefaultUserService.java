@@ -10,10 +10,9 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.scout.rt.platform.util.IOUtility;
-import org.eclipse.scout.tasks.data.Document;
-import org.eclipse.scout.tasks.data.Role;
-import org.eclipse.scout.tasks.data.User;
-import org.eclipse.scout.tasks.model.UserEntity;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.Role;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.scout.auth.AccessControlService;
 import org.eclipse.scout.tasks.scout.ui.ResourceBase;
 import org.eclipse.scout.tasks.scout.ui.task.CreateTaskPermission;
@@ -21,9 +20,11 @@ import org.eclipse.scout.tasks.scout.ui.task.ReadTaskPermission;
 import org.eclipse.scout.tasks.scout.ui.task.UpdateTaskPermission;
 import org.eclipse.scout.tasks.scout.ui.task.ViewAllTasksPermission;
 import org.eclipse.scout.tasks.scout.ui.user.UserPictureProviderService;
-import org.eclipse.scout.tasks.spring.repository.DocumentRepository;
-import org.eclipse.scout.tasks.spring.repository.RoleRepository;
-import org.eclipse.scout.tasks.spring.repository.UserRepository;
+import org.eclipse.scout.tasks.service.RoleService;
+import org.eclipse.scout.tasks.service.UserService;
+import org.eclipse.scout.tasks.spring.persistence.UserEntity;
+import org.eclipse.scout.tasks.spring.persistence.repository.DocumentRepository;
+import org.eclipse.scout.tasks.spring.persistence.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class DefaultUserService implements UserService {
   private UserRepository userRepository;
 
   @Autowired
-  private RoleRepository roleRepository;
+  private RoleService roleService;
 
   @Autowired
   private DocumentRepository documentRepository;
@@ -105,7 +106,7 @@ public class DefaultUserService implements UserService {
     UserEntity userEntity = userRepository.save(userRepository.convert(user));
     userEntity.setRoles(user.getRoles()
         .stream()
-        .map(r -> roleRepository.getOne(r))
+        .map(r -> DefaultRoleService.convert(roleService.get(r)))
         .collect(Collectors.toSet()));
 
     accessControlService.clearCache();
@@ -119,7 +120,7 @@ public class DefaultUserService implements UserService {
     if (userEntity != null) {
       return userEntity.getRoles()
           .stream()
-          .map(r -> roleRepository.convert(r))
+          .map(r -> DefaultRoleService.convert(r))
           .collect(Collectors.toSet());
     }
 
@@ -177,11 +178,11 @@ public class DefaultUserService implements UserService {
   private void initRoles() {
     LOG.info("Check and initialise roles");
 
-    if (!roleRepository.exists(Role.ROOT_ID)) {
-      roleRepository.save(roleRepository.convert(Role.ROOT));
+    if (!roleService.exists(Role.ROOT_ID)) {
+      roleService.save(Role.ROOT);
     }
 
-    if (!roleRepository.exists(SUPER_USER)) {
+    if (!roleService.exists(SUPER_USER)) {
       Role roleSuperUser = new Role(SUPER_USER);
       Set<String> permissions = new HashSet<>();
 
@@ -191,10 +192,10 @@ public class DefaultUserService implements UserService {
       permissions.add(ViewAllTasksPermission.class.getName());
       roleSuperUser.setPermissions(permissions);
 
-      roleRepository.save(roleRepository.convert(roleSuperUser));
+      roleService.save(roleSuperUser);
     }
 
-    if (!roleRepository.exists(USER)) {
+    if (!roleService.exists(USER)) {
       Role roleUser = new Role(USER);
       Set<String> permissions = new HashSet<>();
 
@@ -203,7 +204,7 @@ public class DefaultUserService implements UserService {
       permissions.add(UpdateTaskPermission.class.getName());
       roleUser.setPermissions(permissions);
 
-      roleRepository.save(roleRepository.convert(roleUser));
+      roleService.save(roleUser);
     }
   }
 
@@ -213,42 +214,9 @@ public class DefaultUserService implements UserService {
   private void initUsers() {
     LOG.info("Check and initialise users");
 
-    addUser(USER_ROOT, "Root", "cando", "eclipse.jpg", Role.ROOT_ID, null);
+    addUser(USER_ROOT, "Root", "eclipse", "eclipse.jpg", Role.ROOT_ID, null);
     addUser(USER_ALICE, "Alice", "test", "alice.jpg", USER, SUPER_USER);
     addUser(USER_BOB, "Bob", "test", "bob.jpg", USER, null);
-
-    /*
-    if (!userRepository.exists(USER_ROOT)) {
-      User root = new User(USER_ROOT, "Root", "cando");
-      root.getRoles().add(Role.ROOT_ID);
-    
-      Document picture = getDefaultUserPicture(USER_ROOT, "eclipse.jpg");
-      root.setPictureId(picture.getId());
-    
-      userRepository.save(userRepository.convert(root));
-    }
-    
-    if (!userRepository.exists(USER_ALICE)) {
-      User alice = new User(USER_ALICE, "Alice", "test");
-      alice.getRoles().add(USER);
-      alice.getRoles().add(SUPER_USER);
-    
-      Document picture = getDefaultUserPicture(USER_ALICE, "alice.jpg");
-      alice.setPictureId(picture.getId());
-    
-      userRepository.save(userRepository.convert(alice));
-    }
-    
-    if (!userRepository.exists(USER_BOB)) {
-      User bob = new User(USER_BOB, "Bob", "test");
-      bob.getRoles().add(USER);
-    
-      Document picture = getDefaultUserPicture(USER_BOB, "bob.jpg");
-      bob.setPictureId(picture.getId());
-    
-      userRepository.save(userRepository.convert(bob));
-    }
-     */
   }
 
   private void addUser(String login, String firstName, String password, String pictureFile, String role1, String role2) {

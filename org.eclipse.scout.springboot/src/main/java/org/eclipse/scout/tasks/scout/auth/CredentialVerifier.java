@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.eclipse.scout.rt.platform.security.ICredentialVerifier;
 import org.eclipse.scout.rt.platform.util.StringUtility;
-import org.eclipse.scout.tasks.data.User;
-import org.eclipse.scout.tasks.spring.service.UserService;
+import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.service.UserService;
 
 public class CredentialVerifier implements ICredentialVerifier {
 

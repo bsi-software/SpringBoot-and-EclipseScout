@@ -1,9 +1,9 @@
-package org.eclipse.scout.tasks.spring.service;
+package org.eclipse.scout.tasks.service;
 
 import java.util.Collection;
 import java.util.UUID;
 
-import org.eclipse.scout.tasks.data.Task;
+import org.eclipse.scout.tasks.model.Task;
 
 public interface TaskService extends ValidatorService {
 

@@ -22,7 +22,7 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
-import org.eclipse.scout.tasks.data.Role;
+import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.OkButton;
@@ -30,7 +30,7 @@ import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField.Table;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.RoleIdField;
-import org.eclipse.scout.tasks.spring.service.RoleService;
+import org.eclipse.scout.tasks.service.RoleService;
 
 @Bean
 public class RoleForm extends AbstractForm {

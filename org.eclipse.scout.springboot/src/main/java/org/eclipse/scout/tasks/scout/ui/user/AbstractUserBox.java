@@ -15,8 +15,8 @@ import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.eclipse.scout.tasks.data.Document;
-import org.eclipse.scout.tasks.data.User;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.User;
 
 public abstract class AbstractUserBox extends AbstractGroupBox {
 
@@ -40,6 +40,11 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
 
   public LoacleField getLoacleField() {
     return getFieldByClass(LoacleField.class);
+  }
+
+  @Override
+  protected double getConfiguredGridWeightY() {
+    return 0;
   }
 
   @Order(10)
@@ -78,6 +83,11 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     @Override
     protected String getConfiguredLabel() {
       return TEXTS.get("Language");
+    }
+
+    @Override
+    protected boolean getConfiguredMandatory() {
+      return true;
     }
 
     @Override

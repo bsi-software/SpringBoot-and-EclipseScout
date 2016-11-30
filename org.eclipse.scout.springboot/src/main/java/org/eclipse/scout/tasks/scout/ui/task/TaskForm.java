@@ -20,7 +20,7 @@ import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.eclipse.scout.tasks.data.Task;
+import org.eclipse.scout.tasks.model.Task;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.CancelButton;
@@ -37,7 +37,7 @@ import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.ReminderFie
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.ResponsibleField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.TitleField;
 import org.eclipse.scout.tasks.scout.ui.user.UserLookupCall;
-import org.eclipse.scout.tasks.spring.service.TaskService;
+import org.eclipse.scout.tasks.service.TaskService;
 
 @Bean
 public class TaskForm extends AbstractForm {

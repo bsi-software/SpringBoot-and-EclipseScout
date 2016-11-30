@@ -21,8 +21,8 @@ import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.data.Document;
-import org.eclipse.scout.tasks.data.User;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.scout.auth.PasswordUtility;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.user.UserForm.MainBox.CancelButton;
@@ -31,9 +31,9 @@ import org.eclipse.scout.tasks.scout.ui.user.UserForm.MainBox.PasswordField;
 import org.eclipse.scout.tasks.scout.ui.user.UserForm.MainBox.RoleTableField;
 import org.eclipse.scout.tasks.scout.ui.user.UserForm.MainBox.RoleTableField.Table;
 import org.eclipse.scout.tasks.scout.ui.user.UserForm.MainBox.UserBox;
-import org.eclipse.scout.tasks.spring.service.DocumentService;
-import org.eclipse.scout.tasks.spring.service.RoleService;
-import org.eclipse.scout.tasks.spring.service.UserService;
+import org.eclipse.scout.tasks.service.DocumentService;
+import org.eclipse.scout.tasks.service.RoleService;
+import org.eclipse.scout.tasks.service.UserService;
 
 @Bean
 public class UserForm extends AbstractForm {

@@ -8,8 +8,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
-import org.eclipse.scout.tasks.data.Task;
-import org.eclipse.scout.tasks.spring.repository.TaskRepository;
+import org.eclipse.scout.tasks.model.Task;
+import org.eclipse.scout.tasks.service.TaskService;
+import org.eclipse.scout.tasks.spring.persistence.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

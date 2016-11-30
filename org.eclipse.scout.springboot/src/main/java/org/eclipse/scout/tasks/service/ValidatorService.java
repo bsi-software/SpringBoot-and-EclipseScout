@@ -1,4 +1,4 @@
-package org.eclipse.scout.tasks.spring.service;
+package org.eclipse.scout.tasks.service;
 
 import java.util.Set;
 

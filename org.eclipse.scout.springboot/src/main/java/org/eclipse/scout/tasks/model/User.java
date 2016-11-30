@@ -1,4 +1,4 @@
-package org.eclipse.scout.tasks.data;
+package org.eclipse.scout.tasks.model;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -11,9 +11,9 @@ import javax.validation.constraints.Size;
 
 import org.eclipse.scout.tasks.scout.auth.PasswordUtility;
 
-public class User {
+public class User extends Model<String> {
 
-  public static final Locale LOCALE_DEFAULT = Locale.forLanguageTag("en_US");
+  public static final Locale LOCALE_DEFAULT = Locale.forLanguageTag("en-US");
 
   public static final int ID_LENGTH_MIN = 3;
   public static final int ID_LENGTH_MAX = 32;
@@ -25,10 +25,12 @@ public class User {
   public static final int FIRST_NAME_LENGTH_MAX = 64;
   public static final String FIRST_NAME_ERROR_LENGTH = "FirstNameErrorLength";
 
-  @NotNull
   @Size(min = ID_LENGTH_MIN, max = ID_LENGTH_MAX, message = ID_ERROR_LENGTH)
   @Pattern(regexp = ID_PATTERN, message = ID_ERROR_PATTERN)
-  private String id;
+  @Override
+  public String getId() {
+    return super.getId();
+  }
 
   @NotNull
   private String passwordHash;
@@ -52,19 +54,12 @@ public class User {
   }
 
   public User(String userId, String firstName, String passwordPlain) {
-    this.id = userId;
+    super(userId);
+
     this.firstName = firstName;
     this.passwordSalt = PasswordUtility.generatePasswordSalt();
     this.passwordHash = PasswordUtility.calculatePasswordHash(passwordPlain, passwordSalt);
     this.locale = LOCALE_DEFAULT;
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String userId) {
-    id = userId;
   }
 
   public String getPasswordHash() {
@@ -121,32 +116,6 @@ public class User {
 
   public void setRoles(Set<String> roles) {
     this.roles = roles;
-  }
-
-  /**
-   * Returns true if the two objects share the same user id, false otherwise.
-   */
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof User)) {
-      return false;
-    }
-
-    User user = (User) obj;
-
-    if (user.getId() == null) {
-      return false;
-    }
-
-    return user.getId().equals(id);
-  }
-
-  /**
-   * returns the hash code of the user id of this object.
-   */
-  @Override
-  public int hashCode() {
-    return id == null ? 0 : id.hashCode();
   }
 
   @Override

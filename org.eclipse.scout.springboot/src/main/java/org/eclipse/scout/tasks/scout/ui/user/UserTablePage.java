@@ -24,9 +24,9 @@ import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tasks.data.User;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.scout.ui.user.UserTablePage.Table;
-import org.eclipse.scout.tasks.spring.service.UserService;
+import org.eclipse.scout.tasks.service.UserService;
 
 @Bean
 public class UserTablePage extends AbstractPageWithTable<Table> {

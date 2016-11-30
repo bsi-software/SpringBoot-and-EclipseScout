@@ -20,10 +20,10 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tasks.data.Role;
+import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.scout.ui.user.RoleForm.MainBox.RoleBox.PermissionTableField.Table.NameColumn;
 import org.eclipse.scout.tasks.scout.ui.user.RoleTablePage.Table;
-import org.eclipse.scout.tasks.spring.service.RoleService;
+import org.eclipse.scout.tasks.service.RoleService;
 
 @Bean
 public class RoleTablePage extends AbstractPageWithTable<Table> {

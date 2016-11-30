@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.eclipse.scout.tasks.data.Document;
-import org.eclipse.scout.tasks.spring.repository.DocumentRepository;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.service.DocumentService;
+import org.eclipse.scout.tasks.spring.persistence.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

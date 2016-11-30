@@ -1,10 +1,10 @@
-package org.eclipse.scout.tasks.spring.repository;
+package org.eclipse.scout.tasks.spring.persistence.repository;
 
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.scout.tasks.data.Task;
-import org.eclipse.scout.tasks.model.TaskEntity;
+import org.eclipse.scout.tasks.model.Task;
+import org.eclipse.scout.tasks.spring.persistence.TaskEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TaskRepository extends JpaRepository<TaskEntity, UUID> {

@@ -1,14 +1,18 @@
 package org.eclipse.scout.tasks.spring.service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.scout.tasks.data.Role;
-import org.eclipse.scout.tasks.model.RoleEntity;
+import javax.annotation.PostConstruct;
+
+import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.scout.auth.AccessControlService;
-import org.eclipse.scout.tasks.spring.repository.RoleRepository;
+import org.eclipse.scout.tasks.service.RoleService;
+import org.eclipse.scout.tasks.spring.persistence.RoleEntity;
+import org.eclipse.scout.tasks.spring.persistence.repository.RoleRepository;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.spi.MappingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +31,7 @@ public class DefaultRoleService implements RoleService {
   public List<Role> getAll() {
     return roleRepository.findAll()
         .stream()
-        .map(r -> roleRepository.convert(r))
+        .map(r -> convert(r))
         .collect(Collectors.toList());
   }
 
@@ -39,27 +43,54 @@ public class DefaultRoleService implements RoleService {
   @Override
   @Transactional(readOnly = true)
   public Role get(String roleId) {
-    return roleRepository.convert(roleRepository.getOne(roleId));
+    return convert(roleRepository.getOne(roleId));
   }
 
   @Override
   @Transactional
   public void save(Role role) {
-    roleRepository.save(roleRepository.convert(role));
+    roleRepository.save(convert(role));
     accessControlService.clearCache();
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public Set<String> getPermissions(String roleId) {
-    RoleEntity role = roleRepository.getOne(roleId);
+  private static ModelMapper mapper;
 
-    if (role != null) {
-      role.getPermissions().size();
-      return role.getPermissions();
-    }
+  @PostConstruct
+  private static void initMapper() {
+    mapper = new ModelMapper();
+    mapper.createTypeMap(RoleEntity.class, Role.class).setPostConverter(new Converter<RoleEntity, Role>() {
+      @Override
+      public Role convert(MappingContext<RoleEntity, Role> context) {
+        context.getDestination().setPermissions(
+            context.getSource().getPermissions()
+                .stream()
+                .map(p -> new String(p))
+                .collect(Collectors.toSet()));
 
-    return new HashSet<String>();
+        return context.getDestination();
+      }
+    });
+
+    mapper.createTypeMap(Role.class, RoleEntity.class).setPostConverter(new Converter<Role, RoleEntity>() {
+      @Override
+      public RoleEntity convert(MappingContext<Role, RoleEntity> context) {
+        context.getDestination().setPermissions(
+            context.getSource().getPermissions()
+                .stream()
+                .map(p -> new String(p))
+                .collect(Collectors.toSet()));
+
+        return context.getDestination();
+      }
+    });
+  }
+
+  public static Role convert(RoleEntity role) {
+    return mapper.map(role, Role.class);
+  }
+
+  public static RoleEntity convert(Role role) {
+    return mapper.map(role, RoleEntity.class);
   }
 
 }

@@ -1,34 +1,28 @@
-package org.eclipse.scout.tasks.data;
+package org.eclipse.scout.tasks.model;
 
 import java.util.UUID;
 
-public class Document {
+public class Document extends Model<UUID> {
 
   public static final int TYPE_OTHER = 0;
   public static final int TYPE_PICTURE = 1;
 
-  private UUID id = UUID.randomUUID();
   private String name;
   private byte[] data;
   private int type;
   private long size;
 
   public Document() {
+    setId(UUID.randomUUID());
   }
 
   public Document(String name, byte[] data, int type) {
+    setId(UUID.randomUUID());
+
     this.name = name;
     this.type = type;
 
     setData(data);
-  }
-
-  public UUID getId() {
-    return id;
-  }
-
-  public void setId(UUID id) {
-    this.id = id;
   }
 
   public String getName() {

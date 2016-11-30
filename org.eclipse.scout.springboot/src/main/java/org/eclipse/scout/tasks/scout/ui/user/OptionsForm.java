@@ -13,8 +13,8 @@ import org.eclipse.scout.rt.client.ui.form.fields.sequencebox.AbstractSequenceBo
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.data.Document;
-import org.eclipse.scout.tasks.data.User;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.scout.auth.PasswordUtility;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.user.OptionsForm.MainBox.ApplyButton;
@@ -26,8 +26,8 @@ import org.eclipse.scout.tasks.scout.ui.user.OptionsForm.MainBox.ChangePasswordB
 import org.eclipse.scout.tasks.scout.ui.user.OptionsForm.MainBox.ChangePasswordBox.OldPasswordField;
 import org.eclipse.scout.tasks.scout.ui.user.OptionsForm.MainBox.ChangePasswordBox.UpdateLinkButton;
 import org.eclipse.scout.tasks.scout.ui.user.OptionsForm.MainBox.UserBox;
-import org.eclipse.scout.tasks.spring.service.DocumentService;
-import org.eclipse.scout.tasks.spring.service.UserService;
+import org.eclipse.scout.tasks.service.DocumentService;
+import org.eclipse.scout.tasks.service.UserService;
 
 @Bean
 public class OptionsForm extends AbstractForm {
@@ -248,9 +248,14 @@ public class OptionsForm extends AbstractForm {
     }
 
     public class DummyField extends AbstractPlaceholderField {
+//      @Override
+//      protected String getConfiguredCssClass() {
+//        return "options-form-bottom-placeholder";
+//      }
+
       @Override
-      protected String getConfiguredCssClass() {
-        return "options-form-bottom-placeholder";
+      protected int getConfiguredHeightInPixel() {
+        return 6;
       }
 
       @Override

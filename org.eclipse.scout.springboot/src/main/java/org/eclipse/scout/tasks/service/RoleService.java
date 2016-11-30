@@ -1,9 +1,8 @@
-package org.eclipse.scout.tasks.spring.service;
+package org.eclipse.scout.tasks.service;
 
 import java.util.List;
-import java.util.Set;
 
-import org.eclipse.scout.tasks.data.Role;
+import org.eclipse.scout.tasks.model.Role;
 
 public interface RoleService extends ValidatorService {
 
@@ -14,7 +13,5 @@ public interface RoleService extends ValidatorService {
   void save(Role role);
 
   Role get(String roleId);
-
-  Set<String> getPermissions(String roleId);
 
 }

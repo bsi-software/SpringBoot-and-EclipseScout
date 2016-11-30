@@ -1,11 +1,11 @@
-package org.eclipse.scout.tasks.spring.service;
+package org.eclipse.scout.tasks.service;
 
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.scout.tasks.data.Document;
-import org.eclipse.scout.tasks.data.Role;
-import org.eclipse.scout.tasks.data.User;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.Role;
+import org.eclipse.scout.tasks.model.User;
 
 public interface UserService extends ValidatorService<User> {
 
