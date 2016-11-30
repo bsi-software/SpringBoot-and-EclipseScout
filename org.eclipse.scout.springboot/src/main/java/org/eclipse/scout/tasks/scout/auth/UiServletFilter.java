@@ -27,7 +27,6 @@ public class UiServletFilter implements Filter {
 
   private CredentialVerifier credentialVerifier;
 
-  // TODO [mzi] check if this is really needed
   public UiServletFilter(TrivialAccessController tac, FormBasedAccessController fac, ScoutSpringDevAccessController dac, CredentialVerifier cv) {
     trivialAccessController = tac;
     formBasedAccessController = fac;

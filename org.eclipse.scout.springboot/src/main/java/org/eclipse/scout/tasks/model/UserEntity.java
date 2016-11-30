@@ -24,7 +24,9 @@ public class UserEntity implements Persistable<String> {
   private String lastName;
 
   @NotNull
-  private String password;
+  private String passwordHash;
+  @NotNull
+  private String passwordSalt;
   private String locale;
 
   @Type(type = "uuid-char")
@@ -58,12 +60,20 @@ public class UserEntity implements Persistable<String> {
     this.lastName = lastName;
   }
 
-  public String getPassword() {
-    return password;
+  public String getPasswordHash() {
+    return passwordHash;
   }
 
-  public void setPassword(String password) {
-    this.password = password;
+  public void setPasswordHash(String password) {
+    this.passwordHash = password;
+  }
+
+  public String getPasswordSalt() {
+    return passwordSalt;
+  }
+
+  public void setPasswordSalt(String passwordSalt) {
+    this.passwordSalt = passwordSalt;
   }
 
   public String getLocale() {

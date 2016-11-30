@@ -42,11 +42,69 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     return getFieldByClass(LoacleField.class);
   }
 
-  public PasswordField getPasswordField() {
-    return getFieldByClass(PasswordField.class);
+  @Order(10)
+  public class FirstNameField extends AbstractStringField {
+    @Override
+    protected String getConfiguredLabel() {
+      return TEXTS.get("FirstName");
+    }
+
+    @Override
+    protected boolean getConfiguredMandatory() {
+      return true;
+    }
+
+    @Override
+    protected int getConfiguredMaxLength() {
+      return 128;
+    }
   }
 
-  @Order(10)
+  @Order(20)
+  public class LastNameField extends AbstractStringField {
+    @Override
+    protected String getConfiguredLabel() {
+      return TEXTS.get("LastName");
+    }
+
+    @Override
+    protected int getConfiguredMaxLength() {
+      return 128;
+    }
+  }
+
+  @Order(30)
+  public class LoacleField extends AbstractSmartField<Locale> {
+    @Override
+    protected String getConfiguredLabel() {
+      return TEXTS.get("Language");
+    }
+
+    @Override
+    protected Class<? extends ILookupCall<Locale>> getConfiguredLookupCall() {
+      return LocaleLookupCall.class;
+    }
+  }
+
+  @Order(40)
+  public class UserIdField extends AbstractStringField {
+    @Override
+    protected String getConfiguredLabel() {
+      return TEXTS.get("UserName");
+    }
+
+    @Override
+    protected boolean getConfiguredMandatory() {
+      return true;
+    }
+
+    @Override
+    protected int getConfiguredMaxLength() {
+      return 128;
+    }
+  }
+
+  @Order(60)
   public class PictureField extends AbstractImageField {
 
     private Document picture;
@@ -116,100 +174,15 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     }
   }
 
-  @Order(20)
-  public class FirstNameField extends AbstractStringField {
-    @Override
-    protected String getConfiguredLabel() {
-      return TEXTS.get("FirstName");
-    }
-
-    @Override
-    protected boolean getConfiguredMandatory() {
-      return true;
-    }
-
-    @Override
-    protected int getConfiguredMaxLength() {
-      return 128;
-    }
-  }
-
-  @Order(30)
-  public class LastNameField extends AbstractStringField {
-    @Override
-    protected String getConfiguredLabel() {
-      return TEXTS.get("LastName");
-    }
-
-    @Override
-    protected int getConfiguredMaxLength() {
-      return 128;
-    }
-  }
-
-  @Order(40)
-  public class UserIdField extends AbstractStringField {
-    @Override
-    protected String getConfiguredLabel() {
-      return TEXTS.get("UserName");
-    }
-
-    @Override
-    protected boolean getConfiguredMandatory() {
-      return true;
-    }
-
-    @Override
-    protected int getConfiguredMaxLength() {
-      return 128;
-    }
-  }
-
-  @Order(50)
-  public class LoacleField extends AbstractSmartField<Locale> {
-    @Override
-    protected String getConfiguredLabel() {
-      return TEXTS.get("Language");
-    }
-
-    @Override
-    protected Class<? extends ILookupCall<Locale>> getConfiguredLookupCall() {
-      return LocaleLookupCall.class;
-    }
-  }
-
-  @Order(60)
-  public class PasswordField extends AbstractStringField {
-    @Override
-    protected String getConfiguredLabel() {
-      return TEXTS.get("Password");
-    }
-
-    @Override
-    protected boolean getConfiguredMandatory() {
-      return true;
-    }
-
-    @Override
-    protected boolean getConfiguredInputMasked() {
-      return true;
-    }
-
-    @Override
-    protected int getConfiguredMaxLength() {
-      return 128;
-    }
-  }
-
   public void importFormFieldData(User user) {
     if (user == null) {
+      getLoacleField().setValue(User.LOCALE_DEFAULT);
       return;
     }
 
     getUserIdField().setValue(user.getId());
     getFirstNameField().setValue(user.getFirstName());
     getLastNameField().setValue(user.getLastName());
-    getPasswordField().setValue(user.getPassword());
     getLoacleField().setValue(user.getLocale());
   }
 
@@ -217,7 +190,6 @@ public abstract class AbstractUserBox extends AbstractGroupBox {
     user.setId(getUserIdField().getValue());
     user.setFirstName(getFirstNameField().getValue());
     user.setLastName(getLastNameField().getValue());
-    user.setPassword(getPasswordField().getValue());
     user.setLocale(getLoacleField().getValue());
   }
 

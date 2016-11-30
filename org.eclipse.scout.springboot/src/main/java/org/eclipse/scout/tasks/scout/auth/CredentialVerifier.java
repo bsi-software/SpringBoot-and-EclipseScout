@@ -21,7 +21,11 @@ public class CredentialVerifier implements ICredentialVerifier {
     }
 
     final User user = userService.get(username);
-    if (user == null || !user.getPassword().equals(String.valueOf(passwordPlainText))) {
+    String passwordHash = user.getPasswordHash();
+    String passwordSalt = user.getPasswordSalt();
+    String passwordPlain = new String(passwordPlainText);
+
+    if (user == null || !PasswordUtility.passwordIsValid(passwordPlain, passwordHash, passwordSalt)) {
       return AUTH_FORBIDDEN;
     }
 

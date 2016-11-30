@@ -14,7 +14,8 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     final UserEntity userEntity = new UserEntity();
     if (user != null) {
       userEntity.setId(user.getId());
-      userEntity.setPassword(user.getPassword());
+      userEntity.setPasswordHash(user.getPasswordHash());
+      userEntity.setPasswordSalt(user.getPasswordSalt());
       userEntity.setFirstName(user.getFirstName());
       userEntity.setLastName(user.getLastName());
       userEntity.setPictureId(user.getPictureId());
@@ -35,7 +36,8 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
   default User convert(UserEntity userEntity) {
     final User user = new User();
     user.setId(userEntity.getId());
-    user.setPassword(userEntity.getPassword());
+    user.setPasswordHash(userEntity.getPasswordHash());
+    user.setPasswordSalt(userEntity.getPasswordSalt());
     user.setFirstName(userEntity.getFirstName());
     user.setLastName(userEntity.getLastName());
     user.setPictureId(userEntity.getPictureId());

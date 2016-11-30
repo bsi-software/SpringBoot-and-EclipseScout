@@ -213,35 +213,61 @@ public class DefaultUserService implements UserService {
   private void initUsers() {
     LOG.info("Check and initialise users");
 
+    addUser(USER_ROOT, "Root", "cando", "eclipse.jpg", Role.ROOT_ID, null);
+    addUser(USER_ALICE, "Alice", "test", "alice.jpg", USER, SUPER_USER);
+    addUser(USER_BOB, "Bob", "test", "bob.jpg", USER, null);
+
+    /*
     if (!userRepository.exists(USER_ROOT)) {
       User root = new User(USER_ROOT, "Root", "cando");
       root.getRoles().add(Role.ROOT_ID);
-
+    
       Document picture = getDefaultUserPicture(USER_ROOT, "eclipse.jpg");
       root.setPictureId(picture.getId());
-
+    
       userRepository.save(userRepository.convert(root));
     }
-
+    
     if (!userRepository.exists(USER_ALICE)) {
       User alice = new User(USER_ALICE, "Alice", "test");
       alice.getRoles().add(USER);
       alice.getRoles().add(SUPER_USER);
-
+    
       Document picture = getDefaultUserPicture(USER_ALICE, "alice.jpg");
       alice.setPictureId(picture.getId());
-
+    
       userRepository.save(userRepository.convert(alice));
     }
-
+    
     if (!userRepository.exists(USER_BOB)) {
       User bob = new User(USER_BOB, "Bob", "test");
       bob.getRoles().add(USER);
-
+    
       Document picture = getDefaultUserPicture(USER_BOB, "bob.jpg");
       bob.setPictureId(picture.getId());
-
+    
       userRepository.save(userRepository.convert(bob));
     }
+     */
+  }
+
+  private void addUser(String login, String firstName, String password, String pictureFile, String role1, String role2) {
+    if (userRepository.exists(login)) {
+      return;
+    }
+
+    User user = new User(login, firstName, password);
+    user.getRoles().add(role1);
+
+    if (role2 != null) {
+      user.getRoles().add(role2);
+    }
+
+    if (pictureFile != null) {
+      Document picture = getDefaultUserPicture(login, pictureFile);
+      user.setPictureId(picture.getId());
+    }
+
+    userRepository.save(userRepository.convert(user));
   }
 }
