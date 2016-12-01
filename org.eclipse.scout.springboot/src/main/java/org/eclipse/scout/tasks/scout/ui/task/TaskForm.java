@@ -20,9 +20,11 @@ import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.eclipse.scout.tasks.model.Task;
+import org.eclipse.scout.tasks.model.entity.Task;
+import org.eclipse.scout.tasks.model.service.TaskService;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
+import org.eclipse.scout.tasks.scout.ui.admin.user.UserLookupCall;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.OkButton;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox;
@@ -36,8 +38,6 @@ import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.DueDateFiel
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.ReminderField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.ResponsibleField;
 import org.eclipse.scout.tasks.scout.ui.task.TaskForm.MainBox.TopBox.TitleField;
-import org.eclipse.scout.tasks.scout.ui.user.UserLookupCall;
-import org.eclipse.scout.tasks.service.TaskService;
 
 @Bean
 public class TaskForm extends AbstractForm {
@@ -178,8 +178,9 @@ public class TaskForm extends AbstractForm {
         @Override
         protected void execChangedValue() {
           if (!getForm().isFormLoading()) {
-            getAcceptedField().setValue(false);
-            getAssignedByField().setValue(ClientSession.get().getUserId());
+            String userId = ClientSession.get().getUserId();
+            getAcceptedField().setValue(userId.equals(getValue()));
+            getAssignedByField().setValue(userId);
             getAssignedAtField().setValue(new Date());
           }
         }
@@ -305,19 +306,13 @@ public class TaskForm extends AbstractForm {
     @Override
     protected void execLoad() {
       setEnabledPermission(new UpdateTaskPermission());
-
-      Task task = taskService.getTask(getTaskId());
-      importFormFieldData(task);
-
+      importFormFieldData(taskService.get(getTaskId()));
       getForm().setSubTitle(calculateSubTitle());
     }
 
     @Override
     protected void execStore() {
-      Task task = taskService.getTask(getTaskId());
-      exportFormFieldData(task);
-
-      taskService.saveTask(task);
+      store(taskService.get(getTaskId()));
     }
 
     @Override
@@ -336,17 +331,12 @@ public class TaskForm extends AbstractForm {
     @Override
     protected void execLoad() {
       setEnabledPermission(new CreateTaskPermission());
-
-      String userId = ClientSession.get().getUserId();
-      setDefaultFieldValues(userId);
+      setDefaultFieldValues();
     }
 
     @Override
     protected void execStore() {
-      Task task = new Task();
-      exportFormFieldData(task);
-
-      taskService.addTask(task);
+      store(new Task());
     }
 
     @Override
@@ -355,7 +345,14 @@ public class TaskForm extends AbstractForm {
     }
   }
 
-  private void setDefaultFieldValues(String userId) {
+  private void store(Task task) {
+    exportFormFieldData(task);
+    taskService.save(task);
+  }
+
+  private void setDefaultFieldValues() {
+    String userId = ClientSession.get().getUserId();
+
     getAssignedByField().setValue(userId);
     getResponsibleField().setValue(userId);
     getAcceptedField().setValue(true);

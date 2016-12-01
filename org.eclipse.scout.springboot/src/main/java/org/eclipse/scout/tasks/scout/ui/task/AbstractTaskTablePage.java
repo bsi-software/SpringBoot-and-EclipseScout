@@ -34,12 +34,12 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.common.security.IAccessControlService;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.eclipse.scout.tasks.model.Task;
+import org.eclipse.scout.tasks.model.entity.Task;
+import org.eclipse.scout.tasks.model.service.TaskService;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
+import org.eclipse.scout.tasks.scout.ui.admin.user.UserLookupCall;
+import org.eclipse.scout.tasks.scout.ui.admin.user.UserPictureProviderService;
 import org.eclipse.scout.tasks.scout.ui.task.AbstractTaskTablePage.Table;
-import org.eclipse.scout.tasks.scout.ui.user.UserLookupCall;
-import org.eclipse.scout.tasks.scout.ui.user.UserPictureProviderService;
-import org.eclipse.scout.tasks.service.TaskService;
 
 @Bean
 public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
@@ -303,11 +303,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
       }
 
       private boolean acceptTask(UUID taskId) {
-        Task task = taskService.getTask(taskId);
+        Task task = taskService.get(taskId);
 
         if (task != null && task.getResponsible().equals(ClientSession.get().getUserId())) {
           task.setAccepted(true);
-          taskService.saveTask(task);
+          taskService.save(task);
 
           return true;
         }

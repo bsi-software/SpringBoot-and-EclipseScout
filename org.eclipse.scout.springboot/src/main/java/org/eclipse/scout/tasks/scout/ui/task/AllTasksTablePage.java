@@ -5,8 +5,8 @@ import java.util.Collection;
 import javax.inject.Inject;
 
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.model.Task;
-import org.eclipse.scout.tasks.service.TaskService;
+import org.eclipse.scout.tasks.model.entity.Task;
+import org.eclipse.scout.tasks.model.service.TaskService;
 
 public class AllTasksTablePage extends AbstractTaskTablePage {
 
@@ -29,7 +29,7 @@ public class AllTasksTablePage extends AbstractTaskTablePage {
 
   @Override
   protected Collection<Task> getTasks() {
-    return taskService.getAllTasks();
+    return taskService.getAll();
   }
 
   @Override

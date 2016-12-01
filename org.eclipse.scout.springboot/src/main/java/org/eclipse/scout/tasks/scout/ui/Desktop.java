@@ -16,13 +16,18 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.config.PlatformConfigProperties.ApplicationNameProperty;
 import org.eclipse.scout.rt.platform.util.collection.OrderedCollection;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.scout.ui.user.OptionsForm;
+import org.eclipse.scout.tasks.scout.ui.admin.AdminOutline;
+import org.eclipse.scout.tasks.scout.ui.admin.ViewAdminOutlinePermission;
+import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm;
+import org.eclipse.scout.tasks.scout.ui.task.TaskOutline;
 
 /**
  * This Spring managed bean represents the web application.
  */
 @Bean
 public class Desktop extends AbstractDesktop {
+
+  public static final String LOGO_ICON = "eclipse_scout";
 
   private final ApplicationNameProperty applicationNameConfig;
 
@@ -40,22 +45,22 @@ public class Desktop extends AbstractDesktop {
 
   @Override
   protected String getConfiguredLogoId() {
-    return Icons.ECLIPSE_SCOUT;
+    return LOGO_ICON;
   }
 
   @Override
   protected void execDefaultView() {
-    setOutline(HomeOutline.class);
+    setOutline(TaskOutline.class);
   }
 
   @Order(10)
   public class HomeOutlineViewButton extends AbstractOutlineViewButton {
 
     public HomeOutlineViewButton() {
-      this(HomeOutline.class);
+      this(TaskOutline.class);
     }
 
-    protected HomeOutlineViewButton(final Class<? extends HomeOutline> outlineClass) {
+    protected HomeOutlineViewButton(final Class<? extends TaskOutline> outlineClass) {
       super(Desktop.this, outlineClass);
     }
 

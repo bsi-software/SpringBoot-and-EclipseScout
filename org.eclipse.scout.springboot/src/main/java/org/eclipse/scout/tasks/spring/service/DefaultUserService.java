@@ -10,21 +10,24 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.scout.rt.platform.util.IOUtility;
-import org.eclipse.scout.tasks.model.Document;
-import org.eclipse.scout.tasks.model.Role;
-import org.eclipse.scout.tasks.model.User;
+import org.eclipse.scout.tasks.model.entity.Document;
+import org.eclipse.scout.tasks.model.entity.Role;
+import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.service.DocumentService;
+import org.eclipse.scout.tasks.model.service.RoleService;
+import org.eclipse.scout.tasks.model.service.UserService;
 import org.eclipse.scout.tasks.scout.auth.AccessControlService;
 import org.eclipse.scout.tasks.scout.ui.ResourceBase;
+import org.eclipse.scout.tasks.scout.ui.admin.user.UserPictureProviderService;
 import org.eclipse.scout.tasks.scout.ui.task.CreateTaskPermission;
 import org.eclipse.scout.tasks.scout.ui.task.ReadTaskPermission;
 import org.eclipse.scout.tasks.scout.ui.task.UpdateTaskPermission;
 import org.eclipse.scout.tasks.scout.ui.task.ViewAllTasksPermission;
-import org.eclipse.scout.tasks.scout.ui.user.UserPictureProviderService;
-import org.eclipse.scout.tasks.service.RoleService;
-import org.eclipse.scout.tasks.service.UserService;
-import org.eclipse.scout.tasks.spring.persistence.UserEntity;
-import org.eclipse.scout.tasks.spring.persistence.repository.DocumentRepository;
-import org.eclipse.scout.tasks.spring.persistence.repository.UserRepository;
+import org.eclipse.scout.tasks.spring.repository.UserRepository;
+import org.eclipse.scout.tasks.spring.repository.entity.UserEntity;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.spi.MappingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +52,7 @@ public class DefaultUserService implements UserService {
   private RoleService roleService;
 
   @Autowired
-  private DocumentRepository documentRepository;
+  private DocumentService documentService;
 
   @Autowired
   private UserPictureProviderService userPictureProviderService;
@@ -63,7 +66,7 @@ public class DefaultUserService implements UserService {
       Document picture = new Document(image, data, Document.TYPE_PICTURE);
 
       userPictureProviderService.addUserPicture(userId, picture.getData());
-      documentRepository.save(documentRepository.convert(picture));
+      documentService.save(picture);
 
       return picture;
     }
@@ -79,7 +82,7 @@ public class DefaultUserService implements UserService {
   public List<User> getAll() {
     return userRepository.findAll()
         .stream()
-        .map(u -> userRepository.convert(u))
+        .map(user -> convert(user))
         .collect(Collectors.toList());
   }
 
@@ -91,7 +94,8 @@ public class DefaultUserService implements UserService {
   @Override
   @Transactional(readOnly = true)
   public User get(String userId) {
-    return userRepository.getOne(userId) != null ? userRepository.convert(userRepository.getOne(userId)) : null;
+    UserEntity user = userRepository.getOne(userId);
+    return user != null ? convert(user) : null;
   }
 
   @Override
@@ -103,12 +107,7 @@ public class DefaultUserService implements UserService {
 
     validate(user);
 
-    UserEntity userEntity = userRepository.save(userRepository.convert(user));
-    userEntity.setRoles(user.getRoles()
-        .stream()
-        .map(r -> DefaultRoleService.convert(roleService.get(r)))
-        .collect(Collectors.toSet()));
-
+    userRepository.save(convert(user));
     accessControlService.clearCache();
   }
 
@@ -120,18 +119,11 @@ public class DefaultUserService implements UserService {
     if (userEntity != null) {
       return userEntity.getRoles()
           .stream()
-          .map(r -> DefaultRoleService.convert(r))
+          .map(roleId -> roleService.get(roleId))
           .collect(Collectors.toSet());
     }
 
     return new HashSet<Role>();
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public boolean isRoot(String userId) {
-    Set<Role> roles = getRoles(userId);
-    return roles.contains(Role.ROOT);
   }
 
   @Override
@@ -141,8 +133,8 @@ public class DefaultUserService implements UserService {
     if (userEntity != null) {
       UUID pictureId = userEntity.getPictureId();
 
-      if (pictureId != null && documentRepository.exists(pictureId)) {
-        return documentRepository.convert(documentRepository.getOne(pictureId));
+      if (pictureId != null && documentService.exists(pictureId)) {
+        return documentService.get(pictureId);
       }
     }
 
@@ -156,11 +148,53 @@ public class DefaultUserService implements UserService {
     if (userEntity != null) {
       if (picture != null) {
         userEntity.setPictureId(picture.getId());
-        documentRepository.save(documentRepository.convert(picture));
+        documentService.save(picture);
         userPictureProviderService.addUserPicture(userId, picture.getData());
         userRepository.save(userEntity);
       }
     }
+  }
+
+  private static ModelMapper mapper = getMapper();
+
+  private static ModelMapper getMapper() {
+    ModelMapper mapper = new ModelMapper();
+
+    mapper.createTypeMap(UserEntity.class, User.class).setPostConverter(new Converter<UserEntity, User>() {
+      @Override
+      public User convert(MappingContext<UserEntity, User> context) {
+        context.getDestination().setRoles(
+            context.getSource().getRoles()
+                .stream()
+                .map(r -> new String(r))
+                .collect(Collectors.toSet()));
+
+        return context.getDestination();
+      }
+    });
+
+    mapper.createTypeMap(User.class, UserEntity.class).setPostConverter(new Converter<User, UserEntity>() {
+      @Override
+      public UserEntity convert(MappingContext<User, UserEntity> context) {
+        context.getDestination().setRoles(
+            context.getSource().getRoles()
+                .stream()
+                .map(r -> new String(r))
+                .collect(Collectors.toSet()));
+
+        return context.getDestination();
+      }
+    });
+
+    return mapper;
+  }
+
+  public static User convert(UserEntity role) {
+    return mapper.map(role, User.class);
+  }
+
+  public static UserEntity convert(User role) {
+    return mapper.map(role, UserEntity.class);
   }
 
   /**
@@ -220,7 +254,7 @@ public class DefaultUserService implements UserService {
   }
 
   private void addUser(String login, String firstName, String password, String pictureFile, String role1, String role2) {
-    if (userRepository.exists(login)) {
+    if (exists(login)) {
       return;
     }
 
@@ -236,6 +270,6 @@ public class DefaultUserService implements UserService {
       user.setPictureId(picture.getId());
     }
 
-    userRepository.save(userRepository.convert(user));
+    save(user);
   }
 }

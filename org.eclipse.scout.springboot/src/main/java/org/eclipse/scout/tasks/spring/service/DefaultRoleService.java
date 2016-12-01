@@ -3,13 +3,11 @@ package org.eclipse.scout.tasks.spring.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
-import org.eclipse.scout.tasks.model.Role;
+import org.eclipse.scout.tasks.model.entity.Role;
+import org.eclipse.scout.tasks.model.service.RoleService;
 import org.eclipse.scout.tasks.scout.auth.AccessControlService;
-import org.eclipse.scout.tasks.service.RoleService;
-import org.eclipse.scout.tasks.spring.persistence.RoleEntity;
-import org.eclipse.scout.tasks.spring.persistence.repository.RoleRepository;
+import org.eclipse.scout.tasks.spring.repository.RoleRepository;
+import org.eclipse.scout.tasks.spring.repository.entity.RoleEntity;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.spi.MappingContext;
@@ -49,22 +47,23 @@ public class DefaultRoleService implements RoleService {
   @Override
   @Transactional
   public void save(Role role) {
+    validate(role);
     roleRepository.save(convert(role));
     accessControlService.clearCache();
   }
 
-  private static ModelMapper mapper;
+  private static ModelMapper mapper = getMapper();
 
-  @PostConstruct
-  private static void initMapper() {
-    mapper = new ModelMapper();
+  private static ModelMapper getMapper() {
+    ModelMapper mapper = new ModelMapper();
+
     mapper.createTypeMap(RoleEntity.class, Role.class).setPostConverter(new Converter<RoleEntity, Role>() {
       @Override
       public Role convert(MappingContext<RoleEntity, Role> context) {
         context.getDestination().setPermissions(
             context.getSource().getPermissions()
                 .stream()
-                .map(p -> new String(p))
+                .map(permission -> new String(permission))
                 .collect(Collectors.toSet()));
 
         return context.getDestination();
@@ -77,12 +76,14 @@ public class DefaultRoleService implements RoleService {
         context.getDestination().setPermissions(
             context.getSource().getPermissions()
                 .stream()
-                .map(p -> new String(p))
+                .map(permission -> new String(permission))
                 .collect(Collectors.toSet()));
 
         return context.getDestination();
       }
     });
+
+    return mapper;
   }
 
   public static Role convert(RoleEntity role) {

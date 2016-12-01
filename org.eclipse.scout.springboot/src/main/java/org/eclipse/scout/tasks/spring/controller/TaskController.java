@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.UUID;
 
 import org.eclipse.scout.tasks.WebMvcConfig;
-import org.eclipse.scout.tasks.model.Task;
-import org.eclipse.scout.tasks.service.TaskService;
+import org.eclipse.scout.tasks.model.entity.Task;
+import org.eclipse.scout.tasks.model.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +20,12 @@ public class TaskController {
 
   @RequestMapping(path = {"", "/"})
   public Collection<Task> showTasks() {
-    return taskService.getAllTasks();
+    return taskService.getAll();
   }
 
   @RequestMapping("/{id}")
   public Task showTaskById(@PathVariable String id) {
-    return taskService.getTask(UUID.fromString(id));
+    return taskService.get(UUID.fromString(id));
   }
 
 }
