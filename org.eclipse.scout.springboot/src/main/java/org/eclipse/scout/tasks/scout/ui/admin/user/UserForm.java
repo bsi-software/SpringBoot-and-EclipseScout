@@ -13,6 +13,7 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.IForm;
+import org.eclipse.scout.rt.client.ui.form.fields.booleanfield.AbstractBooleanField;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractCancelButton;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
@@ -21,19 +22,20 @@ import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.model.entity.Document;
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.DocumentService;
 import org.eclipse.scout.tasks.model.service.RoleService;
 import org.eclipse.scout.tasks.model.service.UserService;
 import org.eclipse.scout.tasks.scout.auth.PasswordUtility;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
+import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.AccountLockedField;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.OkButton;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.PasswordField;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.RoleTableField;
-import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.UserBox;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.RoleTableField.Table;
+import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.UserBox;
 
 @Bean
 public class UserForm extends AbstractForm {
@@ -98,6 +100,10 @@ public class UserForm extends AbstractForm {
     return getFieldByClass(RoleTableField.class);
   }
 
+  public AccountLockedField getAccountLockedField() {
+    return getFieldByClass(AccountLockedField.class);
+  }
+
   public OkButton getOkButton() {
     return getFieldByClass(OkButton.class);
   }
@@ -115,6 +121,14 @@ public class UserForm extends AbstractForm {
       @Override
       protected void execChangedValue() {
         validateField();
+      }
+    }
+
+    @Order(25)
+    public class AccountLockedField extends AbstractBooleanField {
+      @Override
+      protected String getConfiguredLabel() {
+        return TEXTS.get("AccountIsLocked");
       }
     }
 
@@ -142,6 +156,10 @@ public class UserForm extends AbstractForm {
           return getColumnSet().getColumnByClass(AssignedColumn.class);
         }
 
+        public RoleColumn getRoleColumn() {
+          return getColumnSet().getColumnByClass(RoleColumn.class);
+        }
+
         public IdColumn getIdColumn() {
           return getColumnSet().getColumnByClass(IdColumn.class);
         }
@@ -155,8 +173,16 @@ public class UserForm extends AbstractForm {
           }
 
           @Override
+          protected boolean getConfiguredDisplayable() {
+            return false;
+          }
+        }
+
+        @Order(20)
+        public class RoleColumn extends AbstractStringColumn {
+          @Override
           protected String getConfiguredHeaderText() {
-            return TEXTS.get("Name");
+            return TEXTS.get("Role");
           }
 
           @Override
@@ -165,7 +191,7 @@ public class UserForm extends AbstractForm {
           }
         }
 
-        @Order(20)
+        @Order(30)
         public class AssignedColumn extends AbstractBooleanColumn {
           @Override
           protected String getConfiguredHeaderText() {
@@ -208,6 +234,8 @@ public class UserForm extends AbstractForm {
       box.importFormFieldData(user);
       box.importUserPicture(picture);
       importUserRoles(user);
+
+      getAccountLockedField().setValue(!user.isEnabled());
 
       getForm().setSubTitle(calculateSubTitle());
     }
@@ -277,6 +305,9 @@ public class UserForm extends AbstractForm {
       user.setPasswordHash(hash);
     }
 
+    // handle user locking
+    user.setEnabled(!getAccountLockedField().getValue());
+
     // handle user roles
     exportUserRoles(user);
 
@@ -298,7 +329,11 @@ public class UserForm extends AbstractForm {
     roles.stream()
         .forEach(e -> {
           ITableRow row = table.createRow();
+          String role = TEXTS.getWithFallback(e, e);
+
           table.getIdColumn().setValue(row, e);
+          table.getRoleColumn().setValue(row, role);
+
           if (user != null) {
             if (user.getRoles().contains(e)) {
               table.getAssignedColumn().setValue(row, true);

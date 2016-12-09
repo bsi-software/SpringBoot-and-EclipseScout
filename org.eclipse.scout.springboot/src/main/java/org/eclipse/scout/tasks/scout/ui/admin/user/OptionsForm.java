@@ -13,8 +13,8 @@ import org.eclipse.scout.rt.client.ui.form.fields.sequencebox.AbstractSequenceBo
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.model.entity.Document;
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.DocumentService;
 import org.eclipse.scout.tasks.model.service.UserService;
 import org.eclipse.scout.tasks.scout.auth.PasswordUtility;

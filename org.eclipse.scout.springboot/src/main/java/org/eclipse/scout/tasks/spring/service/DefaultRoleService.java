@@ -3,7 +3,7 @@ package org.eclipse.scout.tasks.spring.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.scout.tasks.model.entity.Role;
+import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.model.service.RoleService;
 import org.eclipse.scout.tasks.scout.auth.AccessControlService;
 import org.eclipse.scout.tasks.spring.repository.RoleRepository;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DefaultRoleService implements RoleService {
+public class DefaultRoleService implements RoleService, MapperService<Role, RoleEntity> {
 
   @Autowired
   private RoleRepository roleRepository;
@@ -29,7 +29,7 @@ public class DefaultRoleService implements RoleService {
   public List<Role> getAll() {
     return roleRepository.findAll()
         .stream()
-        .map(r -> convert(r))
+        .map(role -> convertToModel(role, Role.class))
         .collect(Collectors.toList());
   }
 
@@ -41,21 +41,20 @@ public class DefaultRoleService implements RoleService {
   @Override
   @Transactional(readOnly = true)
   public Role get(String roleId) {
-    return convert(roleRepository.getOne(roleId));
+    return convertToModel(roleRepository.getOne(roleId), Role.class);
   }
 
   @Override
   @Transactional
   public void save(Role role) {
     validate(role);
-    roleRepository.save(convert(role));
+    roleRepository.save(convertToEntity(role, RoleEntity.class));
     accessControlService.clearCache();
   }
 
-  private static ModelMapper mapper = getMapper();
-
-  private static ModelMapper getMapper() {
-    ModelMapper mapper = new ModelMapper();
+  @Override
+  public ModelMapper getMapper() {
+    ModelMapper mapper = MapperService.super.getMapper();
 
     mapper.createTypeMap(RoleEntity.class, Role.class).setPostConverter(new Converter<RoleEntity, Role>() {
       @Override
@@ -84,14 +83,6 @@ public class DefaultRoleService implements RoleService {
     });
 
     return mapper;
-  }
-
-  public static Role convert(RoleEntity role) {
-    return mapper.map(role, Role.class);
-  }
-
-  public static RoleEntity convert(Role role) {
-    return mapper.map(role, RoleEntity.class);
   }
 
 }

@@ -4,19 +4,16 @@ import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import org.eclipse.scout.tasks.model.entity.Task;
-import org.eclipse.scout.tasks.model.entity.User;
-import org.eclipse.scout.tasks.spring.repository.entity.converter.UuidConverter;
+import org.eclipse.scout.tasks.model.Task;
+import org.eclipse.scout.tasks.model.User;
 
 @Entity
 public class TaskEntity extends Task {
 
   @Id
-  @Convert(converter = UuidConverter.class)
   @Override
   public UUID getId() {
     return super.getId();

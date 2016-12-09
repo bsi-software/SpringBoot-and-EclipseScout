@@ -15,7 +15,7 @@ import org.eclipse.scout.rt.shared.ISession;
 import org.eclipse.scout.rt.shared.cache.ICacheBuilder;
 import org.eclipse.scout.rt.shared.services.common.security.AbstractAccessControlService;
 import org.eclipse.scout.rt.shared.services.common.security.IAccessControlService;
-import org.eclipse.scout.tasks.model.entity.Role;
+import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.model.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

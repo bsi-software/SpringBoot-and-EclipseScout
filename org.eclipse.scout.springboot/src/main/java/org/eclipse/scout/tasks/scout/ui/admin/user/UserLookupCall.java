@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupRow;
 import org.eclipse.scout.rt.shared.services.lookup.LocalLookupCall;
 import org.eclipse.scout.rt.shared.services.lookup.LookupRow;
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.UserService;
 
 public class UserLookupCall extends LocalLookupCall<String> {

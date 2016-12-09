@@ -3,14 +3,14 @@ package org.eclipse.scout.tasks.model.service;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.scout.tasks.model.entity.Document;
-import org.eclipse.scout.tasks.model.entity.Role;
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.Role;
+import org.eclipse.scout.tasks.model.User;
 
 public interface UserService extends ValidatorService<User> {
 
   /**
-   * Returns a list including all available Users.
+   * Returns all available Users.
    */
   List<User> getAll();
 

@@ -8,7 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 
-import org.eclipse.scout.tasks.model.entity.Document;
+import org.eclipse.scout.tasks.model.Document;
 import org.eclipse.scout.tasks.spring.repository.entity.converter.UuidConverter;
 
 @Entity

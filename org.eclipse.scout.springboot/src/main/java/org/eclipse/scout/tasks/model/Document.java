@@ -1,4 +1,4 @@
-package org.eclipse.scout.tasks.model.entity;
+package org.eclipse.scout.tasks.model;
 
 import java.util.UUID;
 

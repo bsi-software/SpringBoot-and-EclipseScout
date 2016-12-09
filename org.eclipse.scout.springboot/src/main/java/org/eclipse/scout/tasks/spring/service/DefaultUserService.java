@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.scout.rt.platform.util.IOUtility;
-import org.eclipse.scout.tasks.model.entity.Document;
-import org.eclipse.scout.tasks.model.entity.Role;
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.Document;
+import org.eclipse.scout.tasks.model.Role;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.DocumentService;
 import org.eclipse.scout.tasks.model.service.RoleService;
 import org.eclipse.scout.tasks.model.service.UserService;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DefaultUserService implements UserService {
+public class DefaultUserService implements UserService, MapperService<User, UserEntity> {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultUserService.class);
 
   protected static final String SUPER_USER = "SuperUser";
@@ -82,7 +82,7 @@ public class DefaultUserService implements UserService {
   public List<User> getAll() {
     return userRepository.findAll()
         .stream()
-        .map(user -> convert(user))
+        .map(user -> convertToModel(user, User.class))
         .collect(Collectors.toList());
   }
 
@@ -95,7 +95,7 @@ public class DefaultUserService implements UserService {
   @Transactional(readOnly = true)
   public User get(String userId) {
     UserEntity user = userRepository.getOne(userId);
-    return user != null ? convert(user) : null;
+    return user != null ? convertToModel(user, User.class) : null;
   }
 
   @Override
@@ -107,7 +107,7 @@ public class DefaultUserService implements UserService {
 
     validate(user);
 
-    userRepository.save(convert(user));
+    userRepository.save(convertToEntity(user, UserEntity.class));
     accessControlService.clearCache();
   }
 
@@ -155,10 +155,9 @@ public class DefaultUserService implements UserService {
     }
   }
 
-  private static ModelMapper mapper = getMapper();
-
-  private static ModelMapper getMapper() {
-    ModelMapper mapper = new ModelMapper();
+  @Override
+  public ModelMapper getMapper() {
+    ModelMapper mapper = MapperService.super.getMapper();
 
     mapper.createTypeMap(UserEntity.class, User.class).setPostConverter(new Converter<UserEntity, User>() {
       @Override
@@ -188,14 +187,14 @@ public class DefaultUserService implements UserService {
 
     return mapper;
   }
-
-  public static User convert(UserEntity role) {
-    return mapper.map(role, User.class);
-  }
-
-  public static UserEntity convert(User role) {
-    return mapper.map(role, UserEntity.class);
-  }
+//
+//  public User convert(UserEntity role) {
+//    return getMapper().map(role, User.class);
+//  }
+//
+//  public UserEntity convert(User role) {
+//    return getMapper().map(role, UserEntity.class);
+//  }
 
   /**
    * Add initial demo entities: roles and users.

@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.eclipse.scout.rt.platform.security.ICredentialVerifier;
 import org.eclipse.scout.rt.platform.util.StringUtility;
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.UserService;
 
 public class CredentialVerifier implements ICredentialVerifier {
@@ -25,7 +25,7 @@ public class CredentialVerifier implements ICredentialVerifier {
     String passwordSalt = user.getPasswordSalt();
     String passwordPlain = new String(passwordPlainText);
 
-    if (user == null || !PasswordUtility.passwordIsValid(passwordPlain, passwordHash, passwordSalt)) {
+    if (user == null || !user.isEnabled() || !PasswordUtility.passwordIsValid(passwordPlain, passwordHash, passwordSalt)) {
       return AUTH_FORBIDDEN;
     }
 

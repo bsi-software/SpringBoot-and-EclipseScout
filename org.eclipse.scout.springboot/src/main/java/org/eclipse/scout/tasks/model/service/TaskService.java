@@ -3,7 +3,7 @@ package org.eclipse.scout.tasks.model.service;
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.scout.tasks.model.entity.Task;
+import org.eclipse.scout.tasks.model.Task;
 
 public interface TaskService extends ValidatorService<Task> {
 

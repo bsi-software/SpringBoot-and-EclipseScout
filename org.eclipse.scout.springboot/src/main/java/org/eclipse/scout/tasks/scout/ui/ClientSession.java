@@ -6,7 +6,7 @@ import org.eclipse.scout.rt.client.AbstractClientSession;
 import org.eclipse.scout.rt.client.IClientSession;
 import org.eclipse.scout.rt.client.session.ClientSessionProvider;
 import org.eclipse.scout.rt.platform.BEANS;
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.UserService;
 
 public class ClientSession extends AbstractClientSession {

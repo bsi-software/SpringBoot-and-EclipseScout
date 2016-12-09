@@ -10,7 +10,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.spring.repository.entity.converter.LocaleConverter;
 import org.eclipse.scout.tasks.spring.repository.entity.converter.UuidConverter;
 
@@ -65,6 +65,13 @@ public class UserEntity extends User {
   @Override
   public Set<String> getRoles() {
     return super.getRoles();
+  }
+
+  /**
+   * Method is only needed to convince JPA to persist this attribute (isEnabled won't do).
+   */
+  public boolean getEnabled() {
+    return isEnabled();
   }
 
 }

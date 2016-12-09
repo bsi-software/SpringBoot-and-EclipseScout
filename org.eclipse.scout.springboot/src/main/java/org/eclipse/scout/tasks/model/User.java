@@ -1,4 +1,4 @@
-package org.eclipse.scout.tasks.model.entity;
+package org.eclipse.scout.tasks.model;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -52,6 +52,7 @@ public class User extends Model<String> {
 
   private UUID pictureId;
   private Set<String> roles = new HashSet<>();
+  private boolean enabled;
 
   public User() {
   }
@@ -63,6 +64,7 @@ public class User extends Model<String> {
     this.passwordSalt = PasswordUtility.generatePasswordSalt();
     this.passwordHash = PasswordUtility.calculatePasswordHash(passwordPlain, passwordSalt);
     this.locale = LOCALE_DEFAULT;
+    this.enabled = true;
   }
 
   public String getPasswordHash() {
@@ -119,6 +121,14 @@ public class User extends Model<String> {
 
   public void setRoles(Set<String> roles) {
     this.roles = roles;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 
   @Override

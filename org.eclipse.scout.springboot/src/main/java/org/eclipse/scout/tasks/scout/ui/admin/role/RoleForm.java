@@ -5,10 +5,7 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 
-import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.IForm;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractCancelButton;
@@ -22,15 +19,15 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
-import org.eclipse.scout.tasks.model.entity.Role;
+import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.model.service.RoleService;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.admin.role.RoleForm.MainBox.CancelButton;
 import org.eclipse.scout.tasks.scout.ui.admin.role.RoleForm.MainBox.OkButton;
 import org.eclipse.scout.tasks.scout.ui.admin.role.RoleForm.MainBox.RoleBox;
 import org.eclipse.scout.tasks.scout.ui.admin.role.RoleForm.MainBox.RoleBox.PermissionTableField;
-import org.eclipse.scout.tasks.scout.ui.admin.role.RoleForm.MainBox.RoleBox.RoleIdField;
 import org.eclipse.scout.tasks.scout.ui.admin.role.RoleForm.MainBox.RoleBox.PermissionTableField.Table;
+import org.eclipse.scout.tasks.scout.ui.admin.role.RoleForm.MainBox.RoleBox.RoleIdField;
 import org.eclipse.scout.tasks.scout.ui.admin.user.CreateUserPermission;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UpdateUserPermission;
 
@@ -138,62 +135,11 @@ public class RoleForm extends AbstractForm {
           return 4;
         }
 
-        public class Table extends AbstractTable {
+        public class Table extends AbstractPermissionTable {
 
-          public AssignedColumn getAssignedColumn() {
-            return getColumnSet().getColumnByClass(AssignedColumn.class);
-          }
-
-          public NameColumn getNameColumn() {
-            return getColumnSet().getColumnByClass(NameColumn.class);
-          }
-
-          public IdColumn getIdColumn() {
-            return getColumnSet().getColumnByClass(IdColumn.class);
-          }
-
-          @Order(1000)
-          public class IdColumn extends AbstractStringColumn {
-            @Override
-            protected boolean getConfiguredDisplayable() {
-              return false;
-            }
-
-            @Override
-            protected boolean getConfiguredPrimaryKey() {
-              return true;
-            }
-          }
-
-          @Order(2000)
-          public class NameColumn extends AbstractStringColumn {
-            @Override
-            protected String getConfiguredHeaderText() {
-              return TEXTS.get("Name");
-            }
-
-            @Override
-            protected int getConfiguredWidth() {
-              return 250;
-            }
-          }
-
-          @Order(3000)
-          public class AssignedColumn extends AbstractBooleanColumn {
-            @Override
-            protected String getConfiguredHeaderText() {
-              return TEXTS.get("Assigned");
-            }
-
-            @Override
-            protected int getConfiguredWidth() {
-              return 100;
-            }
-
-            @Override
-            protected boolean getConfiguredEditable() {
-              return true;
-            }
+          @Override
+          protected void execReloadPage() {
+            reloadTableData();
           }
         }
       }
@@ -275,24 +221,17 @@ public class RoleForm extends AbstractForm {
       getRoleIdField().setValue(role.getId());
     }
 
-    final Table table = getPermissionTableField().getTable();
-    getPermissions().stream().forEach(permission -> {
-      final ITableRow row = table.createRow();
-
-      String pId = permission.getName();
-      String pName = TEXTS.getWithFallback(pId, pId);
-
-      table.getIdColumn().setValue(row, pId);
-      table.getNameColumn().setValue(row, pName);
-
-      if (role != null) {
-        if (role.equals(Role.ROOT) || role.getPermissions().contains(permission.getName())) {
-          table.getAssignedColumn().setValue(row, true);
-        }
-      }
-
-      table.addRow(row);
-    });
+    Table table = getPermissionTableField().getTable();
+    table.loadData(null);
+    table.getRows()
+        .stream()
+        .forEach(row -> {
+          if (role != null) {
+            String pId = table.getIdColumn().getValue(row);
+            boolean assign = role.equals(Role.ROOT) || role.getPermissions().contains(pId);
+            table.getAssignedColumn().setValue(row, assign);
+          }
+        });
   }
 
   protected Collection<Class<? extends Permission>> getPermissions() {

@@ -7,17 +7,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.scout.rt.platform.util.date.DateUtility;
-import org.eclipse.scout.tasks.model.entity.Task;
+import org.eclipse.scout.tasks.model.Task;
 import org.eclipse.scout.tasks.model.service.TaskService;
 import org.eclipse.scout.tasks.spring.repository.TaskRepository;
 import org.eclipse.scout.tasks.spring.repository.entity.TaskEntity;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DefaultTaskService implements TaskService {
+public class DefaultTaskService implements TaskService, MapperService<Task, TaskEntity> {
 
   @Autowired
   private TaskRepository taskRepository;
@@ -27,7 +26,7 @@ public class DefaultTaskService implements TaskService {
   public List<Task> getAll() {
     return taskRepository.findAll()
         .stream()
-        .map(task -> convert(task))
+        .map(task -> convertToModel(task, Task.class))
         .collect(Collectors.toList());
   }
 
@@ -86,19 +85,19 @@ public class DefaultTaskService implements TaskService {
   @Override
   @Transactional(readOnly = true)
   public Task get(UUID taskId) {
-    return convert(taskRepository.findOne(taskId));
+    return convertToModel(taskRepository.findOne(taskId), Task.class);
   }
 
   @Override
   @Transactional
   public void save(Task task) {
-    taskRepository.save(convert(task));
+    taskRepository.save(convertToEntity(task, TaskEntity.class));
   }
 
   protected List<Task> getUserTasks(String userId) {
     return taskRepository.findByResponsible(userId)
         .stream()
-        .map(task -> convert(task))
+        .map(task -> convertToModel(task, Task.class))
         .collect(Collectors.toList());
   }
 
@@ -108,16 +107,6 @@ public class DefaultTaskService implements TaskService {
     }
 
     return DateUtility.isSameDay(new Date(), date);
-  }
-
-  private static ModelMapper mapper = new ModelMapper();
-
-  public static Task convert(TaskEntity task) {
-    return mapper.map(task, Task.class);
-  }
-
-  public static TaskEntity convert(Task task) {
-    return mapper.map(task, TaskEntity.class);
   }
 
 }

@@ -20,10 +20,10 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tasks.model.entity.Role;
+import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.model.service.RoleService;
-import org.eclipse.scout.tasks.scout.ui.admin.role.RoleForm.MainBox.RoleBox.PermissionTableField.Table.NameColumn;
 import org.eclipse.scout.tasks.scout.ui.admin.role.RoleTablePage.Table;
+import org.eclipse.scout.tasks.scout.ui.admin.text.TranslationForm;
 
 @Bean
 public class RoleTablePage extends AbstractPageWithTable<Table> {
@@ -58,7 +58,9 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
     for (Role role : roles) {
       ITableRow row = table.createRow();
-      table.getIdColumn().setValue(row, role.getId());
+      String roleId = role.getId();
+      table.getIdColumn().setValue(row, roleId);
+      table.getNameColumn().setValue(row, TEXTS.getWithFallback(roleId, roleId));
       table.addRow(row);
     }
   }
@@ -78,7 +80,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
       return getColumnSet().getColumnByClass(IdColumn.class);
     }
 
-    @Order(1000)
+    @Order(10)
     public class NewMenu extends AbstractMenu {
 
       @Override
@@ -94,6 +96,11 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
+      protected String getConfiguredKeyStroke() {
+        return "alt-n";
+      }
+
+      @Override
       protected Set<? extends IMenuType> getConfiguredMenuTypes() {
         return CollectionUtility.hashSet(TableMenuType.EmptySpace, TableMenuType.SingleSelection, TableMenuType.MultiSelection);
       }
@@ -106,7 +113,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
-    @Order(2000)
+    @Order(20)
     public class EditMenu extends AbstractMenu {
 
       @Override
@@ -118,6 +125,11 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
       protected String getConfiguredIconId() {
         // get unicode from http://fontawesome.io/icon/pencil/
         return "font:awesomeIcons \uf040";
+      }
+
+      @Override
+      protected String getConfiguredKeyStroke() {
+        return "alt-e";
       }
 
       @Override
@@ -136,6 +148,44 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
+    @Order(30)
+    public class TranslateMenu extends AbstractMenu {
+      @Override
+      protected String getConfiguredText() {
+        return TEXTS.get("Translate");
+      }
+
+      @Override
+      protected String getConfiguredIconId() {
+        // get unicode from http://fontawesome.io/icon/language/
+        return "font:awesomeIcons \uf1ab";
+      }
+
+      @Override
+      protected String getConfiguredKeyStroke() {
+        return "alt-t";
+      }
+
+      @Override
+      protected Set<? extends IMenuType> getConfiguredMenuTypes() {
+        return CollectionUtility.hashSet(TableMenuType.SingleSelection);
+      }
+
+      @Override
+      protected void execAction() {
+        String roleId = getIdColumn().getSelectedValue();
+
+        TranslationForm form = BEANS.get(TranslationForm.class);
+        form.setKey(roleId);
+        form.startModify();
+        form.waitFor();
+
+        if (form.isFormStored()) {
+          reloadPage();
+        }
+      }
+    }
+
     private class RoleFormListener implements FormListener {
 
       @Override
@@ -147,7 +197,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
-    @Order(1000)
+    @Order(10)
     public class IdColumn extends AbstractStringColumn {
 
       @Override
@@ -165,5 +215,19 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
         return 150;
       }
     }
+
+    @Order(20)
+    public class NameColumn extends AbstractStringColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("RoleText");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 200;
+      }
+    }
+
   }
 }

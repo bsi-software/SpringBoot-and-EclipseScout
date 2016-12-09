@@ -2,19 +2,26 @@ package org.eclipse.scout.tasks.scout.auth;
 
 import java.security.BasicPermission;
 import java.security.Permission;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.config.AbstractStringConfigProperty;
+import org.eclipse.scout.rt.platform.config.CONFIG;
 import org.eclipse.scout.rt.platform.inventory.ClassInventory;
 import org.eclipse.scout.rt.platform.inventory.IClassInfo;
 import org.eclipse.scout.rt.platform.inventory.IClassInventory;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.services.common.security.IPermissionService;
+import org.eclipse.scout.tasks.scout.ui.TextDbProviderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,18 +30,56 @@ import org.slf4j.LoggerFactory;
  */
 @Order(4900)
 public class PermissionService implements IPermissionService {
+
+  public static final String EXCLUDE_PROPERTY = "scout.auth.permission.exclude";
+
   private static final Logger LOG = LoggerFactory.getLogger(PermissionService.class);
 
   private final Object m_permissionClassesLock = new Object();
   private Set<Class<? extends Permission>> m_permissionClasses;
   private Map<String, Permission> m_permissionMap = new HashMap<>();
 
+  @Inject
+  TextDbProviderService textDbService;
+
   /**
-   * Populates permission cache before it is accessed by the application.
+   * Populates permission cache before it is accessed by the application. Also fills in default translations if these
+   * should be missing.
    */
   @PostConstruct
   public void populatePermissionCache() {
     checkCache();
+
+    getAllPermissionClasses()
+        .stream()
+        .forEach(permission -> {
+          checkTranslations(permission.getName());
+        });
+  }
+
+  private void checkTranslations(String id) {
+    String prefix = id.substring(0, id.lastIndexOf("."));
+    String group = prefix.substring(prefix.lastIndexOf(".") + 1);
+    String key = id.substring(id.lastIndexOf(".") + 1);
+
+    checkTranslation(prefix, group);
+    checkTranslation(id, key);
+  }
+
+  private void checkTranslation(String key, String text) {
+    if (StringUtility.hasText(key)) {
+      Map<Locale, String> translations = textDbService.getTexts(key);
+      if (translations == null || translations.size() == 0) {
+        String t1 = StringUtility.splitCamelCase(text);
+        String t2 = t1.substring(0, 1).toUpperCase() + t1.substring(1);
+
+        if (t2.endsWith(" Permission")) {
+          t2 = t2.substring(0, t2.indexOf(" Permission"));
+        }
+
+        textDbService.addText(key, Locale.ROOT, t2);
+      }
+    }
   }
 
   @Override
@@ -64,26 +109,40 @@ public class PermissionService implements IPermissionService {
       // null-check with lock (valid check)
       if (m_permissionClasses == null) {
         Set<IClassInfo> allKnownPermissions = getPermissionsFromInventory();
-        Set<Class<? extends Permission>> discoveredPermissions = new HashSet<>(allKnownPermissions.size());
-        for (IClassInfo permInfo : allKnownPermissions) {
-          if (acceptClass(permInfo)) {
-            try {
-              @SuppressWarnings("unchecked")
-              Class<? extends Permission> permClass = (Class<? extends Permission>) permInfo.resolveClass();
-              discoveredPermissions.add(permClass);
+        Set<String> excludePermissions = getPermissionsToExclude();
+        Set<Class<? extends Permission>> discoveredPermissions;
 
-              String name = permClass.getName();
-              Permission permission = (Permission) Class.forName(permClass.getName()).newInstance();
-              m_permissionMap.put(name, permission);
-            }
-            catch (Exception e) {
-              LOG.warn("Unable to load permission: " + e.getLocalizedMessage());
-            }
-          }
-        }
+        discoveredPermissions = processPermission(allKnownPermissions, excludePermissions);
         m_permissionClasses = CollectionUtility.hashSet(discoveredPermissions);
       }
     }
+  }
+
+  private Set<Class<? extends Permission>> processPermission(Set<IClassInfo> allPermissions, Set<String> excludePermissions) {
+    Set<Class<? extends Permission>> discoveredPermissions = new HashSet<>(allPermissions.size());
+
+    for (IClassInfo permInfo : allPermissions) {
+      if (acceptClass(permInfo)) {
+        try {
+          @SuppressWarnings("unchecked")
+          Class<? extends Permission> permClass = (Class<? extends Permission>) permInfo.resolveClass();
+
+          String name = permInfo.name();
+          if (!excludePermissions.contains(name)) {
+            discoveredPermissions.add(permClass);
+
+//            String name = permClass.getName();
+            Permission permission = (Permission) Class.forName(permClass.getName()).newInstance();
+            m_permissionMap.put(name, permission);
+          }
+        }
+        catch (Exception e) {
+          LOG.warn("Unable to load permission: " + e.getLocalizedMessage());
+        }
+      }
+    }
+
+    return discoveredPermissions;
   }
 
   /**
@@ -125,4 +184,36 @@ public class PermissionService implements IPermissionService {
     return true;
   }
 
+  public static class ExcludePermissionsProperty extends AbstractStringConfigProperty {
+
+    @Override
+    public String getKey() {
+      return EXCLUDE_PROPERTY;
+    }
+
+    @Override
+    protected String getDefaultValue() {
+      return "";
+    }
+
+  }
+
+  private Set<String> getPermissionsToExclude() {
+    String excludePermission = CONFIG.getPropertyValue(ExcludePermissionsProperty.class);
+
+    if (StringUtility.isNullOrEmpty(excludePermission)) {
+      return new HashSet<String>();
+    }
+
+    Set<String> excludeList = new HashSet<String>();
+    Arrays.asList(excludePermission.split(","))
+        .stream()
+        .forEach(permission -> {
+          if (StringUtility.hasText(permission)) {
+            excludeList.add(permission);
+          }
+        });
+
+    return excludeList;
+  }
 }

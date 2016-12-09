@@ -24,7 +24,7 @@ import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tasks.model.entity.User;
+import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.UserService;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserTablePage.Table;
 
@@ -68,6 +68,7 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       table.getFirstNameColumn().setValue(row, user.getFirstName());
       table.getLastNameColumn().setValue(row, user.getLastName());
       table.isRootColumn().setValue(row, user.isRoot());
+      table.getIsLockedColumn().setValue(row, !user.isEnabled());
       table.addRow(row);
     }
   }
@@ -77,6 +78,10 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
     @Override
     protected void execRowAction(ITableRow row) {
       getMenuByClass(EditMenu.class).execAction();
+    }
+
+    public IsLockedColumn getIsLockedColumn() {
+      return getColumnSet().getColumnByClass(IsLockedColumn.class);
     }
 
     public UserIdColumn getUserIdColumn() {
@@ -182,6 +187,19 @@ public class UserTablePage extends AbstractPageWithTable<Table> {
       @Override
       protected int getConfiguredWidth() {
         return 150;
+      }
+    }
+
+    @Order(5000)
+    public class IsLockedColumn extends AbstractBooleanColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("IsLocked");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 120;
       }
     }
 

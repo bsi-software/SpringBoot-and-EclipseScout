@@ -6,7 +6,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import org.eclipse.scout.tasks.model.entity.Role;
+import org.eclipse.scout.tasks.model.Role;
 
 @Entity
 public class RoleEntity extends Role {
