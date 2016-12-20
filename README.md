@@ -56,5 +56,6 @@ Users with the root role may also add/change roles and defining its associted pe
 * Dockerize application with multi-container setup: Data, DB, Application
 * Use PostgreSQL for realistic setup
 * Create Maven artefact based on this application
+* Add user signup functionaliy (+ password reset by email)
 
 View [README](org.eclipse.scout.springboot/README.md) for more information
