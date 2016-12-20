@@ -1,5 +1,7 @@
 # Open Source Business Application
-Application with **[Spring Boot](https://projects.spring.io/spring-boot/)** and **[Eclipse Scout](http://www.eclipse.org/scout/) UI**
+Demo application with **[Spring Boot](https://projects.spring.io/spring-boot/)** and **[Eclipse Scout](http://www.eclipse.org/scout/) UI**
+
+**Please Note**: This is work in progress and has not (yet) been tested for productive usage.
 
 ## Application Description
 Minimal but fully functioning business application
