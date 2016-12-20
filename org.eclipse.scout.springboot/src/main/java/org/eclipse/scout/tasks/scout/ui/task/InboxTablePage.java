@@ -28,4 +28,9 @@ public class InboxTablePage extends AbstractTaskTablePage {
   protected Collection<Task> getTasks() {
     return taskService.getInbox(getUserId());
   }
+
+  @Override
+  protected void execPageActivated() {
+    reloadPage();
+  }
 }

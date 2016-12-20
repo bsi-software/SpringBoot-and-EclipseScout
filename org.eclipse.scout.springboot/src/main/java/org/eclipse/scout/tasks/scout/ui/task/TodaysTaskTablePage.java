@@ -30,4 +30,9 @@ public class TodaysTaskTablePage extends AbstractTaskTablePage {
   protected Collection<Task> getTasks() {
     return taskService.getToday(getUserId());
   }
+
+  @Override
+  protected void execPageActivated() {
+    reloadPage();
+  }
 }

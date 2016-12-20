@@ -40,9 +40,13 @@ import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserLookupCall;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserPictureProviderService;
 import org.eclipse.scout.tasks.scout.ui.task.AbstractTaskTablePage.Table;
+import org.eclipse.scout.tasks.spring.service.DefaultUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Bean
 public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultUserService.class);
 
   @Inject
   private TaskService taskService;
@@ -67,17 +71,22 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
   @Override
   protected void execLoadData(SearchFilter filter) {
+    LOG.info("Loading data from persistence layer");
     Collection<Task> tasks = getTasks();
     importTableRowData(tasks);
   }
 
   private void importTableRowData(Collection<Task> tasks) {
-    if (tasks == null || tasks.size() == 0) {
+    if (tasks == null) {
       return;
     }
 
     Table table = getTable();
     table.deleteAllRows();
+
+    if (tasks.size() == 0) {
+      return;
+    }
 
     SimpleDateFormat formatter = getFormatter();
     for (Task task : tasks) {
@@ -247,6 +256,11 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
         form.addFormListener(new TaskFormListener());
         form.setTaskId(taskId);
         form.startModify();
+
+        form.waitFor();
+        if (form.isFormStored()) {
+          reloadPage();
+        }
       }
 
       private boolean accessAllowed() {
