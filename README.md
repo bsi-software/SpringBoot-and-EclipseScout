@@ -57,4 +57,4 @@ Users with the root role may also add/change roles and defining its associted pe
 * Use PostgreSQL for realistic setup
 * Create Maven artefact based on this application
 
-View [README](org.eclipse.scout.springboot/README.txt) for more information
+View [README](org.eclipse.scout.springboot/README.md) for more information
