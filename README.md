@@ -32,5 +32,6 @@ Minimal but fully functioning business application
 * Add tests and Travis CI
 * Dockerize application with multi-container setup: Data, DB, Application
 * Use PostgreSQL for realistic setup
+* Create Maven artefact based on this application
 
 View [README](org.eclipse.scout.springboot/README.txt) for more information
