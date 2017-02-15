@@ -29,7 +29,7 @@ public class ScoutSpringDevToolsPropertyDefaultsPostProcessor implements Environ
     properties.put("server.session.timeout", "900");
 
     // Print all SQL statements during development time
-    properties.put("spring.jpa.properties.hibernate.show_sql", "true");
+    properties.put("spring.jpa.properties.hibernate.show_sql", "false");
     properties.put("spring.jpa.properties.hibernate.format_sql", "false");
 
     PROPERTIES = Collections.unmodifiableMap(properties);

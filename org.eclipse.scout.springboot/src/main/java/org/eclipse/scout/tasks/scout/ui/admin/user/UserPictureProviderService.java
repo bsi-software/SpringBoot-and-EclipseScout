@@ -6,14 +6,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.scout.rt.client.services.common.icon.AbstractIconProviderService;
 import org.eclipse.scout.rt.client.services.common.icon.IconSpec;
-import org.eclipse.scout.rt.platform.CreateImmediately;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.resource.BinaryResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Order(1000)
-@CreateImmediately // todo: check if necessary
 public class UserPictureProviderService extends AbstractIconProviderService {
   private static final Logger LOG = LoggerFactory.getLogger(UserPictureProviderService.class);
 

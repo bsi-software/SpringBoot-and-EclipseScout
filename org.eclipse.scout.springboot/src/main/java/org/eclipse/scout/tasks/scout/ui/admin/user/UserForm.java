@@ -27,7 +27,7 @@ import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.DocumentService;
 import org.eclipse.scout.tasks.model.service.RoleService;
 import org.eclipse.scout.tasks.model.service.UserService;
-import org.eclipse.scout.tasks.scout.auth.PasswordUtility;
+import org.eclipse.scout.tasks.scout.auth.PasswordService;
 import org.eclipse.scout.tasks.scout.ui.AbstractDirtyFormHandler;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.AccountLockedField;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserForm.MainBox.CancelButton;
@@ -48,6 +48,9 @@ public class UserForm extends AbstractForm {
 
   @Inject
   protected DocumentService documentService;
+
+  @Inject
+  protected PasswordService passwordService;
 
   public String getUserId() {
     return getUserBox().getUserIdField().getValue();
@@ -291,17 +294,14 @@ public class UserForm extends AbstractForm {
 
     // handle password
     String password = getPasswordField().getValue();
-    String salt, hash;
+    String hash;
 
     if (newUser) {
-      salt = PasswordUtility.generatePasswordSalt();
-      hash = PasswordUtility.calculatePasswordHash(password, salt);
-      user.setPasswordSalt(salt);
+      hash = passwordService.calculatePasswordHash(password);
       user.setPasswordHash(hash);
     }
     else if (password != null) {
-      salt = user.getPasswordSalt();
-      hash = PasswordUtility.calculatePasswordHash(password, salt);
+      hash = passwordService.calculatePasswordHash(password);
       user.setPasswordHash(hash);
     }
 

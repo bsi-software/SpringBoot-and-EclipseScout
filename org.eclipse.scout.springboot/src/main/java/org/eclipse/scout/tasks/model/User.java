@@ -9,8 +9,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import org.eclipse.scout.tasks.scout.auth.PasswordUtility;
-
 public class User extends Model<String> {
 
   public static final Locale LOCALE_DEFAULT = Locale.forLanguageTag("en-US");
@@ -37,10 +35,6 @@ public class User extends Model<String> {
   private String passwordHash;
 
   @NotNull
-  @Size(min = PasswordUtility.SALT_LENGTH)
-  private String passwordSalt;
-
-  @NotNull
   private Locale locale;
 
   @NotNull
@@ -57,12 +51,11 @@ public class User extends Model<String> {
   public User() {
   }
 
-  public User(String userId, String firstName, String passwordPlain) {
+  public User(String userId, String firstName, String passwordHash) {
     super(userId);
 
     this.firstName = firstName;
-    this.passwordSalt = PasswordUtility.generatePasswordSalt();
-    this.passwordHash = PasswordUtility.calculatePasswordHash(passwordPlain, passwordSalt);
+    this.passwordHash = passwordHash;
     this.locale = LOCALE_DEFAULT;
     this.enabled = true;
   }
@@ -73,14 +66,6 @@ public class User extends Model<String> {
 
   public void setPasswordHash(String password) {
     this.passwordHash = password;
-  }
-
-  public String getPasswordSalt() {
-    return passwordSalt;
-  }
-
-  public void setPasswordSalt(String passwordSalt) {
-    this.passwordSalt = passwordSalt;
   }
 
   public Locale getLocale() {

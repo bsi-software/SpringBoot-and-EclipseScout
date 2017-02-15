@@ -32,7 +32,7 @@ public class AccessControlService extends AbstractAccessControlService<String> {
 
   @Override
   protected String getCurrentUserCacheKey() {
-    return getUserIdOfCurrentUser();
+    return getUserIdOfCurrentSubject();
   }
 
   @Override
@@ -54,7 +54,7 @@ public class AccessControlService extends AbstractAccessControlService<String> {
   }
 
   @Override
-  protected PermissionCollection execLoadPermissions(String userId) {
+  public PermissionCollection execLoadPermissions(String userId) {
     LOG.info("loading permissions for user '" + userId + "'");
 
     Collection<Role> roles = userService.getRoles(userId);

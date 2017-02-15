@@ -42,12 +42,6 @@ public class UserEntity extends User {
     return super.getPasswordHash();
   }
 
-  @Column(nullable = false)
-  @Override
-  public String getPasswordSalt() {
-    return super.getPasswordSalt();
-  }
-
   @Convert(converter = LocaleConverter.class)
   @Column(nullable = false)
   @Override

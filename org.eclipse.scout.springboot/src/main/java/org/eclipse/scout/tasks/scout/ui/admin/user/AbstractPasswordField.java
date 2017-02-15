@@ -1,12 +1,17 @@
 package org.eclipse.scout.tasks.scout.ui.admin.user;
 
+import javax.inject.Inject;
+
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
 import org.eclipse.scout.rt.platform.status.MultiStatus;
 import org.eclipse.scout.rt.platform.status.Status;
 import org.eclipse.scout.rt.shared.TEXTS;
-import org.eclipse.scout.tasks.scout.auth.PasswordUtility;
+import org.eclipse.scout.tasks.scout.auth.PasswordService;
 
 public class AbstractPasswordField extends AbstractStringField {
+
+  @Inject
+  private PasswordService passwordService;
 
   @Override
   protected String getConfiguredLabel() {
@@ -20,7 +25,7 @@ public class AbstractPasswordField extends AbstractStringField {
 
   /**
    * Verifies password value and sets error indicators accordingly.
-   * 
+   *
    * @return true if the password complies with the implemented password policy. in all other cases false is returned.
    */
   public boolean validateField() {
@@ -31,18 +36,18 @@ public class AbstractPasswordField extends AbstractStringField {
       return false;
     }
 
-    if (getValue().length() < PasswordUtility.PASSWORD_LENGTH_MIN) {
-      setError(TEXTS.get("PasswordTooShortError", String.valueOf(PasswordUtility.PASSWORD_LENGTH_MIN)));
+    if (getValue().length() < PasswordService.PASSWORD_LENGTH_MIN) {
+      setError(TEXTS.get("PasswordTooShortError", String.valueOf(PasswordService.PASSWORD_LENGTH_MIN)));
       return false;
     }
 
-    if (getValue().length() > PasswordUtility.PASSWORD_LENGTH_MAX) {
-      setError(TEXTS.get("PasswordTooLongError", String.valueOf(PasswordUtility.PASSWORD_LENGTH_MAX)));
+    if (getValue().length() > PasswordService.PASSWORD_LENGTH_MAX) {
+      setError(TEXTS.get("PasswordTooLongError", String.valueOf(PasswordService.PASSWORD_LENGTH_MAX)));
       return false;
     }
 
     // make sure that we catch all relevant password constrains
-    if (!PasswordUtility.matchesPasswordPolicy(getValue())) {
+    if (passwordService.matchesPasswordPolicy(getValue())) {
       setError(TEXTS.get("PasswordPolicyError"));
       return false;
     }

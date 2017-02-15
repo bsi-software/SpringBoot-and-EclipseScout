@@ -1,5 +1,7 @@
 package org.eclipse.scout.tasks.scout.platform;
 
+import java.net.CookieHandler;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -7,11 +9,12 @@ import javax.servlet.ServletContextListener;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.BeanMetaData;
 import org.eclipse.scout.rt.server.commons.WebappEventListener;
+import org.springframework.web.context.ContextCleanupListener;
 
 /**
  * Same as {@link WebappEventListener}, but without starting the platform.
  */
-public class ScoutSpringWebappListener implements ServletContextListener {
+public class ScoutSpringWebappListener extends ContextCleanupListener implements ServletContextListener {
 
   @Override
   public void contextInitialized(ServletContextEvent event) {
@@ -21,6 +24,6 @@ public class ScoutSpringWebappListener implements ServletContextListener {
 
   @Override
   public void contextDestroyed(ServletContextEvent sce) {
-    // NOOP
+    CookieHandler.setDefault(null);
   }
 }

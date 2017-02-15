@@ -37,6 +37,7 @@ import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.eclipse.scout.tasks.model.Task;
 import org.eclipse.scout.tasks.model.service.TaskService;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
+import org.eclipse.scout.tasks.scout.ui.FontAwesomeIcons;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserLookupCall;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserPictureProviderService;
 import org.eclipse.scout.tasks.scout.ui.task.AbstractTaskTablePage.Table;
@@ -179,9 +180,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected String getConfiguredIconId() {
-        // get unicode from http://fontawesome.io/icon/magic/
-        return "font:awesomeIcons \uf0d0";
-
+        return FontAwesomeIcons.fa_magic;
       }
 
       @Override
@@ -225,8 +224,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected String getConfiguredIconId() {
-        // get unicode from http://fontawesome.io/icon/pencil/
-        return "font:awesomeIcons \uf040";
+        return FontAwesomeIcons.fa_pencil;
       }
 
       @Override
@@ -278,8 +276,7 @@ public class AbstractTaskTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected String getConfiguredIconId() {
-        // get unicode from http://fontawesome.io/icon/check/
-        return "font:awesomeIcons \uf00c";
+        return FontAwesomeIcons.fa_check;
       }
 
       @Override

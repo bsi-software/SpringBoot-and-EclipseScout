@@ -22,6 +22,7 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.tasks.model.Role;
 import org.eclipse.scout.tasks.model.service.RoleService;
+import org.eclipse.scout.tasks.scout.ui.FontAwesomeIcons;
 import org.eclipse.scout.tasks.scout.ui.admin.role.RoleTablePage.Table;
 import org.eclipse.scout.tasks.scout.ui.admin.text.TranslationForm;
 
@@ -90,9 +91,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected String getConfiguredIconId() {
-        // get unicode from http://fontawesome.io/icon/magic/
-        return "font:awesomeIcons \uf0d0";
-
+        return FontAwesomeIcons.fa_magic;
       }
 
       @Override
@@ -123,8 +122,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected String getConfiguredIconId() {
-        // get unicode from http://fontawesome.io/icon/pencil/
-        return "font:awesomeIcons \uf040";
+        return FontAwesomeIcons.fa_pencil;
       }
 
       @Override
@@ -157,8 +155,7 @@ public class RoleTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected String getConfiguredIconId() {
-        // get unicode from http://fontawesome.io/icon/language/
-        return "font:awesomeIcons \uf1ab";
+        return FontAwesomeIcons.fa_language;
       }
 
       @Override
