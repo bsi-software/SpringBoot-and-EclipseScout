@@ -93,8 +93,7 @@ public class Desktop extends AbstractDesktop {
 
     @Override
     protected String getConfiguredIconId() {
-      // get unicode http://fontawesome.io/icon/users/
-      return AdminOutline.OUTLINE_ICON;
+      return FontAwesomeIcons.fa_users;
     }
 
     @Override
@@ -113,8 +112,7 @@ public class Desktop extends AbstractDesktop {
 
     @Override
     protected String getConfiguredIconId() {
-      // get unicode http://fontawesome.io/icon/cog/
-      return "font:awesomeIcons \uf013";
+      return FontAwesomeIcons.fa_cog;
     }
 
     @Override
@@ -150,8 +148,7 @@ public class Desktop extends AbstractDesktop {
 
     @Override
     protected String getConfiguredIconId() {
-      // get unicode http://fontawesome.io/icon/sign-out/
-      return "font:awesomeIcons \uf08b";
+      return FontAwesomeIcons.fa_signOut;
     }
 
     @Override

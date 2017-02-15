@@ -8,6 +8,7 @@ import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.tasks.scout.ui.FontAwesomeIcons;
 
 public abstract class AbstractTranslateMenu extends AbstractMenu {
 
@@ -22,8 +23,7 @@ public abstract class AbstractTranslateMenu extends AbstractMenu {
 
   @Override
   protected String getConfiguredIconId() {
-    // get unicode from http://fontawesome.io/icon/language/
-    return "font:awesomeIcons \uf1ab";
+    return FontAwesomeIcons.fa_language;
   }
 
   @Override

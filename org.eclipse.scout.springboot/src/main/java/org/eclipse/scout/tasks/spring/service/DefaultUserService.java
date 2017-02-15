@@ -1,8 +1,11 @@
 package org.eclipse.scout.tasks.spring.service;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,12 +20,15 @@ import org.eclipse.scout.tasks.model.service.DocumentService;
 import org.eclipse.scout.tasks.model.service.RoleService;
 import org.eclipse.scout.tasks.model.service.UserService;
 import org.eclipse.scout.tasks.scout.auth.AccessControlService;
+import org.eclipse.scout.tasks.scout.auth.PasswordService;
 import org.eclipse.scout.tasks.scout.ui.ResourceBase;
+import org.eclipse.scout.tasks.scout.ui.admin.db.ReadDatabaseAdministrationConsolePermission;
 import org.eclipse.scout.tasks.scout.ui.admin.user.UserPictureProviderService;
 import org.eclipse.scout.tasks.scout.ui.task.CreateTaskPermission;
 import org.eclipse.scout.tasks.scout.ui.task.ReadTaskPermission;
 import org.eclipse.scout.tasks.scout.ui.task.UpdateTaskPermission;
 import org.eclipse.scout.tasks.scout.ui.task.ViewAllTasksPermission;
+import org.eclipse.scout.tasks.spring.controller.ReadApiPermission;
 import org.eclipse.scout.tasks.spring.repository.UserRepository;
 import org.eclipse.scout.tasks.spring.repository.entity.UserEntity;
 import org.modelmapper.Converter;
@@ -38,13 +44,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultUserService implements UserService, MapperService<User, UserEntity> {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultUserService.class);
 
-  protected static final String SUPER_USER = "SuperUser";
-  protected static final String USER = "User";
-
-  protected static final String USER_ROOT = "root";
-  protected static final String USER_ALICE = "alice";
-  protected static final String USER_BOB = "bob";
-
   @Autowired
   private UserRepository userRepository;
 
@@ -53,6 +52,9 @@ public class DefaultUserService implements UserService, MapperService<User, User
 
   @Autowired
   private DocumentService documentService;
+
+  @Autowired
+  private PasswordService passwordService;
 
   @Autowired
   private UserPictureProviderService userPictureProviderService;
@@ -187,14 +189,6 @@ public class DefaultUserService implements UserService, MapperService<User, User
 
     return mapper;
   }
-//
-//  public User convert(UserEntity role) {
-//    return getMapper().map(role, User.class);
-//  }
-//
-//  public UserEntity convert(User role) {
-//    return getMapper().map(role, UserEntity.class);
-//  }
 
   /**
    * Add initial demo entities: roles and users.
@@ -206,40 +200,55 @@ public class DefaultUserService implements UserService, MapperService<User, User
   }
 
   /**
-   * Add roles: root, super user and user.
+   * Add roles: root, dba, super user and user.
    */
-  private void initRoles() {
+  protected void initRoles() {
     LOG.info("Check and initialise roles");
 
     if (!roleService.exists(Role.ROOT_ID)) {
       roleService.save(Role.ROOT);
     }
+    Map<String, String[]> roles = new HashMap<>();
+    roles.put(API, new String[]{
+        ReadApiPermission.class.getName()
+    });
+    roles.put(DBA, new String[]{
+        ReadDatabaseAdministrationConsolePermission.class.getName()
+    });
+    roles.put(SUPER_USER, new String[]{
+        ReadTaskPermission.class.getName(),
+        CreateTaskPermission.class.getName(),
+        UpdateTaskPermission.class.getName(),
+        ViewAllTasksPermission.class.getName()
+    });
+    roles.put(USER, new String[]{
+        ReadTaskPermission.class.getName(),
+        CreateTaskPermission.class.getName(),
+        UpdateTaskPermission.class.getName()
+    });
 
-    if (!roleService.exists(SUPER_USER)) {
-      Role roleSuperUser = new Role(SUPER_USER);
-      Set<String> permissions = new HashSet<>();
-
-      permissions.add(ReadTaskPermission.class.getName());
-      permissions.add(CreateTaskPermission.class.getName());
-      permissions.add(UpdateTaskPermission.class.getName());
-      permissions.add(ViewAllTasksPermission.class.getName());
-      roleSuperUser.setPermissions(permissions);
-
-      roleService.save(roleSuperUser);
-    }
-
-    if (!roleService.exists(USER)) {
-      Role roleUser = new Role(USER);
-      Set<String> permissions = new HashSet<>();
-
-      permissions.add(ReadTaskPermission.class.getName());
-      permissions.add(CreateTaskPermission.class.getName());
-      permissions.add(UpdateTaskPermission.class.getName());
-      roleUser.setPermissions(permissions);
-
-      roleService.save(roleUser);
-    }
+    roles.forEach((s, p) -> {
+      if (!roleService.exists(s)) {
+        Role roleSuperUser = new Role(s);
+        if (p != null) {
+          roleSuperUser.setPermissions(
+              Arrays.stream(p)
+                  .collect(Collectors.toSet()));
+        }
+        roleService.save(roleSuperUser);
+      }
+    });
   }
+
+  protected static final String DBA = "DBA";
+  protected static final String API = "API";
+
+  protected static final String SUPER_USER = "SuperUser";
+  protected static final String USER = "User";
+
+  protected static final String USER_ROOT = "root";
+  protected static final String USER_ALICE = "alice";
+  protected static final String USER_BOB = "bob";
 
   /**
    * Add users: root, alice and bob.
@@ -247,21 +256,20 @@ public class DefaultUserService implements UserService, MapperService<User, User
   private void initUsers() {
     LOG.info("Check and initialise users");
 
-    addUser(USER_ROOT, "Root", "eclipse", "eclipse.jpg", Role.ROOT_ID, null);
-    addUser(USER_ALICE, "Alice", "test", "alice.jpg", USER, SUPER_USER);
-    addUser(USER_BOB, "Bob", "test", "bob.jpg", USER, null);
+    addUser(USER_ROOT, "Root", "eclipse", "eclipse.jpg", Role.ROOT_ID);
+    addUser(USER_ALICE, "Alice", "test", "alice.jpg", USER, SUPER_USER, API, DBA);
+    addUser(USER_BOB, "Bob", "test", "bob.jpg", USER, API);
   }
 
-  private void addUser(String login, String firstName, String password, String pictureFile, String role1, String role2) {
+  private void addUser(String login, String firstName, String passwordPlain, String pictureFile, String... roles) {
     if (exists(login)) {
       return;
     }
 
-    User user = new User(login, firstName, password);
-    user.getRoles().add(role1);
+    User user = new User(login, firstName, passwordService.calculatePasswordHash(passwordPlain));
 
-    if (role2 != null) {
-      user.getRoles().add(role2);
+    if (roles != null) {
+      user.getRoles().addAll(Arrays.asList(roles));
     }
 
     if (pictureFile != null) {

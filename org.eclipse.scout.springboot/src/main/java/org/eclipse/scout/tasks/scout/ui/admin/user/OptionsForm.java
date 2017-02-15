@@ -17,17 +17,17 @@ import org.eclipse.scout.tasks.model.Document;
 import org.eclipse.scout.tasks.model.User;
 import org.eclipse.scout.tasks.model.service.DocumentService;
 import org.eclipse.scout.tasks.model.service.UserService;
-import org.eclipse.scout.tasks.scout.auth.PasswordUtility;
+import org.eclipse.scout.tasks.scout.auth.PasswordService;
 import org.eclipse.scout.tasks.scout.ui.ClientSession;
 import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.ApplyButton;
 import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.ChangePasswordBox;
-import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.UserBox;
 import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.ChangePasswordBox.CancelPasswordChangeLink;
 import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.ChangePasswordBox.ChangePasswordLink;
 import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.ChangePasswordBox.ConfirmPasswordField;
 import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.ChangePasswordBox.NewPasswordField;
 import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.ChangePasswordBox.OldPasswordField;
 import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.ChangePasswordBox.UpdateLinkButton;
+import org.eclipse.scout.tasks.scout.ui.admin.user.OptionsForm.MainBox.UserBox;
 
 @Bean
 public class OptionsForm extends AbstractForm {
@@ -37,6 +37,9 @@ public class OptionsForm extends AbstractForm {
 
   @Inject
   protected DocumentService documentService;
+
+  @Inject
+  protected PasswordService passwordService;
 
   public OptionsForm() {
     super();
@@ -173,7 +176,7 @@ public class OptionsForm extends AbstractForm {
         }
 
         @Override
-        protected int getConfiguredLabelPosition() {
+        protected byte getConfiguredLabelPosition() {
           return AbstractFormField.LABEL_POSITION_ON_FIELD;
         }
       }
@@ -187,7 +190,7 @@ public class OptionsForm extends AbstractForm {
         }
 
         @Override
-        protected int getConfiguredLabelPosition() {
+        protected byte getConfiguredLabelPosition() {
           return AbstractFormField.LABEL_POSITION_ON_FIELD;
         }
       }
@@ -201,7 +204,7 @@ public class OptionsForm extends AbstractForm {
         }
 
         @Override
-        protected int getConfiguredLabelPosition() {
+        protected byte getConfiguredLabelPosition() {
           return AbstractFormField.LABEL_POSITION_ON_FIELD;
         }
       }
@@ -315,7 +318,7 @@ public class OptionsForm extends AbstractForm {
       User user = userService.get(getUserId());
       String password = getOldPasswordField().getValue();
 
-      if (!PasswordUtility.passwordIsValid(password, user.getPasswordHash(), user.getPasswordSalt())) {
+      if (passwordService.passwordIsValid(password, user.getPasswordHash())) {
         getOldPasswordField().setError(TEXTS.get("PasswordInvalid"));
         return false;
       }
@@ -370,8 +373,7 @@ public class OptionsForm extends AbstractForm {
       //  handle user password
       if (getChangePasswordBox().getValue()) {
         String passwordNew = getNewPasswordField().getValue();
-        String passwordSalt = user.getPasswordSalt();
-        String passwordHash = PasswordUtility.calculatePasswordHash(passwordNew, passwordSalt);
+        String passwordHash = passwordService.calculatePasswordHash(passwordNew);
 
         user.setPasswordHash(passwordHash);
       }

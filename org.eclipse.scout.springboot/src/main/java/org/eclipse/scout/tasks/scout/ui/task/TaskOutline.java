@@ -7,6 +7,7 @@ import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Bean;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.tasks.scout.ui.FontAwesomeIcons;
 
 @Bean
 public class TaskOutline extends AbstractOutline {
@@ -18,8 +19,7 @@ public class TaskOutline extends AbstractOutline {
 
   @Override
   protected String getConfiguredIconId() {
-    // get unicode http://fontawesome.io/icon/calendar-check-o/
-    return "font:awesomeIcons \uf274";
+    return FontAwesomeIcons.fa_calendarCheckO;
   }
 
   @Override
