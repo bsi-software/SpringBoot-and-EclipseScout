@@ -1,4 +1,12 @@
 # Open Source Business Application
+
+**Outdated repository**: the content of this repository is not the latest development. Please refer to:
+
+* [ScoutBoot](https://github.com/BSI-Business-Systems-Integration-AG/ScoutBoot): Spring Boot & Eclipse Scout Integration (framework).
+* [ScoutBoot-Tasks](https://github.com/BSI-Business-Systems-Integration-AG/ScoutBoot-Tasks): an integration example using *ScoutBoot*.
+
+---
+
 Demo application with **[Spring Boot](https://projects.spring.io/spring-boot/)** and **[Eclipse Scout](http://www.eclipse.org/scout/) UI**
 
 **Please Note**: This is work in progress and has not (yet) been tested for productive usage.
